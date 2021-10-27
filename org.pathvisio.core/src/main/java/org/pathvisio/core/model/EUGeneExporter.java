@@ -27,7 +27,6 @@ import java.util.Map;
 
 import org.bridgedb.DataSource;
 import org.bridgedb.Xref;
-import org.bridgedb.bio.BioDataSource;
 import org.pathvisio.core.debug.Logger;
 
 /**
@@ -140,7 +139,7 @@ public class EUGeneExporter implements PathwayExporter
 			system = maxCode;
 
 			if(system == null) { //May occur when no identifiers available
-				system = BioDataSource.ENSEMBL;
+				system = DataSource.getByCompactIdentifierPrefix("ensembl");
 			}
 
 			if(codeCount.keySet().size() > 1) {
@@ -179,15 +178,15 @@ public class EUGeneExporter implements PathwayExporter
 	                                           };
 	private static final DataSource[] GENMAPP_SYSTEMS = new DataSource[]
 	                                            {
-		BioDataSource.ENSEMBL,
-		BioDataSource.UNIPROT,
-		BioDataSource.ENTREZ_GENE,
-		BioDataSource.UNIGENE,
-		BioDataSource.AFFY,
-		BioDataSource.AGILENT,
-		BioDataSource.HUGO,
-		BioDataSource.PDB,
-		BioDataSource.SGD
+	    DataSource.getByCompactIdentifierPrefix("ensembl"),
+		DataSource.getByCompactIdentifierPrefix("uniprot"),
+		DataSource.getByCompactIdentifierPrefix("ncbigene"),
+		DataSource.getByCompactIdentifierPrefix("unigene"),
+		DataSource.getByCompactIdentifierPrefix("affy.probeset"),
+		DataSource.getExistingByFullName("Agilent"), //TODO
+		DataSource.getExistingByFullName("HGNC"), //TODO
+		DataSource.getByCompactIdentifierPrefix("pdb"),
+		DataSource.getByCompactIdentifierPrefix("sgd")
 	                                            };
 
 	static
