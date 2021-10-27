@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<project name="org.pathvisio.desktop" default="jar" basedir=".">
+
+	<import file="../../build-common.xml" />
+
+	<path id="project.class.path">
+	  <fileset dir="../../lib">
+	  	<include name="org.apache.batik.*.jar"/>
+		<include name="org.apache.xml*.jar"/>
+		<include name="org.apache.xalan*.jar"/>
+		<include name="org.apache.xerces*.jar"/>
+		<include name="org.w3c.css.sac*.jar"/>
+		<include name="org.w3c.dom.smil*.jar"/>
+		<include name="org.w3c.dom.svg*.jar"/>
+		<include name="org.pathvisio.pdftranscoder.jar"/>
+		<include name="com.springsource.org.jdom-*.jar"/>
+		<include name="org.bridgedb.jar"/>
+		<include name="org.bridgedb.bio.jar"/>
+		<include name="org.bridgedb.rdb.jar"/>
+		<include name="org.bridgedb.rdb.construct.jar"/>
+		<include name="org.bridgedb.gui.jar"/>
+		<include name="org.pathvisio.jgoodies.forms.jar"/>
+		<include name="commons-math-2.0.jar"/>
+		<include name="org.eclipse.osgi.jar"/>
+		<include name="org.apache.felix.bundlerepository-1.6.6.jar"/>
+	  </fileset>
+	  <fileset dir="${bundle.dest}">
+		<include name="org.pathvisio.core.jar"/>
+		<include name="org.pathvisio.data.jar"/>
+		<include name="org.pathvisio.pluginmanager.jar"/>
+		<include name="org.pathvisio.gui.jar"/>
+	  </fileset>
+	</path>
+
+	<path id="test.class.path">
+		<pathelement path="../../lib-build/junit-4.12.jar"/>
+		<pathelement path="../../lib-build/measure.jar"/>
+	</path>
+
+</project>

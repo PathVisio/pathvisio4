@@ -1,0 +1,1032 @@
+/*******************************************************************************
+ * PathVisio, a tool for data visualization and analysis using biological pathways
+ * Copyright 2006-2019 BiGCaT Bioinformatics
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.  You may obtain a copy
+ * of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package org.pathvisio.gexplugin;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JProgressBar;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JViewport;
+import javax.swing.ListCellRenderer;
+import javax.swing.SwingWorker;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
+
+import org.bridgedb.DataSource;
+import org.bridgedb.IDMapperException;
+import org.bridgedb.gui.SimpleFileFilter;
+import org.bridgedb.rdb.construct.DBConnector;
+import org.pathvisio.core.debug.Logger;
+import org.pathvisio.core.preferences.GlobalPreference;
+import org.pathvisio.core.preferences.PreferenceManager;
+import org.pathvisio.core.util.FileUtils;
+import org.pathvisio.core.util.ProgressKeeper;
+import org.pathvisio.core.util.ProgressKeeper.ProgressEvent;
+import org.pathvisio.core.util.ProgressKeeper.ProgressListener;
+import org.pathvisio.data.DataException;
+import org.pathvisio.data.DataInterface;
+import org.pathvisio.desktop.PvDesktop;
+import org.pathvisio.desktop.data.DBConnectorSwing;
+import org.pathvisio.desktop.util.RowNumberHeader;
+import org.pathvisio.desktop.visualization.ColorGradient;
+import org.pathvisio.desktop.visualization.ColorGradient.ColorValuePair;
+import org.pathvisio.desktop.visualization.ColorSet;
+import org.pathvisio.desktop.visualization.ColorSetManager;
+import org.pathvisio.desktop.visualization.Visualization;
+import org.pathvisio.desktop.visualization.VisualizationManager;
+import org.pathvisio.gui.DataSourceModel;
+import org.pathvisio.visualization.plugins.ColorByExpression;
+import org.pathvisio.visualization.plugins.DataNodeLabel;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
+import com.nexes.wizard.Wizard;
+import com.nexes.wizard.WizardPanelDescriptor;
+
+/**
+ * Wizard to guide the user through importing a large dataset from a tab delimited text file
+ * in PathVisio. For example gene expression data.
+ */
+public class GexImportWizard extends Wizard
+{
+	private ImportInformation importInformation = new ImportInformation();
+
+    FilePage fpd = new FilePage();
+    HeaderPage hpd = new HeaderPage();
+    ColumnPage cpd = new ColumnPage();
+    ImportPage ipd = new ImportPage();
+
+    private final PvDesktop standaloneEngine;
+
+	public GexImportWizard (PvDesktop standaloneEngine)
+	{
+		this.standaloneEngine = standaloneEngine;
+
+		getDialog().setTitle ("Expression data import wizard");
+		Wizard wiz = new Wizard();
+		wiz.getDialog();
+        registerWizardPanel(fpd);
+        registerWizardPanel(hpd);
+        registerWizardPanel(cpd);
+        registerWizardPanel(ipd);
+
+        setCurrentPanel(FilePage.IDENTIFIER);
+	}
+
+	private class FilePage extends WizardPanelDescriptor implements ActionListener
+	{
+	    public static final String IDENTIFIER = "FILE_PAGE";
+	    static final String ACTION_INPUT = "input";
+	    static final String ACTION_OUTPUT = "output";
+	    static final String ACTION_GDB = "gdb";
+
+	    private JTextField txtInput;
+	    private JTextField txtOutput;
+	    private JTextField txtGdb;
+	    private JButton btnGdb;
+	    private JButton btnInput;
+	    private JButton btnOutput;
+	    private boolean txtFileComplete = false;
+
+		/**
+		 * Stores the given {@link File} pointing to the file containing the expresssion
+		 * data in text form to the {@link ImportInformation} object
+		 * @param file
+		 */
+		private void updateTxtFile()
+		{
+			String fileName = txtInput.getText();
+			File file = new File (fileName);
+			txtFileComplete = true;
+			
+			if (fileName.contains(" ") || fileName.contains("(") || fileName.contains("[")) {
+				setErrorMessage("Remove special characters from file name, e.g. \"(\", \" \".");
+				txtFileComplete = false;
+			} else if (!file.exists()) {
+				setErrorMessage("Specified file to import does not exist");
+				txtFileComplete = false;
+			} else if (!file.canRead()) {
+				setErrorMessage("Can't access specified file containing expression data");
+				txtFileComplete = false;
+			} else try {
+				importInformation.setTxtFile(file);
+			} catch (IOException e) {
+				setErrorMessage("Exception while reading file: " + e.getMessage());
+				txtFileComplete = false;
+			}
+
+		    getWizard().setNextFinishButtonEnabled(txtFileComplete);
+
+		    // add .pgex.
+			String outFile = FileUtils.removeExtension(fileName) + ".pgex";
+		    txtOutput.setText(outFile);
+		    	
+		    if (txtFileComplete)
+			{
+				setErrorMessage(null);
+				txtFileComplete = true;
+			}
+		}
+
+		public void aboutToDisplayPanel()
+		{
+	        getWizard().setNextFinishButtonEnabled(txtFileComplete);
+			getWizard().setPageTitle ("Choose file locations");
+		}
+
+	    public FilePage()
+	    {
+	        super(IDENTIFIER);
+	    }
+
+	    public Object getNextPanelDescriptor()
+	    {
+	        return HeaderPage.IDENTIFIER;
+	    }
+
+	    public Object getBackPanelDescriptor()
+	    {
+	        return null;
+	    }
+
+		protected JPanel createContents()
+		{
+			txtInput = new JTextField(40);
+		    txtOutput = new JTextField(40);
+		    txtGdb = new JTextField(40);
+		    btnGdb = new JButton ("Browse");
+		    btnInput = new JButton ("Browse");
+		    btnOutput = new JButton ("Browse");
+
+		    FormLayout layout = new FormLayout (
+		    		"right:pref, 3dlu, pref, 3dlu, pref",
+		    		"p, 3dlu, p, 3dlu, p");
+
+		    PanelBuilder builder = new PanelBuilder(layout);
+		    builder.setDefaultDialogBorder();
+
+		    CellConstraints cc = new CellConstraints();
+
+			builder.addLabel ("Input file", cc.xy (1,1));
+			builder.add (txtInput, cc.xy (3,1));
+			builder.add (btnInput, cc.xy (5,1));
+			builder.addLabel ("Output file", cc.xy (1,3));
+			builder.add (txtOutput, cc.xy (3,3));
+			builder.add (btnOutput, cc.xy (5,3));
+			builder.addLabel ("Gene database", cc.xy (1,5));
+			builder.add (txtGdb, cc.xy (3,5));
+			builder.add (btnGdb, cc.xy (5,5));
+
+			btnInput.addActionListener(this);
+			btnInput.setActionCommand(ACTION_INPUT);
+			btnOutput.addActionListener(this);
+			btnOutput.setActionCommand(ACTION_OUTPUT);
+			btnGdb.addActionListener(this);
+			btnGdb.setActionCommand(ACTION_GDB);
+
+			txtInput.getDocument().addDocumentListener(new DocumentListener()
+			{
+				public void changedUpdate(DocumentEvent arg0)
+				{
+					updateTxtFile();
+				}
+
+				public void insertUpdate(DocumentEvent arg0)
+				{
+					updateTxtFile();
+				}
+
+				public void removeUpdate(DocumentEvent arg0)
+				{
+					updateTxtFile();
+				}
+
+			});
+			txtGdb.setText(
+					PreferenceManager.getCurrent().get(GlobalPreference.DB_CONNECTSTRING_GDB)
+			);
+			return builder.getPanel();
+		}
+
+		public void aboutToHidePanel()
+		{
+			importInformation.guessSettings();
+			File f = new File(txtOutput.getText());
+			// if the pgex file already exists the file import often
+			// goes wrong (probably because writing in an existing
+			// database - therefore the file name will be changed if the file already exists
+			if(f.exists()) {
+				String filePath = FileUtils.removeExtension(txtOutput.getText());
+				importInformation.setGexName(getFinalPgexFileLocation(filePath));
+			} else {
+				importInformation.setGexName (txtOutput.getText());
+			}
+	    }
+
+		private String getFinalPgexFileLocation(String filepath) {
+			int count = 1;
+			while(true) {
+				String buffer = filepath + "-" + count + ".pgex";
+				File n = new File(buffer);
+				if(!n.exists()) {
+					return buffer;
+				}
+				count++;
+			}
+		}
+		
+		public void actionPerformed(ActionEvent e) {
+			String action = e.getActionCommand();
+
+			if(ACTION_GDB.equals(action)) {
+				standaloneEngine.selectGdb("Gene");
+				txtGdb.setText(
+						PreferenceManager.getCurrent().get(GlobalPreference.DB_CONNECTSTRING_GDB)
+				);
+			} else if(ACTION_INPUT.equals(action)) {
+
+				File defaultdir = PreferenceManager.getCurrent().getFile(GlobalPreference.DIR_LAST_USED_EXPRESSION_IMPORT);
+				JFileChooser jfc = new JFileChooser();
+				jfc.setCurrentDirectory(defaultdir);
+				jfc.addChoosableFileFilter(new SimpleFileFilter("Data files", "*.txt|*.csv|*.tab", true));
+				int result = jfc.showDialog(null, "Select data file");
+				if (result == JFileChooser.APPROVE_OPTION)
+				{
+					File f = jfc.getSelectedFile();
+					defaultdir = jfc.getCurrentDirectory();
+					PreferenceManager.getCurrent().setFile(GlobalPreference.DIR_LAST_USED_EXPRESSION_IMPORT, defaultdir);
+					txtInput.setText("" + f);
+					updateTxtFile ();
+				}
+			} else if(ACTION_OUTPUT.equals(action)) {
+				try {
+					DBConnector dbConn = standaloneEngine.getGexManager().getDBConnector();
+						String output = ((DBConnectorSwing)dbConn).openNewDbDialog(
+								getPanelComponent(), importInformation.getGexName()
+						);
+						if(output != null) {
+							txtOutput.setText(output);
+						}
+				} catch(Exception ex) {
+					JOptionPane.showMessageDialog(
+							getPanelComponent(), "The database connector is not supported"
+
+					);
+					Logger.log.error("No gex database connector", ex);
+				}
+			}
+		}
+
+	}
+
+	private class HeaderPage extends WizardPanelDescriptor
+	{
+	    public static final String IDENTIFIER = "HEADER_PAGE";
+		private PreviewTableModel ptm;
+		private JTable tblPreview;
+		private JRadioButton rbSepTab;
+		private JRadioButton rbSepComma;
+		private JRadioButton rbSepSemi;
+		private JRadioButton rbSepSpace;
+		private JRadioButton rbSepOther;
+		//private JButton btnAdvanced;
+
+	    public HeaderPage()
+	    {
+	        super(IDENTIFIER);
+	    }
+
+	    public Object getNextPanelDescriptor()
+	    {
+	        return ColumnPage.IDENTIFIER;
+	    }
+
+	    public Object getBackPanelDescriptor()
+	    {
+	        return FilePage.IDENTIFIER;
+	    }
+
+	    @Override
+		protected Component createContents()
+		{
+		    FormLayout layout = new FormLayout (
+		    		"pref, 3dlu, pref, 3dlu, pref, pref:grow",
+		    		"p, 3dlu, p, 3dlu, p, 15dlu, fill:[100dlu,min]:grow");
+
+		    PanelBuilder builder = new PanelBuilder(layout);
+		    builder.setDefaultDialogBorder();
+
+		    CellConstraints cc = new CellConstraints();
+
+			rbSepTab = new JRadioButton ("tab");
+			rbSepComma = new JRadioButton ("comma");
+			rbSepSemi = new JRadioButton ("semicolon");
+			rbSepSpace = new JRadioButton ("space");
+			rbSepOther = new JRadioButton ("other");
+			ButtonGroup bgSeparator = new ButtonGroup();
+			bgSeparator.add (rbSepTab);
+			bgSeparator.add (rbSepComma);
+			bgSeparator.add (rbSepSemi);
+			bgSeparator.add (rbSepSpace);
+			bgSeparator.add (rbSepOther);
+
+			builder.add (rbSepTab, cc.xy(1,1));
+			builder.add (rbSepComma, cc.xy(1,3));
+			builder.add (rbSepSemi, cc.xy(1,5));
+			builder.add (rbSepSpace, cc.xy(3,1));
+			builder.add (rbSepOther, cc.xy(3,3));
+
+			final JTextField txtOther = new JTextField(3);
+			builder.add (txtOther, cc.xy(5, 3));
+
+			//btnAdvanced = new JButton("More Options");
+			//builder.add (btnAdvanced, cc.xy (5, 5));
+
+			ptm = new PreviewTableModel(importInformation);
+			tblPreview = new JTable(ptm);
+			tblPreview.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+			JScrollPane scrTable = new JScrollPane(tblPreview);
+
+			builder.add (scrTable, cc.xyw(1,7,6));
+
+			txtOther.addActionListener(new ActionListener () {
+
+				public void actionPerformed(ActionEvent arg0)
+				{
+					importInformation.setDelimiter (txtOther.getText());
+					importInformation.guessSettings();
+					ptm.refresh();
+					rbSepOther.setSelected (true);
+				}
+
+
+			})
+			;
+
+			rbSepComma.addActionListener(new ActionListener()
+			{
+				public void actionPerformed (ActionEvent ae)
+				{
+					importInformation.setDelimiter(",");
+					ptm.refresh();
+				}
+
+			});
+			rbSepTab.addActionListener(new ActionListener()
+			{
+				public void actionPerformed (ActionEvent ae)
+				{
+					importInformation.setDelimiter("\t");
+					ptm.refresh();
+				}
+
+			});
+			rbSepSemi.addActionListener(new ActionListener()
+			{
+				public void actionPerformed (ActionEvent ae)
+				{
+					importInformation.setDelimiter(";");
+					ptm.refresh();
+				}
+			});
+			rbSepSpace.addActionListener(new ActionListener()
+			{
+				public void actionPerformed (ActionEvent ae)
+				{
+					importInformation.setDelimiter(" ");
+					ptm.refresh();
+				}
+
+			});
+
+			return builder.getPanel();
+		}
+
+	    public void aboutToDisplayPanel()
+	    {
+			getWizard().setPageTitle ("Choose data delimiter");
+
+	    	hpd.ptm.refresh();
+	    	String del = importInformation.getDelimiter();
+	    	if (del.equals ("\t"))
+	    	{
+	    		rbSepTab.setSelected(true);
+	    	}
+	    	else if (del.equals (","))
+			{
+	    		rbSepComma.setSelected(true);
+			}
+	    	else if (del.equals (";"))
+			{
+	    		rbSepSemi.setSelected(true);
+			}
+	    	else if (del.equals (" "))
+			{
+	    		rbSepSpace.setSelected(true);
+			}
+	    	else
+	    	{
+	    		rbSepOther.setSelected (true);
+	    	}
+	    }
+	}
+
+	private class ColumnPage extends WizardPanelDescriptor
+	{
+	    public static final String IDENTIFIER = "COLUMN_PAGE";
+
+	    private ColumnTableModel ctm;
+		private JTable tblColumn;
+
+	    private JComboBox cbColId;
+	    private JComboBox cbDataSource;
+	    private JComboBox cbColSyscode;
+	    private JRadioButton rbFixedNo;
+	    private JRadioButton rbFixedYes;
+	    
+	    private DataSourceModel mDataSource;
+
+	    public ColumnPage()
+	    {
+	        super(IDENTIFIER);
+	    }
+
+	    public Object getNextPanelDescriptor()
+	    {
+	        return ImportPage.IDENTIFIER;
+	    }
+
+	    public Object getBackPanelDescriptor()
+	    {
+	        return HeaderPage.IDENTIFIER;
+	    }
+
+	    @Override
+		protected JPanel createContents()
+		{
+		    FormLayout layout = new FormLayout (
+		    		"pref, 7dlu, pref:grow",
+		    		"5dlu, pref, 20dlu, pref, 3dlu, pref, 3dlu, pref, 20dlu, fill:[100dlu,min]:grow");
+
+		    PanelBuilder builder = new PanelBuilder(layout);
+		    builder.setDefaultDialogBorder();
+
+		    CellConstraints cc = new CellConstraints();
+
+		    rbFixedYes = new JRadioButton("Same for all rows:");
+		    rbFixedNo = new JRadioButton("(Advanced) System code column:");
+			ButtonGroup bgSyscodeCol = new ButtonGroup ();
+			bgSyscodeCol.add (rbFixedNo);
+			bgSyscodeCol.add (rbFixedYes);
+
+			cbColId = new JComboBox();
+			cbColId.setBackground(new Color(192, 255, 192));
+			cbColSyscode = new JComboBox();
+
+			mDataSource = new DataSourceModel();
+			String[] types = {"metabolite","protein","gene","interaction","probe","pathway"};
+			mDataSource.setTypeFilter(types);
+			cbDataSource = new JComboBox(mDataSource);
+			((JLabel)cbDataSource.getRenderer()).setHorizontalAlignment(JLabel.CENTER);
+			
+			ctm = new ColumnTableModel(importInformation);
+			tblColumn = new JTable(ctm);
+			tblColumn.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+			tblColumn.setDefaultRenderer(Object.class, ctm.getTableCellRenderer());
+			tblColumn.setCellSelectionEnabled(false);
+
+			tblColumn.getTableHeader().addMouseListener(new ColumnPopupListener());
+			JTable rowHeader = new RowNumberHeader(tblColumn);
+			rowHeader.addMouseListener(new RowPopupListener());
+			JScrollPane scrTable = new JScrollPane(tblColumn);
+
+			JViewport jv = new JViewport();
+		    jv.setView(rowHeader);
+		    jv.setPreferredSize(rowHeader.getPreferredSize());
+		    scrTable.setRowHeader(jv);
+
+			builder.addLabel ("1. Identifier column:", cc.xy(1,2));
+			builder.add (cbColId, cc.xy(3,2));
+			
+			builder.addSeparator("", cc.xyw(1, 3, 3));
+
+			builder.addLabel("2. Database selection:", cc.xy(1,4));
+			builder.add (rbFixedYes, cc.xy(1,6));
+			builder.add (cbDataSource, cc.xy(3,6));
+			
+			builder.add (rbFixedNo, cc.xy(1,8));
+			builder.add (cbColSyscode, cc.xy (3,8));
+
+			builder.add (scrTable, cc.xyw(1,10,3));
+
+			ActionListener rbAction = new ActionListener() {
+				public void actionPerformed (ActionEvent ae)
+				{
+					boolean result = (ae.getSource() == rbFixedYes);
+					importInformation.setSyscodeFixed(result);
+					cbDataSource.setSelectedItem(selectDatasource(importInformation.getSampleData(1, importInformation.getIdColumn())));
+			    	columnPageRefresh();
+				}
+			};
+			rbFixedYes.addActionListener(rbAction);
+			rbFixedNo.addActionListener(rbAction);
+
+			mDataSource.addListDataListener(new ListDataListener()
+			{
+				public void contentsChanged(ListDataEvent arg0)
+				{
+					importInformation.setDataSource(mDataSource.getSelectedDataSource());
+				}
+
+				public void intervalAdded(ListDataEvent arg0) {}
+
+				public void intervalRemoved(ListDataEvent arg0) {}
+			});
+
+			cbColSyscode.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent ae)
+				{
+					importInformation.setSysodeColumn(cbColSyscode.getSelectedIndex());
+					columnPageRefresh();
+				}
+			});
+			cbColId.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent ae)
+				{
+					importInformation.setIdColumn(cbColId.getSelectedIndex());
+					if(importInformation.isSyscodeFixed()) {
+						cbDataSource.setSelectedItem(selectDatasource(importInformation.getSampleData(1, importInformation.getIdColumn())));
+					}
+					
+			    	columnPageRefresh();
+				}
+			});
+			return builder.getPanel();
+		}
+
+	    private class ColumnPopupListener extends MouseAdapter
+	    {
+	    	@Override public void mousePressed (MouseEvent e)
+			{
+				showPopup(e);
+			}
+
+			@Override public void mouseReleased (MouseEvent e)
+			{
+				showPopup(e);
+			}
+
+			int clickedCol;
+
+			private void showPopup(MouseEvent e)
+			{
+				if (e.isPopupTrigger())
+				{
+					JPopupMenu popup;
+					popup = new JPopupMenu();
+					clickedCol = tblColumn.columnAtPoint(e.getPoint());
+					if (clickedCol != importInformation.getSyscodeColumn())
+						popup.add(new SyscodeColAction());
+					if (clickedCol != importInformation.getIdColumn())
+						popup.add(new IdColAction());
+					popup.show(e.getComponent(),
+							e.getX(), e.getY());
+				}
+			}
+
+			private class SyscodeColAction extends AbstractAction
+			{
+				public SyscodeColAction()
+				{
+					putValue(Action.NAME, "SystemCode column");
+				}
+
+				public void actionPerformed(ActionEvent arg0)
+				{
+					// if id and code column are about to be the same, swap them
+					if (clickedCol == importInformation.getIdColumn())
+						importInformation.setIdColumn(importInformation.getSyscodeColumn());
+					importInformation.setSysodeColumn(clickedCol);
+					columnPageRefresh();
+				}
+			}
+
+			private class IdColAction extends AbstractAction
+			{
+				public IdColAction()
+				{
+					putValue(Action.NAME, "Identifier column");
+				}
+
+				public void actionPerformed(ActionEvent arg0)
+				{
+					// if id and code column are about to be the same, swap them
+					if (clickedCol == importInformation.getSyscodeColumn())
+						importInformation.setSysodeColumn(importInformation.getIdColumn());
+					importInformation.setIdColumn(clickedCol);
+					columnPageRefresh();
+				}
+			}
+	    }
+
+	    private class RowPopupListener extends MouseAdapter
+	    {
+	    	@Override public void mousePressed (MouseEvent e)
+			{
+				showPopup(e);
+			}
+
+			@Override public void mouseReleased (MouseEvent e)
+			{
+				showPopup(e);
+			}
+
+			int clickedRow;
+
+			private void showPopup(MouseEvent e)
+			{
+				if (e.isPopupTrigger())
+				{
+					JPopupMenu popup;
+					popup = new JPopupMenu();
+					clickedRow = tblColumn.rowAtPoint(e.getPoint());
+					popup.add(new DataStartAction());
+					popup.add(new HeaderStartAction());
+					popup.show(e.getComponent(),
+							e.getX(), e.getY());
+				}
+			}
+
+			private class DataStartAction extends AbstractAction
+			{
+				public DataStartAction()
+				{
+					putValue(Action.NAME, "First data row");
+				}
+
+				public void actionPerformed(ActionEvent arg0)
+				{
+					importInformation.setFirstDataRow(clickedRow);
+					columnPageRefresh();
+				}
+			}
+
+			private class HeaderStartAction extends AbstractAction
+			{
+				public HeaderStartAction()
+				{
+					putValue(Action.NAME, "First header row");
+				}
+
+				public void actionPerformed(ActionEvent arg0)
+				{
+					importInformation.setFirstHeaderRow(clickedRow);
+					columnPageRefresh();
+				}
+			}
+
+	    }
+
+	    private void columnPageRefresh()
+	    {
+	    	String error = null;
+			if (importInformation.isSyscodeFixed())
+			{
+				rbFixedYes.setSelected (true);
+				cbColSyscode.setEnabled (false);
+				cbDataSource.setEnabled (true);
+			}
+			else
+			{
+				rbFixedNo.setSelected (true);
+				cbColSyscode.setEnabled (true);
+				cbDataSource.setEnabled (false);
+
+				if (importInformation.getIdColumn() == importInformation.getSyscodeColumn())
+	    		{
+	    			error = "System code column and Id column can't be the same";
+	    		}
+			}
+		    getWizard().setNextFinishButtonEnabled(error == null);
+		    getWizard().setErrorMessage(error == null ? "" : error);
+			getWizard().setPageTitle ("Choose column types");
+
+	    	ctm.refresh();
+	    }
+
+	    private void refreshComboBoxes()
+	    {
+	    	mDataSource.setSelectedItem(importInformation.getDataSource());
+			cbColId.setSelectedIndex(importInformation.getIdColumn());
+			cbColSyscode.setSelectedIndex(importInformation.getSyscodeColumn());
+	    }
+
+	    /**
+	     * A simple cell Renderer for combo boxes that use the
+	     * column index integer as value,
+	     * but will display the column name String
+	     */
+	    private class ColumnNameRenderer extends JLabel implements ListCellRenderer
+	    {
+			public ColumnNameRenderer()
+			{
+				setOpaque(true);
+				setHorizontalAlignment(CENTER);
+				setVerticalAlignment(CENTER);
+			}
+
+			/*
+			* This method finds the image and text corresponding
+			* to the selected value and returns the label, set up
+			* to display the text and image.
+			*/
+			public Component getListCellRendererComponent(
+			                        JList list,
+			                        Object value,
+			                        int index,
+			                        boolean isSelected,
+			                        boolean cellHasFocus)
+			{
+				//Get the selected index. (The index param isn't
+				//always valid, so just use the value.)
+				int selectedIndex = ((Integer)value).intValue();
+
+				if (isSelected)
+				{
+					setBackground(list.getSelectionBackground());
+					setForeground(list.getSelectionForeground());
+				} else {
+					setBackground(list.getBackground());
+					setForeground(list.getForeground());
+				}
+
+				String[] cn = importInformation.getColNames();
+				String column = cn[selectedIndex];
+				setText(column);
+				setFont(list.getFont());
+
+				return this;
+			}
+		}
+
+	    public void aboutToDisplayPanel()
+	    {
+	    	// create an array of size getSampleMaxNumCols()
+	    	Integer[] cn;
+	    	int max = importInformation.getSampleMaxNumCols();
+    		cn = new Integer[max];
+    		for (int i = 0; i < max; ++i) cn[i] = i;
+
+	    	cbColId.setRenderer(new ColumnNameRenderer());
+	    	cbColSyscode.setRenderer(new ColumnNameRenderer());
+	    	cbColId.setModel(new DefaultComboBoxModel(cn));
+	    	cbColSyscode.setModel(new DefaultComboBoxModel(cn));
+
+			columnPageRefresh();
+			refreshComboBoxes();
+
+	    	ctm.refresh();
+	    }
+
+	    @Override
+	    public void aboutToHidePanel()
+	    {
+	    	importInformation.setSyscodeFixed(rbFixedYes.isSelected());
+	    	if (rbFixedYes.isSelected())
+	    	{
+		    	importInformation.setDataSource(mDataSource.getSelectedDataSource());
+	    	}
+	    }
+	}
+
+	private class ImportPage extends WizardPanelDescriptor implements ProgressListener
+	{
+	    public static final String IDENTIFIER = "IMPORT_PAGE";
+
+	    public ImportPage()
+	    {
+	        super(IDENTIFIER);
+	    }
+
+	    public Object getNextPanelDescriptor()
+	    {
+	        return FINISH;
+	    }
+
+	    public Object getBackPanelDescriptor()
+	    {
+	        return ColumnPage.IDENTIFIER;
+	    }
+
+	    private JProgressBar progressSent;
+	    private JTextArea progressText;
+	    private ProgressKeeper pk;
+	    private JLabel lblTask;
+
+	    @Override
+	    public void aboutToCancel()
+	    {
+	    	// let the progress keeper know that the user pressed cancel.
+	    	pk.cancel();
+	    }
+
+		protected JPanel createContents()
+		{
+	    	FormLayout layout = new FormLayout(
+	    			"fill:[100dlu,min]:grow",
+	    			"pref, pref, fill:pref:grow"
+	    	);
+
+	    	DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+	    	builder.setDefaultDialogBorder();
+
+        	pk = new ProgressKeeper((int)1E6);
+        	pk.addListener(this);
+			progressSent = new JProgressBar(0, pk.getTotalWork());
+	        builder.append(progressSent);
+	        builder.nextLine();
+	        lblTask = new JLabel();
+	        builder.append(lblTask);
+
+	        progressText = new JTextArea();
+
+			builder.append(new JScrollPane(progressText));
+			return builder.getPanel();
+		}
+
+	    public void setProgressValue(int i)
+	    {
+	        progressSent.setValue(i);
+	    }
+
+	    public void setProgressText(String msg)
+	    {
+	        progressText.setText(msg);
+	    }
+
+	    public void aboutToDisplayPanel()
+	    {
+			getWizard().setPageTitle ("Perform import");
+	        setProgressValue(0);
+	        setProgressText("");
+
+	        getWizard().setNextFinishButtonEnabled(false);
+	        getWizard().setBackButtonEnabled(false);
+	    }
+
+	    public void displayingPanel()
+	    {
+			SwingWorker<Void, Void> sw = new SwingWorker<Void, Void>() {
+				@Override protected Void doInBackground() throws Exception {
+					pk.setTaskName("Importing pathway");
+					try
+					{
+						GexTxtImporter.importFromTxt(
+								importInformation,
+								pk,
+								standaloneEngine.getSwingEngine().getGdbManager().getCurrentGdb(),
+								standaloneEngine.getGexManager()
+						);
+						if (standaloneEngine.getVisualizationManager().getActiveVisualization() == null)
+							createDefaultVisualization(importInformation);
+					} 
+					catch (Exception e) 
+					{
+						Logger.log.error ("During import", e);
+						setProgressValue(0);
+						setProgressText("An Error Has Occurred: " + e.getMessage() + "\nSee the log for details");
+
+						getWizard().setBackButtonEnabled(true);
+					} finally {
+						pk.finished();
+					}
+					return null;
+				}
+
+				@Override public void done()
+				{
+					getWizard().setNextFinishButtonEnabled(true);
+					getWizard().setBackButtonEnabled(false);
+				}
+			};
+			sw.execute();
+	    }
+
+		public void progressEvent(ProgressEvent e)
+		{
+			switch(e.getType())
+			{
+				case ProgressEvent.FINISHED:
+					progressSent.setValue(pk.getTotalWork());
+				case ProgressEvent.TASK_NAME_CHANGED:
+					lblTask.setText(pk.getTaskName());
+					break;
+				case ProgressEvent.REPORT:
+					progressText.append(e.getProgressKeeper().getReport() + "\n");
+					break;
+				case ProgressEvent.PROGRESS_CHANGED:
+					progressSent.setValue(pk.getProgress());
+					break;
+			}
+		}
+
+	}
+
+	static double makeRoundNumber(double input)
+	{
+		double order = Math.pow(10, Math.round(Math.log10(input))) / 10;
+		return Math.round (input / order) * order;
+	}
+	
+	private void createDefaultVisualization(ImportInformation info) throws IDMapperException, DataException
+	{
+		VisualizationManager visMgr = standaloneEngine.getVisualizationManager(); 
+		ColorSetManager csmgr = visMgr.getColorSetManager();
+		ColorSet cs = new ColorSet(csmgr);
+		csmgr.addColorSet(cs);
+		
+		ColorGradient gradient = new ColorGradient();
+		cs.setGradient(gradient);
+		
+		double lowerbound = makeRoundNumber (info.getMinimum() - info.getMinimum() / 10); 
+		double upperbound = makeRoundNumber (info.getMaximum() + info.getMaximum() / 10);
+		gradient.addColorValuePair(new ColorValuePair(Color.YELLOW, lowerbound));
+		gradient.addColorValuePair(new ColorValuePair(Color.BLUE, upperbound));
+		
+		Visualization v = new Visualization("auto-generated");
+		
+		ColorByExpression cby = new ColorByExpression(standaloneEngine.getGexManager(), 
+				standaloneEngine.getVisualizationManager().getColorSetManager());
+		DataInterface gex = standaloneEngine.getGexManager().getCurrentGex();
+		int count = Math.min (5, gex.getSamples().keySet().size());
+		for (int i = 0; i < count; ++i)
+		{
+			//TODO: check that these samples contain numeric data
+			cby.addUseSample(gex.getSample(i));
+		}
+		cby.setSingleColorSet(cs);
+		v.addMethod(cby);
+
+		DataNodeLabel dnl = new DataNodeLabel();
+		v.addMethod(dnl);
+		
+		visMgr.addVisualization(v);
+		visMgr.setActiveVisualization(v);
+	}
+	
+	private DataSource selectDatasource(String id) {
+		if(id.startsWith("ENS")) {
+			return DataSource.getExistingBySystemCode("En");
+		} else if (id.matches("[0-9]+")) {
+			return DataSource.getExistingBySystemCode("L");
+		} else if (id.startsWith("HMDB")) {
+			return DataSource.getExistingBySystemCode("Ch");
+		} else if (id.startsWith("CHEBI")) {
+			return DataSource.getExistingBySystemCode("Ce");
+		} else if (id.startsWith("LM")) {
+			return DataSource.getExistingBySystemCode("Lm");
+		}
+		return DataSource.getExistingByFullName("Affy");
+	}
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<project name="org.pathvisio.launcher" default="jar" basedir=".">
+
+	<import file="../../build-common.xml" />
+	
+	<target name="prepare">
+		<mkdir dir="resources"/>
+		<echo file="resources/version.props">
+pathvisio.version = ${pathvisio.version}
+		</echo>
+	</target>
+
+	<path id="project.class.path">
+	  <fileset dir="../../lib">
+		<include name="org.eclipse.osgi.jar"/>
+	  </fileset>
+	  <fileset dir="${bundle.dest}">
+		<include name="org.pathvisio.core.jar"/>
+	  </fileset>
+	</path>
+
+</project>
