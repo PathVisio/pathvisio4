@@ -25,32 +25,26 @@ import org.pathvisio.desktop.PvDesktop;
 /**
  * Collection of compatibility "hacks" for the standalone PathVisio app.
  */
-public class StandaloneCompat implements GdbEventListener
-{
+public class StandaloneCompat implements GdbEventListener {
 	private final PvDesktop desktop;
 
-	public StandaloneCompat (PvDesktop desktop)
-	{
+	public StandaloneCompat(PvDesktop desktop) {
 		this.desktop = desktop;
 		desktop.getSwingEngine().getGdbManager().addGdbEventListener(this);
 	}
 
-	public void gdbEvent(GdbEvent e)
-	{
-		switch (e.getType())
-		{
-		case ADDED:
-			{
-				String name = e.getName();
+	public void gdbEvent(GdbEvent e) {
+		switch (e.getType()) {
+		case ADDED: {
+			String name = e.getName();
 
-				//Very primitive check for updates
-				if (name != null && (name.contains("Derby_2011") || name.contains("Derby_2010") || name.contains("Derby_2009") || name.contains("Derby_2008")))
-				{
-					JOptionPane.showMessageDialog(desktop.getFrame(),
-					"A newer identifier mapping database is available\n" +
-					"Please check http://www.pathvisio.org/downloads/download-bridgedbs/ for the latest database.");
-				}
+			// Very primitive check for updates
+			if (name != null && (name.contains("Derby_2011") || name.contains("Derby_2010")
+					|| name.contains("Derby_2009") || name.contains("Derby_2008"))) {
+				JOptionPane.showMessageDialog(desktop.getFrame(), "A newer identifier mapping database is available\n"
+						+ "Please check http://www.pathvisio.org/downloads/download-bridgedbs/ for the latest database.");
 			}
+		}
 		default:
 			break;
 		}

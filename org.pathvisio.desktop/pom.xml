@@ -24,9 +24,22 @@
 		</dependency>
 		<dependency>
 			<groupId>org.pathvisio</groupId>
+			<artifactId>org.pathvisio.data</artifactId>
+			<version>0.0.1</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.pathvisio</groupId>
 			<artifactId>org.pathvisio.gui</artifactId>
 			<version>0.0.1</version>
 			<scope>compile</scope>
+		</dependency>
+		<!-- OSGI framework -->
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.framework</artifactId>
+			<version>1.10.0</version>
+			<scope>provided</scope>
 		</dependency>
 		<!-- BridgeDb -->
 		<dependency>
@@ -49,6 +62,17 @@
 			<groupId>org.bridgedb</groupId>
 			<artifactId>org.bridgedb.rdb</artifactId>
 			<version>3.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bridgedb</groupId>
+			<artifactId>org.bridgedb.rdb.construct</artifactId>
+			<version>3.0.5</version>
+		</dependency>
+		<!-- Apache FOP -->
+		<dependency>
+			<groupId>org.apache.xmlgraphics</groupId>
+			<artifactId>fop</artifactId>
+			<version>2.6</version>
 		</dependency>
 	</dependencies>
 </project>

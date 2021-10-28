@@ -71,8 +71,8 @@ import org.pathvisio.visualization.gui.ColorSetCombo;
 import org.pathvisio.visualization.plugins.ColorByExpression.ConfiguredSample;
 
 /**
- * Configuration panel for the ColorByExpression visualization
- * method
+ * Configuration panel for the ColorByExpression visualization method
+ * 
  * @author thomas
  */
 public class ColorByExpressionPanel extends JPanel implements ActionListener {
@@ -83,11 +83,8 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 	static final String ACTION_COMBO = "colorset";
 
 	static final ImageIcon COLOR_PICK_ICON = new ImageIcon(Resources.getResourceURL("colorpicker.gif"));
-	static final Cursor COLOR_PICK_CURS = Toolkit.getDefaultToolkit().createCustomCursor(
-			COLOR_PICK_ICON.getImage(),
-			new Point(4, 19),
-			"Color picker"
-	);
+	static final Cursor COLOR_PICK_CURS = Toolkit.getDefaultToolkit().createCustomCursor(COLOR_PICK_ICON.getImage(),
+			new Point(4, 19), "Color picker");
 
 	private ColorByExpression method;
 	private Basic basic;
@@ -100,10 +97,8 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 		this.method = method;
 		this.csm = csm;
 
-		setLayout(new FormLayout(
-				"4dlu, pref, 4dlu, pref, fill:pref:grow, 4dlu",
-				"4dlu, pref, 4dlu, fill:pref:grow, 4dlu"
-		));
+		setLayout(new FormLayout("4dlu, pref, 4dlu, pref, fill:pref:grow, 4dlu",
+				"4dlu, pref, 4dlu, fill:pref:grow, 4dlu"));
 
 		ButtonGroup buttons = new ButtonGroup();
 		JRadioButton rbBasic = new JRadioButton(ACTION_BASIC);
@@ -131,7 +126,7 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 
 		add(settings, cc.xyw(2, 4, 4));
 
-		if(method.isAdvanced()) {
+		if (method.isAdvanced()) {
 			rbAdvanced.doClick();
 		} else {
 			rbBasic.doClick();
@@ -140,13 +135,13 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 
 	public void actionPerformed(ActionEvent e) {
 		String action = e.getActionCommand();
-		if(ACTION_ADVANCED.equals(action) || ACTION_BASIC.equals(action)) {
+		if (ACTION_ADVANCED.equals(action) || ACTION_BASIC.equals(action)) {
 			basic.refresh();
 			advanced.refresh();
 			cardLayout.show(settings, action);
-			if(ACTION_BASIC.equals(action)) {
-				//Remove images
-				for(ConfiguredSample s : method.getConfiguredSamples()) {
+			if (ACTION_BASIC.equals(action)) {
+				// Remove images
+				for (ConfiguredSample s : method.getConfiguredSamples()) {
 					s.setURL(null);
 				}
 			}
@@ -162,20 +157,17 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 		ColorSetCombo colorSetCombo;
 
 		public Basic() {
-			setLayout(new FormLayout(
-					"4dlu, pref, 2dlu, fill:pref:grow, 4dlu",
-					"4dlu, pref:grow, 4dlu, pref, 4dlu"
-			));
+			setLayout(new FormLayout("4dlu, pref, 2dlu, fill:pref:grow, 4dlu", "4dlu, pref:grow, 4dlu, pref, 4dlu"));
 
 			List<ISample> selected = method.getSelectedSamples();
-			for (ISample s : selected) if (s == null) throw new NullPointerException();
-			sampleList = new SortSampleCheckList(
-					selected, method.getGexManager()
-			);
+			for (ISample s : selected)
+				if (s == null)
+					throw new NullPointerException();
+			sampleList = new SortSampleCheckList(selected, method.getGexManager());
 			sampleList.getList().addActionListener(this);
 			sampleList.getList().setActionCommand(ACTION_SAMPLE);
 			sampleList.getList().getModel().addListDataListener(this);
-			
+
 			ColorSetChooser csChooser = new ColorSetChooser(csm, method.getGexManager());
 			colorSetCombo = csChooser.getColorSetCombo();
 			colorSetCombo.setActionCommand(ACTION_COMBO);
@@ -192,7 +184,7 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 
 		void refresh() {
 			ColorSet cs = method.getSingleColorSet();
-			if(cs == null) {
+			if (cs == null) {
 				// a way to represent the fact that there are multiple colorsets in action.
 				colorSetCombo.setSelectedItem(null);
 			} else {
@@ -203,7 +195,7 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 
 		private void refreshSamples() {
 			List<ConfiguredSample> csamples = new ArrayList<ConfiguredSample>();
-			for(ISample s : sampleList.getList().getSelectedSamplesInOrder()) {
+			for (ISample s : sampleList.getList().getSelectedSamplesInOrder()) {
 				ConfiguredSample cs = method.new ConfiguredSample(s);
 
 				cs.setColorSet(colorSetCombo.getSelectedColorSet());
@@ -214,12 +206,10 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 
 		public void actionPerformed(ActionEvent e) {
 			String action = e.getActionCommand();
-			if(ACTION_SAMPLE.equals(action)) {
+			if (ACTION_SAMPLE.equals(action)) {
 				refreshSamples();
-			} else if(ACTION_COMBO.equals(action))
-			{
-				if (colorSetCombo.getSelectedItem() != null)
-				{
+			} else if (ACTION_COMBO.equals(action)) {
+				if (colorSetCombo.getSelectedItem() != null) {
 					method.setSingleColorSet(colorSetCombo.getSelectedColorSet());
 				}
 			}
@@ -246,14 +236,10 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 		SamplePanel samplePanel;
 
 		public Advanced() {
-			setLayout(new FormLayout(
-					"4dlu, fill:pref:grow(0.5), 4dlu, fill:pref:grow(0.5), 4dlu",
-					"4dlu, fill:pref:grow, 4dlu"
-			));
+			setLayout(new FormLayout("4dlu, fill:pref:grow(0.5), 4dlu, fill:pref:grow(0.5), 4dlu",
+					"4dlu, fill:pref:grow, 4dlu"));
 
-			sampleList = new SortSampleCheckList(
-					method.getSelectedSamples(), method.getGexManager()
-			);
+			sampleList = new SortSampleCheckList(method.getSelectedSamples(), method.getGexManager());
 			sampleList.getList().addActionListener(this);
 			sampleList.getList().setActionCommand(ACTION_SAMPLE);
 			sampleList.getList().getModel().addListDataListener(this);
@@ -268,21 +254,19 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 
 		void refresh() {
 			sampleList.getList().setSelectedSamples(method.getSelectedSamples());
-			samplePanel.setInput(method.getConfiguredSample(
-					sampleList.getList().getSelectedSample()
-			));
+			samplePanel.setInput(method.getConfiguredSample(sampleList.getList().getSelectedSample()));
 		}
 
 		public void actionPerformed(ActionEvent e) {
 			String action = e.getActionCommand();
-			if(ACTION_SAMPLE.equals(action)) {
+			if (ACTION_SAMPLE.equals(action)) {
 				refreshSamples();
-			} else if(ACTION_COMBO.equals(action)) {
+			} else if (ACTION_COMBO.equals(action)) {
 				ISample s = sampleList.getList().getSelectedSample();
 				ColorSet colorSet = colorSetCombo.getSelectedColorSet();
-				if(s != null && colorSet != null) {
+				if (s != null && colorSet != null) {
 					ConfiguredSample cs = method.getConfiguredSample(s);
-					if(cs != null) {
+					if (cs != null) {
 						cs.setColorSet(colorSet);
 					}
 				}
@@ -291,13 +275,13 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 
 		private void refreshSamples() {
 			List<ConfiguredSample> csamples = new ArrayList<ConfiguredSample>();
-			for(ISample s : sampleList.getList().getSelectedSamplesInOrder()) {
+			for (ISample s : sampleList.getList().getSelectedSamplesInOrder()) {
 				ConfiguredSample cs = method.getConfiguredSample(s);
-				if(cs == null) {
+				if (cs == null) {
 					cs = method.new ConfiguredSample(s);
 				}
 				csamples.add(cs);
-				if(sampleList.getList().getSelectedSample() == s) {
+				if (sampleList.getList().getSelectedSample() == s) {
 					samplePanel.setInput(cs);
 				}
 			}
@@ -317,11 +301,7 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 		}
 
 		public void valueChanged(ListSelectionEvent e) {
-			samplePanel.setInput(
-					method.getConfiguredSample(
-							sampleList.getList().getSelectedSample()
-					)
-			);
+			samplePanel.setInput(method.getConfiguredSample(sampleList.getList().getSelectedSample()));
 		}
 	}
 
@@ -343,31 +323,21 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 		void setInput(ConfiguredSample cs) {
 			this.cs = cs;
 			removeAll();
-			if(cs == null) {
-				setBorder(BorderFactory.createTitledBorder(
-					BorderFactory.createEtchedBorder(),
-					"Sample settings"
-				));
+			if (cs == null) {
+				setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Sample settings"));
 				setLayout(new BorderLayout());
 				add(new JLabel("Select a sample to configure"), BorderLayout.CENTER);
 			} else {
 				setContents();
-				setBorder(BorderFactory.createTitledBorder(
-						BorderFactory.createEtchedBorder(),
-						"Sample settings for " + cs.getSample().getName()
-				));
+				setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+						"Sample settings for " + cs.getSample().getName()));
 			}
 			revalidate();
 		}
 
 		void setContents() {
-			DefaultFormBuilder builder = new DefaultFormBuilder(
-					new FormLayout("pref, 4dlu, fill:pref:grow"),
-					this
-			);
-
-			ColorSetManager csm = method.getVisualization()
-			.getManager().getColorSetManager();
+			DefaultFormBuilder builder = new DefaultFormBuilder(new FormLayout("pref, 4dlu, fill:pref:grow"), this);
+			ColorSetManager csm = method.getVisualization().getManager().getColorSetManager();
 			ColorSetChooser csChooser = new ColorSetChooser(csm, method.getGexManager());
 			colorSetCombo = csChooser.getColorSetCombo();
 			colorSetCombo.setActionCommand(ACTION_COMBO);
@@ -380,9 +350,8 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 			imageCheck.setSelected(cs.getURL() != null);
 
 			imagePanel = new JPanel();
-			imagePanel.setBorder(BorderFactory.createTitledBorder(
-					BorderFactory.createEtchedBorder(), "Image settings"
-			));
+			imagePanel
+					.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Image settings"));
 
 			builder.setDefaultDialogBorder();
 			builder.append("Color set:", csChooser);
@@ -398,23 +367,23 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 			imagePanel.setEnabled(imageCheck.isSelected());
 			imagePanel.removeAll();
 
-			if(imagePanel.isEnabled()) {
+			if (imagePanel.isEnabled()) {
 				imageCombo = new JComboBox(cs.getMethod().getImageURLs().toArray());
 				imageCombo.setSelectedItem(cs.getURL());
 				imageCombo.setRenderer(new DefaultListCellRenderer() {
-					public Component getListCellRendererComponent(JList list,
-							Object value, int index, boolean isSelected,
-							boolean cellHasFocus) {
-						JLabel lbl = (JLabel)super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-						if(value instanceof URL && ((URL)value).getFile() != null) {
-							lbl.setText(new File(((URL)value).getFile()).getName());
+					public Component getListCellRendererComponent(JList list, Object value, int index,
+							boolean isSelected, boolean cellHasFocus) {
+						JLabel lbl = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected,
+								cellHasFocus);
+						if (value instanceof URL && ((URL) value).getFile() != null) {
+							lbl.setText(new File(((URL) value).getFile()).getName());
 						}
 						return lbl;
 					}
 				});
 				imageCombo.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						cs.setURL((URL)imageCombo.getSelectedItem());
+						cs.setURL((URL) imageCombo.getSelectedItem());
 						refreshPreview();
 					}
 				});
@@ -430,7 +399,7 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 				previewLabel.setOpaque(true);
 				previewLabel.setPreferredSize(new Dimension(75, 75));
 
-				final JPanel colorPanel= new JPanel();
+				final JPanel colorPanel = new JPanel();
 				colorPanel.setOpaque(true);
 				colorPanel.setBackground(cs.getReplaceColor());
 				colorPanel.setPreferredSize(new Dimension(15, 15));
@@ -442,7 +411,7 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 						colorPanel.setBackground(cs.getReplaceColor());
 					}
 				});
-				//Work on color picker
+				// Work on color picker
 //				pick.setIcon(COLOR_PICK_ICON);
 //				try {
 //					final Robot robot = new Robot();
@@ -478,20 +447,17 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 //					Logger.log.error("Unable to create robot for color picker");
 //				}
 
-				final JSpinner tolerance = new JSpinner(
-						new SpinnerNumberModel(cs.getTolerance(), 0, 255, 1)
-				);
+				final JSpinner tolerance = new JSpinner(new SpinnerNumberModel(cs.getTolerance(), 0, 255, 1));
 				tolerance.addChangeListener(new ChangeListener() {
 					public void stateChanged(ChangeEvent e) {
-						cs.setTolerance((Integer)tolerance.getValue());
+						cs.setTolerance((Integer) tolerance.getValue());
 						refreshPreview();
 					}
 				});
 
-				imagePanel.setLayout(new FormLayout(
-						"4dlu, fill:pref:grow, 4dlu, pref, 4dlu, fill:10dlu, 4dlu, pref, 4dlu",
-						"4dlu, pref, 4dlu, pref:grow, 4dlu, pref, 4dlu"
-				));
+				imagePanel.setLayout(
+						new FormLayout("4dlu, fill:pref:grow, 4dlu, pref, 4dlu, fill:10dlu, 4dlu, pref, 4dlu",
+								"4dlu, pref, 4dlu, pref:grow, 4dlu, pref, 4dlu"));
 				CellConstraints cc = new CellConstraints();
 				imagePanel.add(imageCombo, cc.xy(2, 2));
 				imagePanel.add(addImg, cc.xy(4, 2));
@@ -511,11 +477,11 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 
 		void refreshPreview() {
 			Dimension size = previewLabel.getSize();
-			if(size.width <= 0 && size.height <= 0) {
+			if (size.width <= 0 && size.height <= 0) {
 				size = previewLabel.getPreferredSize();
 			}
 			Image img = cs.getImage(size, Color.GRAY);
-			if(img != null) {
+			if (img != null) {
 				previewLabel.setIcon(new ImageIcon(img));
 			} else {
 				previewLabel.setIcon(null);
@@ -525,18 +491,16 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 
 		void chooseColor() {
 			Color c = JColorChooser.showDialog(this, "Choose color", cs.getReplaceColor());
-			if(c != null) {
+			if (c != null) {
 				cs.setReplaceColor(c);
 			}
 		}
 
 		void chooseImage() {
 			JFileChooser fc = new JFileChooser();
-			fc.addChoosableFileFilter(new SimpleFileFilter(
-					"Image files", "*.png|*.jpg|*.gif|*.bmp", true
-			));
+			fc.addChoosableFileFilter(new SimpleFileFilter("Image files", "*.png|*.jpg|*.gif|*.bmp", true));
 			int status = fc.showOpenDialog(this);
-			if(status == JFileChooser.APPROVE_OPTION) {
+			if (status == JFileChooser.APPROVE_OPTION) {
 				try {
 					URL url = fc.getSelectedFile().toURI().toURL();
 					cs.getMethod().addImageURL(url);
@@ -544,12 +508,8 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 					imageCombo.addItem(url);
 				} catch (MalformedURLException e) {
 					Logger.log.error("Unable to select image", e);
-					JOptionPane.showMessageDialog(
-							this,
-							"Unable to open image " + fc.getSelectedFile(),
-							"Error",
-							JOptionPane.ERROR_MESSAGE
-					);
+					JOptionPane.showMessageDialog(this, "Unable to open image " + fc.getSelectedFile(), "Error",
+							JOptionPane.ERROR_MESSAGE);
 				}
 				imageCombo.setSelectedItem(cs.getURL());
 			}
@@ -557,10 +517,10 @@ public class ColorByExpressionPanel extends JPanel implements ActionListener {
 
 		public void actionPerformed(ActionEvent e) {
 			String action = e.getActionCommand();
-			if(ACTION_COMBO.equals(action)) {
+			if (ACTION_COMBO.equals(action)) {
 				cs.setColorSet(colorSetCombo.getSelectedColorSet());
-			} else if(ACTION_IMG.equals(action)) {
-				if(imageCheck.isSelected()) {
+			} else if (ACTION_IMG.equals(action)) {
+				if (imageCheck.isSelected()) {
 					cs.setDefaultURL();
 				} else {
 					cs.setURL(null);

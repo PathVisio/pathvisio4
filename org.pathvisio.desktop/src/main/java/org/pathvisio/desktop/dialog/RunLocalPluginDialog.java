@@ -175,7 +175,7 @@ public class RunLocalPluginDialog extends JDialog
 		CellConstraints cc = new CellConstraints();
 		
 		PanelBuilder panel = new PanelBuilder(layout);
-		panel.setBackground(Color.white);
+		panel.background(Color.white); //TODO was setBackground() deprecated? 
 		panel.addLabel("Please select all files that implement the PathVisio plugin interface.", cc.xy(2, 2));
 		panel.addSeparator("", cc.xyw(2, 3, 3));
 		

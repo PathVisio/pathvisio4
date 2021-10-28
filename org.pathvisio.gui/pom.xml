@@ -15,6 +15,24 @@
 		<maven.compiler.target>11</maven.compiler.target>
 	</properties>
 	<dependencies>
+		<!-- PathVisio (temporary) -->
+		<dependency>
+			<groupId>org.pathvisio</groupId>
+			<artifactId>org.pathvisio.core</artifactId>
+			<version>0.0.1</version>
+			<scope>compile</scope>
+		</dependency>
+		<!-- JGoodies Forms -->
+		<dependency>
+			<groupId>com.jgoodies</groupId>
+			<artifactId>jgoodies-forms</artifactId>
+			<version>1.9.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.jgoodies</groupId>
+			<artifactId>jgoodies-forms</artifactId>
+			<version>1.8.0</version> <!-- older version for FontChooser.java -->
+		</dependency>
 		<!-- BridgeDb -->
 		<dependency>
 			<groupId>org.bridgedb</groupId>

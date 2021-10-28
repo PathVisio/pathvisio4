@@ -42,6 +42,7 @@ import javax.swing.text.JTextComponent;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.pathvisio.core.biopax.PublicationXref;
 import org.pathvisio.core.data.PubMedQuery;
@@ -115,7 +116,7 @@ public class PublicationXRefDialog extends OkCancelDialog {
 				"", pk, true, true);
 
 		SwingWorker<Void, Void> sw = new SwingWorker<Void, Void>() {
-			protected Void doInBackground() throws SAXException, IOException
+			protected Void doInBackground() throws SAXException, IOException, ParserConfigurationException
 			{
 				pk.setTaskName("Querying PubMed");
 				pmq.execute();

@@ -79,6 +79,7 @@ public class FontChooser extends OkCancelDialog {
 		italicCheck = new JCheckBox();
 		italicCheck.setSelected(font.isItalic());
 
+		//TODO 
 		DefaultFormBuilder builder = new DefaultFormBuilder(new FormLayout(
 				"pref, 8dlu, pref:grow", ""
 		));
