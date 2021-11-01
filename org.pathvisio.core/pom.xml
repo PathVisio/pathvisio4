@@ -34,8 +34,22 @@
 			</plugin>
 		</plugins>
 	</build>
-
+	
+	<repositories>
+		<repository>
+			<!-- libGPML load as repository. DO NOT set id to "local" because 
+				it is reserved by Maven -->
+			<id>local-maven-repo</id>
+			<url>file://${project.basedir}/repo</url>
+		</repository>
+	</repositories>
 	<dependencies>
+		<!-- libGPML -->
+		<dependency>
+			<groupId>org.pathvisio</groupId>
+			<artifactId>org.pathvisio.libgpml</artifactId>
+			<version>4.0.0-SNAPSHOT</version>
+		</dependency>
 		<!-- Apache Batik -->
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
