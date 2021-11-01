@@ -24,6 +24,8 @@ package org.pathvisio.core.util;
 
 import java.io.File;
 
+import org.bridgedb.DataSource;
+import org.bridgedb.bio.DataSourceTxt;
 import org.pathvisio.core.Engine;
 import org.pathvisio.core.debug.Logger;
 import org.pathvisio.core.model.BatikImageExporter;
@@ -78,6 +80,7 @@ public class Converter {
 						//debug, trace, info, warn, error, fatal
         Logger.log.setLogLevel (false, false, true, true, true, true);
 
+        DataSourceTxt.init();
         PreferenceManager.init();
     	Engine engine = new Engine();
     	engine.addPathwayImporter(new GpmlFormat());
@@ -89,7 +92,7 @@ public class Converter {
 		engine.addPathwayExporter(new BatikImageExporter(ImageExporter.TYPE_TIFF));
 		engine.addPathwayExporter(new BatikImageExporter(ImageExporter.TYPE_PDF));
 		engine.addPathwayExporter(new EUGeneExporter());
-		engine.addPathwayExporter(new DataNodeListExporter());
+//		engine.addPathwayExporter(new DataNodeListExporter());
 
 		// Transient dependency on Biopax converter
 		try
@@ -136,6 +139,8 @@ public class Converter {
 		{
 			inputFile = new File(args[0]);
 			outputFile = new File(args[1]);
+			
+			System.out.println(inputFile.exists());
 			
 			if(inputFile == null || !inputFile.canRead()) {
 				Logger.log.error("Unable to read inputfile: " + inputFile);

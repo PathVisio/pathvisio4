@@ -14,27 +14,27 @@
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 	</properties>
-	
-	 <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <version>5.1.2</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Bundle-Version>${project.version}</Bundle-Version>
-                        <Export-Package>*</Export-Package>
-                        <Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
-                        <Embed-Directory>target/dependency</Embed-Directory>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-	
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>5.1.2</version>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+						<Bundle-Version>${project.version}</Bundle-Version>
+						<Export-Package>*</Export-Package>
+						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
+						<Embed-Directory>target/dependency</Embed-Directory>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 	<dependencies>
 		<!-- Apache Batik -->
 		<dependency>
@@ -107,9 +107,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.bridgedb</groupId>
-			<artifactId>bridgedb-bundle</artifactId>
+			<artifactId>org.bridgedb.rdb</artifactId>
 			<version>3.0.5</version>
-			<type>pom</type>
 		</dependency>
 		<!-- JUnit -->
 		<dependency>
