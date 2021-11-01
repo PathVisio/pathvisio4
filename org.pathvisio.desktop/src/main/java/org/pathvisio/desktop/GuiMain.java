@@ -44,22 +44,16 @@ import org.pathvisio.core.data.GdbEvent;
 import org.pathvisio.core.data.GdbManager;
 import org.pathvisio.core.data.GdbManager.GdbEventListener;
 import org.pathvisio.core.debug.Logger;
+import org.pathvisio.core.model.BatikImageExporter;
 import org.pathvisio.core.model.DataNodeListExporter;
 import org.pathvisio.core.model.EUGeneExporter;
 import org.pathvisio.core.model.GpmlFormat;
 import org.pathvisio.core.model.ImageExporter;
 import org.pathvisio.core.model.MappFormat;
+import org.pathvisio.core.model.RasterImageExporter;
 import org.pathvisio.core.preferences.GlobalPreference;
 import org.pathvisio.core.preferences.PreferenceManager;
 import org.pathvisio.core.util.Resources;
-import org.pathvisio.data.DataException;
-import org.pathvisio.data.DataInterface;
-import org.pathvisio.desktop.gex.GexManager;
-import org.pathvisio.desktop.gex.GexManager.GexManagerEvent;
-import org.pathvisio.desktop.gex.GexManager.GexManagerListener;
-import org.pathvisio.desktop.model.BatikImageWithDataExporter;
-import org.pathvisio.desktop.model.RasterImageWithDataExporter;
-import org.pathvisio.desktop.visualization.VisualizationManager;
 import org.pathvisio.gui.MainPanel;
 import org.pathvisio.gui.SwingEngine;
 import org.pathvisio.gui.SwingEngine.Browser;
@@ -71,9 +65,8 @@ import org.pathvisio.gui.SwingEngine.Browser;
  * 
  * @author thomas
  * @author anwesha
- *
  */
-public class GuiMain implements GdbEventListener, GexManagerListener
+public class GuiMain implements GdbEventListener
 {
 	GuiMain() { 
 		
@@ -132,17 +125,6 @@ public class GuiMain implements GdbEventListener, GexManagerListener
 			openPathwayFile(str);
 		}
 		
-		str = System.getProperty(ARG_PROPERTY_PGEX);
-		if(str != null) {
-			try {
-				pvDesktop.getGexManager().setCurrentGex(str, false);
-				pvDesktop.loadGexCache();
-				Logger.log.info ("Loaded pgex " + str);
-			} 
-			catch (DataException e) {
-				Logger.log.error ("Couldn't open pgex " + str, e);
-			}
-		}
 	}
 
 	private String shortenString(String s) {
@@ -201,22 +183,6 @@ public class GuiMain implements GdbEventListener, GexManagerListener
 		setGdbStatus(allLabel);
 	}
 
-	public void gexManagerEvent(GexManagerEvent e)
-	{
-		if(e.getType() == GexManagerEvent.CONNECTION_OPENED ||
-				e.getType() == GexManagerEvent.CONNECTION_CLOSED)
-		{
-			DataInterface gex = pvDesktop.getGexManager().getCurrentGex();
-			if(gex != null && gex.isConnected()) {
-				gexLabel.setText(" | Dataset: " + shortenString(gex.getDbName()));
-				gexLabel.setToolTipText(gex.getDbName());
-			} else {
-				gexLabel.setText("");
-				gexLabel.setToolTipText("");
-			}
-		}
-	}
-
 	private JLabel allLabel;
 /*	private JLabel gdbLabel;
 	private JLabel mdbLabel;
@@ -259,7 +225,6 @@ public class GuiMain implements GdbEventListener, GexManagerListener
 
 		swingEngine.getGdbManager().addGdbEventListener(this);
 
-		pvDesktop.getGexManager().addListener(this);
 
 		frame.setJMenuBar(mainPanel.getMenuBar());
 		frame.pack();
@@ -337,7 +302,6 @@ public class GuiMain implements GdbEventListener, GexManagerListener
 		}
 		swingEngine.getGdbManager().removeGdbEventListener(this);
 		mainPanel.dispose();
-		pvDesktop.getGexManager().removeListener(this);
 		pvDesktop.dispose();
 		swingEngine.getEngine().dispose();
 		swingEngine.dispose();
@@ -410,12 +374,10 @@ public class GuiMain implements GdbEventListener, GexManagerListener
 		engine.addPathwayExporter(new MappFormat());
 		engine.addPathwayExporter(new GpmlFormat());
 
-		GexManager gex = pvDesktop.getGexManager();
-		VisualizationManager vis = pvDesktop.getVisualizationManager();
-		engine.addPathwayExporter(new RasterImageWithDataExporter(ImageExporter.TYPE_PNG, gex, vis));
-		engine.addPathwayExporter(new BatikImageWithDataExporter(ImageExporter.TYPE_SVG, gex, vis));
-		engine.addPathwayExporter(new BatikImageWithDataExporter(ImageExporter.TYPE_TIFF, gex, vis));
-		engine.addPathwayExporter(new BatikImageWithDataExporter(ImageExporter.TYPE_PDF, gex, vis));
+		engine.addPathwayExporter(new RasterImageExporter(ImageExporter.TYPE_PNG));
+		engine.addPathwayExporter(new BatikImageExporter(ImageExporter.TYPE_SVG));
+		engine.addPathwayExporter(new BatikImageExporter(ImageExporter.TYPE_TIFF));
+		engine.addPathwayExporter(new BatikImageExporter(ImageExporter.TYPE_PDF));
 		engine.addPathwayExporter(new DataNodeListExporter(gdbManager));
 		engine.addPathwayExporter(new EUGeneExporter());
 	}

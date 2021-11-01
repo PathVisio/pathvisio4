@@ -63,9 +63,8 @@ import org.pathvisio.pluginmanager.impl.dialogs.PluginManagerDialog;
 import org.pathvisio.pluginmanager.impl.io.RepoXmlReader;
 
 /**
- * implementation of the IPluginManager interface
- * functionality to install plugins, connecting to the repository,
- * uninstalling plugins
+ * implementation of the IPluginManager interface functionality to install
+ * plugins, connecting to the repository, uninstalling plugins
  * 
  * @author martina
  *
@@ -75,20 +74,20 @@ public class PluginManager implements IPluginManager {
 	private List<PVRepository> onlineRepos;
 	private List<BundleVersion> problems;
 	private Map<String, BundleVersion> tmpBundles;
-	
+
 	private BundleContext context;
 	private RepositoryAdmin repoAdmin;
 
 	private Map<String, Plugin> runningPlugins;
-	
+
 	private PvDesktop desktop;
-	
+
 	private LocalRepositoryHandler localHandler;
 	private PluginManagerDialog dlg;
-	
+
 	public static final String ARG_PROPERTY_WPID = "wp.id";
-	
-	public PluginManager (BundleContext context) {
+
+	public PluginManager(BundleContext context) {
 		this.context = context;
 		onlineRepos = new ArrayList<PVRepository>();
 		runningPlugins = new HashMap<String, Plugin>();
@@ -96,7 +95,7 @@ public class PluginManager implements IPluginManager {
 		localHandler = new LocalRepositoryHandler(context, this);
 		tmpBundles = new HashMap<String, BundleVersion>();
 	}
-	
+
 	public void init(PvDesktop desktop) {
 		this.desktop = desktop;
 
@@ -148,7 +147,7 @@ public class PluginManager implements IPluginManager {
 				protected void done() {
 					if (atLeastOneSuccess) {
 						status = PluginManagerStatus.CONNECTION_COMPLETED_SUCCESSFULLY;
-						
+
 						// check if WP plugin needs to be installed
 						String str = System.getProperty(ARG_PROPERTY_WPID);
 						if (str != null && !runningPlugins.containsKey("org.pathvisio.wpclient")) {
@@ -174,19 +173,19 @@ public class PluginManager implements IPluginManager {
 			Logger.log.error("Could not initialize online repositories.");
 		}
 	}
-	
+
 	/**
 	 * calls init method of all registered plugins
 	 */
 	private void initPlugins() {
 		try {
 			ServiceReference[] refs = context.getServiceReferences(Plugin.class.getName(), null);
-			if(refs != null) {
-				for(int i = 0; i < refs.length; i++) {
+			if (refs != null) {
+				for (int i = 0; i < refs.length; i++) {
 					Plugin plugin = (Plugin) context.getService(refs[i]);
-					if(!runningPlugins.containsKey(refs[i].getBundle().getSymbolicName())) {
+					if (!runningPlugins.containsKey(refs[i].getBundle().getSymbolicName())) {
 						Logger.log.info("Initialize plugin " + refs[i].getBundle().getSymbolicName());
-						
+
 						ServiceReference ref = context.getServiceReference(PvDesktop.class.getName());
 						checkTmpBundles(refs[i]);
 						plugin.init((PvDesktop) context.getService(ref));
@@ -204,45 +203,38 @@ public class PluginManager implements IPluginManager {
 		}
 	}
 
-	
 	private void checkTmpBundles(ServiceReference serviceReference) {
 		String symName = serviceReference.getBundle().getSymbolicName();
-		if(getLocalHandler().containsBundle(symName) == null) {
-			if(!symName.equals("org.pathvisio.gex") && !symName.equals("org.pathvisio.statistics") &&
-					!symName.equals("org.pathvisio.visualization")) {
-				PVBundle b = new PVBundle();
-				b.setInstalled(true);
-				b.setSymbolicName(symName);
-				b.setName(symName);
-				b.setType("plugin");
-				b.setSource("temp");
-				BundleVersion v = new BundleVersion();
-				v.setOsgiBundle(serviceReference.getBundle());
-				v.setBundle(b);
-				v.setTmp(true);
-				v.setVersion(Utils.formatVersion(serviceReference.getBundle().getVersion().toString()));
-				tmpBundles.put(symName, v);
-			}
+		if (getLocalHandler().containsBundle(symName) == null) {
+			PVBundle b = new PVBundle();
+			b.setInstalled(true);
+			b.setSymbolicName(symName);
+			b.setName(symName);
+			b.setType("plugin");
+			b.setSource("temp");
+			BundleVersion v = new BundleVersion();
+			v.setOsgiBundle(serviceReference.getBundle());
+			v.setBundle(b);
+			v.setTmp(true);
+			v.setVersion(Utils.formatVersion(serviceReference.getBundle().getVersion().toString()));
+			tmpBundles.put(symName, v);
 		}
 	}
 
 	/**
-	 * initializes the online repository
-	 * information comes from the pathvisio.xml file
-	 * in the repository
-	 * such an XML file can contain more than one 
-	 * repository
+	 * initializes the online repository information comes from the pathvisio.xml
+	 * file in the repository such an XML file can contain more than one repository
 	 */
 	private void setUpOnlineRepo(Repository repo, URL url) {
-		if(repo != null) {
+		if (repo != null) {
 			Logger.log.info("Initialize repository " + url);
-			
+
 			List<PVRepository> repositories = readPluginInfo(url);
-			if(repositories != null) {
-				for(PVRepository r : repositories) {
+			if (repositories != null) {
+				for (PVRepository r : repositories) {
 					// set to installed if bundle is present in local repository
-					for(BundleVersion version : r.getBundleVersions()) {
-						if(localHandler.containsBundle(version.getSymbolicName()) != null) {
+					for (BundleVersion version : r.getBundleVersions()) {
+						if (localHandler.containsBundle(version.getSymbolicName()) != null) {
 							version.getBundle().setInstalled(true);
 						}
 					}
@@ -253,7 +245,7 @@ public class PluginManager implements IPluginManager {
 			}
 		}
 	}
-	
+
 	/**
 	 * currently the pathvisio.xml file is created through a mysql dump
 	 */
@@ -267,180 +259,204 @@ public class PluginManager implements IPluginManager {
 		}
 		return null;
 	}
-	
-	
+
 	/**
 	 * installs plugin from online repository
 	 */
 	public void installPluginFromRepo(final BundleVersion version) {
-				
+
 		final ProgressKeeper pk = new ProgressKeeper();
 		final ProgressDialog d = new ProgressDialog(dlg, "", pk, false, true);
-		
+
 		SwingWorker<Boolean, Boolean> sw = new SwingWorker<Boolean, Boolean>() {
-			@Override protected Boolean doInBackground() throws InterruptedException {
+			@Override
+			protected Boolean doInBackground() throws InterruptedException {
 				pk.setTaskName("Installing plugin");
 				Thread.sleep(200);
 
 				List<Resource> resources = resolveDependencies(version);
-				if(resources.size() == 0) {
+				if (resources.size() == 0) {
 					version.getBundle().getStatus().setSuccess(false);
-					version.getBundle().getStatus().setMessage("Could not load dependencies for bundle " + version.getSymbolicName());
-					
+					version.getBundle().getStatus()
+							.setMessage("Could not load dependencies for bundle " + version.getSymbolicName());
+
 					Logger.log.error("Could not load dependencies for bundle " + version.getSymbolicName());
 					problems.add(version);
 				} else {
 					List<Bundle> bundleList = new ArrayList<Bundle>();
-						for(Resource res : resources) {
-							BundleVersion bundleVersion = getAvailableBundle(res.getSymbolicName(), Utils.formatVersion(res.getVersion().toString()));
+					for (Resource res : resources) {
+						BundleVersion bundleVersion = getAvailableBundle(res.getSymbolicName(),
+								Utils.formatVersion(res.getVersion().toString()));
 
-							if(bundleVersion != null && !bundleVersion.isInstalled()) {
-								File file;
+						if (bundleVersion != null && !bundleVersion.isInstalled()) {
+							File file;
+							try {
+								file = Utils.downloadFile(res.getURI(), res, localHandler.getLocalRepoLocation());
 								try {
-									file = Utils.downloadFile(res.getURI(), res, localHandler.getLocalRepoLocation());
-									try {
-										Bundle b = context.installBundle(file.toURI().toString());
-										bundleList.add(b);
-										bundleVersion.getBundle().getStatus().setBundle(b);
-										bundleVersion.setJarFile(file.getAbsolutePath());
-										Logger.log.info("Bundle installed " + res.getURI());
-									} catch (BundleException e) {
-										bundleVersion.getBundle().getStatus().setSuccess(false);
-										bundleVersion.getBundle().getStatus().setMessage("Could not install plugin " + res.getURI());
-										file.delete();
-										problems.add(bundleVersion);
-										Logger.log.error("Could not install plugin " + res.getURI() + "\t" + e.getMessage());
-									}
-								} catch (Exception e1) {
+									Bundle b = context.installBundle(file.toURI().toString());
+									bundleList.add(b);
+									bundleVersion.getBundle().getStatus().setBundle(b);
+									bundleVersion.setJarFile(file.getAbsolutePath());
+									Logger.log.info("Bundle installed " + res.getURI());
+								} catch (BundleException e) {
 									bundleVersion.getBundle().getStatus().setSuccess(false);
-									bundleVersion.getBundle().getStatus().setMessage("Could not download file from " + res.getURI() + " (" + e1.getMessage() + ")");
+									bundleVersion.getBundle().getStatus()
+											.setMessage("Could not install plugin " + res.getURI());
+									file.delete();
 									problems.add(bundleVersion);
+									Logger.log
+											.error("Could not install plugin " + res.getURI() + "\t" + e.getMessage());
 								}
-							} else {
-								Logger.log.error("Resource not found in database or it is already installed.");
+							} catch (Exception e1) {
+								bundleVersion.getBundle().getStatus().setSuccess(false);
+								bundleVersion.getBundle().getStatus().setMessage(
+										"Could not download file from " + res.getURI() + " (" + e1.getMessage() + ")");
+								problems.add(bundleVersion);
 							}
+						} else {
+							Logger.log.error("Resource not found in database or it is already installed.");
 						}
-					
-						for(Bundle b : bundleList) {
-							BundleVersion bundleVersion = getAvailableBundle(b.getSymbolicName(), Utils.formatVersion(b.getVersion().toString()));
-							if(bundleVersion != null) {
-								startBundle(b, bundleVersion);
-							} else {
-								Logger.log.error("BundleVersion not found.");
-							}
+					}
+
+					for (Bundle b : bundleList) {
+						BundleVersion bundleVersion = getAvailableBundle(b.getSymbolicName(),
+								Utils.formatVersion(b.getVersion().toString()));
+						if (bundleVersion != null) {
+							startBundle(b, bundleVersion);
+						} else {
+							Logger.log.error("BundleVersion not found.");
 						}
-						
-						localHandler.updateLocalXml();
-						initPlugins();
+					}
+
+					localHandler.updateLocalXml();
+					initPlugins();
 				}
 				pk.finished();
 				return true;
 			}
 
-			@Override public void done()
-			{
-				if(version.getBundle().isInstalled()) {
-					JOptionPane.showMessageDialog(dlg, "Plugin " + version.getSymbolicName() + "  was installed successfully.");
+			@Override
+			public void done() {
+				if (version.getBundle().isInstalled()) {
+					JOptionPane.showMessageDialog(dlg,
+							"Plugin " + version.getSymbolicName() + "  was installed successfully.");
 				} else {
-					JOptionPane.showMessageDialog(dlg, "There was a problem installing plugin " + version.getSymbolicName() + ". Please check the error tab.");
+					JOptionPane.showMessageDialog(dlg, "There was a problem installing plugin "
+							+ version.getSymbolicName() + ". Please check the error tab.");
 				}
 				localHandler.clean(problems);
 				// show status
-				if(dlg != null) dlg.updateData();
+				if (dlg != null)
+					dlg.updateData();
 			}
 		};
 
 		sw.execute();
 		d.setVisible(true);
 	}
-	
+
 	/**
 	 * uninstalls plugin
+	 * 
 	 * @param bundleVersion
 	 */
 	public void uninstallBundle(BundleVersion bundleVersion) {
-		if(localHandler.getStartedBundles().containsKey(bundleVersion.getSymbolicName())) {
-			int reply = JOptionPane.showConfirmDialog(dlg, "Do you really want to uninstall plugin " + bundleVersion.getName() + "?", "Warning", JOptionPane.YES_NO_OPTION);
-	        if (reply == JOptionPane.YES_OPTION) {
-		        Bundle b = localHandler.getStartedBundles().get(bundleVersion.getSymbolicName());
+		if (localHandler.getStartedBundles().containsKey(bundleVersion.getSymbolicName())) {
+			int reply = JOptionPane.showConfirmDialog(dlg,
+					"Do you really want to uninstall plugin " + bundleVersion.getName() + "?", "Warning",
+					JOptionPane.YES_NO_OPTION);
+			if (reply == JOptionPane.YES_OPTION) {
+				Bundle b = localHandler.getStartedBundles().get(bundleVersion.getSymbolicName());
 				try {
 					b.stop();
 					b.uninstall();
 					File file = new File(bundleVersion.getJarFile());
 					file.delete();
-					BundleVersion onlineBundle = getAvailableBundle(bundleVersion.getSymbolicName(), bundleVersion.getVersion());
-					if(onlineBundle != null) {
+					BundleVersion onlineBundle = getAvailableBundle(bundleVersion.getSymbolicName(),
+							bundleVersion.getVersion());
+					if (onlineBundle != null) {
 						onlineBundle.getBundle().setInstalled(false);
 					}
 					localHandler.removeBundleVersion(bundleVersion);
-	
+
 					localHandler.updateLocalXml();
 					dlg.updateData();
 					Logger.log.info("Bundle " + bundleVersion.getName() + " is uninstalled.");
-					JOptionPane.showMessageDialog(dlg, "Plugin " + bundleVersion.getSymbolicName() + " has been uninstalled.");
+					JOptionPane.showMessageDialog(dlg,
+							"Plugin " + bundleVersion.getSymbolicName() + " has been uninstalled.");
 				} catch (BundleException e) {
 					Logger.log.error("Could not stop plugin " + bundleVersion.getName());
-					JOptionPane.showMessageDialog(dlg, "Could not uninstall plugin " + bundleVersion.getSymbolicName() + ". Please check error tab.");
+					JOptionPane.showMessageDialog(dlg, "Could not uninstall plugin " + bundleVersion.getSymbolicName()
+							+ ". Please check error tab.");
 				}
-	        }
+			}
 		} else {
-			if(bundleVersion.getTmp()) {
-				int reply = JOptionPane.showConfirmDialog(dlg, "Do you really want to uninstall plugin " + bundleVersion.getName() + "?", "Warning", JOptionPane.YES_NO_OPTION);
-		        if (reply == JOptionPane.YES_OPTION) {
-		    		try {
+			if (bundleVersion.getTmp()) {
+				int reply = JOptionPane.showConfirmDialog(dlg,
+						"Do you really want to uninstall plugin " + bundleVersion.getName() + "?", "Warning",
+						JOptionPane.YES_NO_OPTION);
+				if (reply == JOptionPane.YES_OPTION) {
+					try {
 						bundleVersion.getOsgiBundle().stop();
 						bundleVersion.getOsgiBundle().uninstall();
 						tmpBundles.remove(bundleVersion.getSymbolicName());
 						dlg.updateData();
 						Logger.log.info("Bundle " + bundleVersion.getName() + " is uninstalled.");
-						JOptionPane.showMessageDialog(dlg, "Plugin " + bundleVersion.getSymbolicName() + " has been uninstalled.");
+						JOptionPane.showMessageDialog(dlg,
+								"Plugin " + bundleVersion.getSymbolicName() + " has been uninstalled.");
 					} catch (BundleException e) {
 						Logger.log.error("Could not stop plugin " + bundleVersion.getName());
-						JOptionPane.showMessageDialog(dlg, "Could not uninstall plugin " + bundleVersion.getSymbolicName() + ". Please check error tab.");
+						JOptionPane.showMessageDialog(dlg, "Could not uninstall plugin "
+								+ bundleVersion.getSymbolicName() + ". Please check error tab.");
 					}
-	        	}
-	        }
-    	}
+				}
+			}
+		}
 	}
-	
+
 	/**
-	 * resolves dependencies when installing bundle
-	 * all dependencies will be downloaded and started
+	 * resolves dependencies when installing bundle all dependencies will be
+	 * downloaded and started
 	 */
 	private List<Resource> resolveDependencies(BundleVersion bundleVersion) {
 		List<Resource> list = new ArrayList<Resource>();
 		try {
 			Resolver resolver = repoAdmin.resolver();
-			
-			String filter = "(&(symbolicname=" + bundleVersion.getSymbolicName() + ")(version>="+ bundleVersion.getVersion()+ "))";
+
+			String filter = "(&(symbolicname=" + bundleVersion.getSymbolicName() + ")(version>="
+					+ bundleVersion.getVersion() + "))";
 			Resource[] resources = repoAdmin.discoverResources(filter);
-			if(resources != null && resources.length > 0) {
+			if (resources != null && resources.length > 0) {
 				Logger.log.info("Installing bundle " + bundleVersion.getSymbolicName());
-				
+
 				resolver.add(resources[0]);
-				if(!resolver.resolve()) {
+				if (!resolver.resolve()) {
 					resolver.getUnsatisfiedRequirements();
 				}
-				
-				for(Resource res : resolver.getAddedResources()) {
-					if(!list.contains(res)) list.add(res);
+
+				for (Resource res : resolver.getAddedResources()) {
+					if (!list.contains(res))
+						list.add(res);
 				}
-				for(Resource res : resolver.getRequiredResources()) {
-					if(!list.contains(res))list.add(res);
+				for (Resource res : resolver.getRequiredResources()) {
+					if (!list.contains(res))
+						list.add(res);
 				}
-				
-				for(Reason r : resolver.getUnsatisfiedRequirements()) {
-					String filterR = "(&(symbolicname=" + r.getResource().getSymbolicName() + ")(version>="+ r.getResource().getVersion()+ "))";
+
+				for (Reason r : resolver.getUnsatisfiedRequirements()) {
+					String filterR = "(&(symbolicname=" + r.getResource().getSymbolicName() + ")(version>="
+							+ r.getResource().getVersion() + "))";
 					Resource[] res = repoAdmin.discoverResources(filterR);
-					if(res.length == 1) {
+					if (res.length == 1) {
 						boolean installed = false;
-						for(Bundle b : context.getBundles()) {
-							if(b.getSymbolicName().equals(res[0].getSymbolicName())) {
+						for (Bundle b : context.getBundles()) {
+							if (b.getSymbolicName().equals(res[0].getSymbolicName())) {
 								installed = true;
 							}
 						}
-						if(!installed) {
-							if(!list.contains(res[0])) list.add(res[0]);
+						if (!installed) {
+							if (!list.contains(res[0]))
+								list.add(res[0]);
 						}
 					}
 				}
@@ -452,7 +468,7 @@ public class PluginManager implements IPluginManager {
 		}
 		return list;
 	}
-	
+
 	/**
 	 * starts a bundle
 	 */
@@ -461,18 +477,19 @@ public class PluginManager implements IPluginManager {
 			b.start();
 			localHandler.getStartedBundles().put(bundleVersion.getSymbolicName(), b);
 			Logger.log.info("Bundle started " + bundleVersion.getSymbolicName());
-			
+
 			bundleVersion.getBundle().getStatus().setSuccess(true);
 			bundleVersion.getBundle().getStatus().setMessage("Installed");
 			bundleVersion.getBundle().setInstalled(true);
-			
+
 			BundleVersion copyVersion = bundleVersion.copyVersion();
 			localHandler.getLocalRepository().addPluginVersion(copyVersion);
-			
+
 		} catch (BundleException e) {
 			bundleVersion.getBundle().getStatus().setSuccess(false);
-			bundleVersion.getBundle().getStatus().setMessage("Could not start bundle " + b.getSymbolicName() + "\t" + e.getMessage());
-			
+			bundleVersion.getBundle().getStatus()
+					.setMessage("Could not start bundle " + b.getSymbolicName() + "\t" + e.getMessage());
+
 			Logger.log.error("Could not start bundle " + b.getSymbolicName() + "\t" + e.getMessage());
 			try {
 				// necessary so it can be installed at a later point
@@ -480,42 +497,42 @@ public class PluginManager implements IPluginManager {
 				File file = new File(bundleVersion.getJarFile());
 				file.delete();
 				problems.add(bundleVersion);
-			} catch (BundleException e1) {}
+			} catch (BundleException e1) {
+			}
 		}
 	}
 
 	/**
-	 * returns bundle version when available in one of the online
-	 * repositories
+	 * returns bundle version when available in one of the online repositories
 	 */
 	public BundleVersion getAvailableBundle(String symbolicName, String version) {
-		for(PVRepository repo : onlineRepos) {
-			for(BundleVersion v : repo.getBundleVersions()) {
-				if(v.getSymbolicName().equals(symbolicName) && v.getVersion().equals(version)) {
+		for (PVRepository repo : onlineRepos) {
+			for (BundleVersion v : repo.getBundleVersions()) {
+				if (v.getSymbolicName().equals(symbolicName) && v.getVersion().equals(version)) {
 					return v;
 				}
 			}
 		}
 		return null;
 	}
-	
+
 	public Set<BundleVersion> getBundlesPerTag(String tag) {
 		Set<BundleVersion> set = new HashSet<BundleVersion>();
-		for(PVRepository repo : onlineRepos) {
-			for(BundleVersion v : repo.getBundleVersions()) {
-				if(!v.isInstalled() && v.getBundle().hasCatgeory(tag)) {
+		for (PVRepository repo : onlineRepos) {
+			for (BundleVersion v : repo.getBundleVersions()) {
+				if (!v.isInstalled() && v.getBundle().hasCatgeory(tag)) {
 					set.add(v);
 				}
 			}
 		}
 		return set;
 	}
-	
+
 	public Set<Category> getAvailableTags() {
 		Set<Category> tags = new HashSet<Category>();
-		for(PVRepository repo : onlineRepos) {
-			for(BundleVersion version : repo.getBundleVersions()) {
-				if(version.getType() != null && version.getType().equals("plugin")) {
+		for (PVRepository repo : onlineRepos) {
+			for (BundleVersion version : repo.getBundleVersions()) {
+				if (version.getType() != null && version.getType().equals("plugin")) {
 					tags.addAll(version.getBundle().getCategories());
 				}
 			}
@@ -524,21 +541,21 @@ public class PluginManager implements IPluginManager {
 	}
 
 	/**
-	 * returns all available plugins that are not installed
-	 * does not return libraries
+	 * returns all available plugins that are not installed does not return
+	 * libraries
 	 */
-	public List<BundleVersion> getAvailablePlugins() {	
+	public List<BundleVersion> getAvailablePlugins() {
 		Map<String, BundleVersion> map = new HashMap<String, BundleVersion>();
-		for(PVRepository repo : onlineRepos) {
-			for(BundleVersion version : repo.getBundleVersions()) {
-				if(version.getType() != null && version.getType().equals("plugin")) {
-					if(!version.isInstalled()) {
+		for (PVRepository repo : onlineRepos) {
+			for (BundleVersion version : repo.getBundleVersions()) {
+				if (version.getType() != null && version.getType().equals("plugin")) {
+					if (!version.isInstalled()) {
 						// only show latest version of the plugin
-						if(map.containsKey(version.getSymbolicName())) {
+						if (map.containsKey(version.getSymbolicName())) {
 							String currentVer = map.get(version.getSymbolicName()).getVersion();
 							String newVer = version.getVersion();
 							int comp = Utils.compareVersions(currentVer, newVer);
-							if(comp < 0) {
+							if (comp < 0) {
 								map.remove(version.getSymbolicName());
 								map.put(version.getSymbolicName(), version);
 							}
@@ -559,53 +576,52 @@ public class PluginManager implements IPluginManager {
 	 */
 	public List<BundleVersion> getErrors() {
 		List<BundleVersion> list = new ArrayList<BundleVersion>();
-		
-			for(BundleVersion version : problems) {
-				if(!version.getBundle().getStatus().isSuccess()) {
-					if(!list.contains(version)) {
-						list.add(version);
-					}
+
+		for (BundleVersion version : problems) {
+			if (!version.getBundle().getStatus().isSuccess()) {
+				if (!list.contains(version)) {
+					list.add(version);
 				}
 			}
+		}
 
-		
 		return list;
 	}
 
-	
 	/**
-	 * implements method of interface that opens the
-	 * plugin manager dialog
-	 * is called from org.pathvisio.desktop module
+	 * implements method of interface that opens the plugin manager dialog is called
+	 * from org.pathvisio.desktop module
 	 */
 	@Override
 	public void showGui(JFrame parent) {
 		dlg = new PluginManagerDialog(this);
 		dlg.createAndShowGUI(parent);
 	}
-	
+
 	/**
-	 * implements method of interface that installs
-	 * a list of plugins and their dependencies
+	 * implements method of interface that installs a list of plugins and their
+	 * dependencies
 	 */
 	@Override
 	public void installLocalPlugins(List<File> plugins, List<File> dependencies) {
 		List<BundleVersion> bundleVersion = new ArrayList<BundleVersion>();
-		for(File file : dependencies) {
+		for (File file : dependencies) {
 			try {
 				BundleVersion ver = createBundleVersion(file, "lib");
-				if(ver != null) bundleVersion.add(ver);
+				if (ver != null)
+					bundleVersion.add(ver);
 			} catch (FileNotFoundException e) {
 				Logger.log.error("Could not read file " + file.getAbsolutePath() + " (" + e.getMessage() + ")");
 			} catch (IOException e) {
 				Logger.log.error("Could not read file " + file.getAbsolutePath() + " (" + e.getMessage() + ")");
 			}
 		}
-		
-		for(File file : plugins) {
+
+		for (File file : plugins) {
 			try {
 				BundleVersion ver = createBundleVersion(file, "plugin");
-				if(ver != null) bundleVersion.add(ver);
+				if (ver != null)
+					bundleVersion.add(ver);
 			} catch (FileNotFoundException e) {
 				Logger.log.error("Could not read file " + file.getAbsolutePath() + " (" + e.getMessage() + ")");
 			} catch (IOException e) {
@@ -613,12 +629,12 @@ public class PluginManager implements IPluginManager {
 			}
 		}
 		Map<BundleVersion, Bundle> map = new HashMap<BundleVersion, Bundle>();
-		for(BundleVersion v : bundleVersion) {
+		for (BundleVersion v : bundleVersion) {
 			try {
 				File file = new File(v.getJarFile());
 				Bundle b = context.installBundle(file.toURI().toString());
 				v.getBundle().getStatus().setBundle(b);
-				
+
 				map.put(v, b);
 				Logger.log.info("Bundle installed " + b.getSymbolicName());
 			} catch (BundleException e) {
@@ -630,40 +646,42 @@ public class PluginManager implements IPluginManager {
 				Logger.log.error("Could not install plugin " + v.getSymbolicName() + "\t" + e.getMessage());
 			}
 		}
-		
-		for(BundleVersion version : map.keySet()) {
+
+		for (BundleVersion version : map.keySet()) {
 			startBundle(map.get(version), version);
 		}
 		localHandler.updateLocalXml();
 		initPlugins();
-		JOptionPane.showMessageDialog(desktop.getFrame(), "Plugins installed.\nCheck the plugin manager for more information.");
-		
+		JOptionPane.showMessageDialog(desktop.getFrame(),
+				"Plugins installed.\nCheck the plugin manager for more information.");
+
 	}
-	
+
 	/**
-	 * creates a bundle version object for a local jar file
-	 * uses symbolic name, name and version in the manifest
+	 * creates a bundle version object for a local jar file uses symbolic name, name
+	 * and version in the manifest
 	 */
 	private BundleVersion createBundleVersion(File file, String type) throws FileNotFoundException, IOException {
 		JarInputStream jarStream = new JarInputStream(new FileInputStream(file));
 		Manifest mf = jarStream.getManifest();
-		
+
 		Attributes attr = mf.getMainAttributes();
 		String symName = attr.getValue("Bundle-SymbolicName");
 		String version = attr.getValue("Bundle-Version");
 		version = Utils.formatVersion(version);
 		String name = attr.getValue("Bundle-Name");
-		if(name.contains("%")) {
+		if (name.contains("%")) {
 			name = symName;
 		}
 		jarStream.close();
-		if(!localHandler.getLocalRepository().containsBundle(symName) || (localHandler.getLocalRepository().getBundle(symName, version) == null)) {
+		if (!localHandler.getLocalRepository().containsBundle(symName)
+				|| (localHandler.getLocalRepository().getBundle(symName, version) == null)) {
 			PVBundle bundle = new PVBundle();
 			bundle.setName(name);
 			bundle.setSymbolicName(symName);
 			bundle.setType(type);
 			bundle.setSource("local installation");
-			
+
 			BundleVersion bVer = new BundleVersion();
 			bVer.setBundle(bundle);
 			bVer.setVersion(version);
@@ -674,7 +692,7 @@ public class PluginManager implements IPluginManager {
 		}
 		return null;
 	}
-	
+
 	// SETTERS & GETTERS
 
 	public List<BundleVersion> getProblems() {
@@ -684,7 +702,7 @@ public class PluginManager implements IPluginManager {
 	public LocalRepositoryHandler getLocalHandler() {
 		return localHandler;
 	}
-	
+
 	public List<PVRepository> getOnlineRepos() {
 		return onlineRepos;
 	}
@@ -693,57 +711,61 @@ public class PluginManager implements IPluginManager {
 		return tmpBundles;
 	}
 
-	public enum PluginManagerStatus
-	{
-		/** This status indicates that the PluginManager attempted to connect,
-		 * but failed due to a problem, most likely due to firewall or slow connection (timeout) */
+	public enum PluginManagerStatus {
+		/**
+		 * This status indicates that the PluginManager attempted to connect, but failed
+		 * due to a problem, most likely due to firewall or slow connection (timeout)
+		 */
 		CONNECTION_COMPLETED_FAILURE,
-		
-		/** This status indicates that the PluginManager is still attempting to connect to the online repository */
+
+		/**
+		 * This status indicates that the PluginManager is still attempting to connect
+		 * to the online repository
+		 */
 		BUSY,
-		
-		/** 
-		 * This status indicates that AT LEAST ONE online repository was initialized correctly.
-		 * It is possible that others did fail.  
-		 * If the number of online repositories is still zero, it means there weren't any to begin with. */
+
+		/**
+		 * This status indicates that AT LEAST ONE online repository was initialized
+		 * correctly. It is possible that others did fail. If the number of online
+		 * repositories is still zero, it means there weren't any to begin with.
+		 */
 		CONNECTION_COMPLETED_SUCCESSFULLY
 	}
-	
+
 	private PluginManagerStatus status = PluginManagerStatus.BUSY;
 	private Throwable savedConnectionException = null;
-	
+
 	public PluginManagerStatus getStatus() {
 		return status;
 	}
 
 	/**
-	 * Return the status of connecting to online repositories.
-	 * The resulting message may contain html formatting suitable for a JLabel.
+	 * Return the status of connecting to online repositories. The resulting message
+	 * may contain html formatting suitable for a JLabel.
 	 */
-	public String getStatusMessage()
-	{
+	public String getStatusMessage() {
 		String msg;
-		switch (status)
-		{
+		switch (status) {
 		case BUSY:
 			msg = "Attempting to connect to online repository, please wait...";
 			break;
 		case CONNECTION_COMPLETED_FAILURE:
 			msg = "PathVisio was not able to connect to the online plugin repository.";
-			if (savedConnectionException != null)
-			{
+			if (savedConnectionException != null) {
 				// create a user-friendly exception message
 				Throwable t = savedConnectionException;
-				if (t.getCause() != null) t = t.getCause();
-				Logger.log.warn("<html>Exception occurred while connecting to the online repository." +
-						"<br>" + t.getClass().getSimpleName() + ": " + savedConnectionException.getCause().getMessage());
+				if (t.getCause() != null)
+					t = t.getCause();
+				Logger.log.warn("<html>Exception occurred while connecting to the online repository." + "<br>"
+						+ t.getClass().getSimpleName() + ": " + savedConnectionException.getCause().getMessage());
 			}
 			break;
 		default:
 		case CONNECTION_COMPLETED_SUCCESSFULLY:
-			// if connection has completed successfully, but repo is empty, then there simply are no plugins
+			// if connection has completed successfully, but repo is empty, then there
+			// simply are no plugins
 			msg = "Connected succesfully to " + onlineRepos.size();
-			if(onlineRepos.size() == 1) {
+			if (onlineRepos.size() == 1) {
 				msg = msg + " repository.";
 			} else {
 				msg = msg + " repositories.";

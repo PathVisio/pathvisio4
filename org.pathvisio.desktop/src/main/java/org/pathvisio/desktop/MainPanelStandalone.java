@@ -39,7 +39,6 @@ import org.pathvisio.core.ApplicationEvent;
 import org.pathvisio.core.debug.Logger;
 import org.pathvisio.core.preferences.GlobalPreference;
 import org.pathvisio.core.preferences.PreferenceManager;
-import org.pathvisio.desktop.gex.BackpageExpression;
 import org.pathvisio.gui.BackpageTextProvider.BackpageAttributes;
 import org.pathvisio.gui.DataPaneTextProvider;
 import org.pathvisio.gui.MainPanel;
@@ -145,7 +144,6 @@ public class MainPanelStandalone extends MainPanel
 		
 		// data hook for showing basic annotation and expression data on the data panel
 		dpt.addDataHook(new BackpageAttributes(swingEngine.getGdbManager().getCurrentGdb()));
-		dpt.addDataHook(new BackpageExpression(desktop.getGexManager()));
 		DataPane dataPane = new DataPane(dpt, swingEngine.getEngine());
 		dataPane.addHyperlinkListener(swingEngine);
 		sidebarTabbedPane.addTab( "Data", new JScrollPane(dataPane) );

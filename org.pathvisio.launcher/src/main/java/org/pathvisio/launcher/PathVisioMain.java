@@ -68,10 +68,7 @@ public class PathVisioMain {
 		"org.bridgedb.rdb",
 		"org.pathvisio.core",
 		"org.pathvisio.gui",
-		"org.pathvisio.desktop",
-		"org.pathvisio.visualization",
-		"org.pathvisio.gex",
-		"org.pathvisio.statistics"	
+		"org.pathvisio.desktop"
 	});	
 	
 	private static final String[][] frameworkProperties = { 
