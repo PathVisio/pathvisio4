@@ -14,4 +14,58 @@
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<archive>
+						<!-- Configures the content of the created manifest -->
+						<manifest>
+							<!-- Adds the class path to the created manifest -->
+							<addClasspath>true</addClasspath>
+							<!-- Specifies that all dependencies of our application are found -->
+							<!-- Configures the main class of the application -->
+							<mainClass>org.pathvisio.launcher.PathVisioMain</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>5.1.2</version>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>
+							${pom.groupId}.${pom.artifactId}
+						</Bundle-SymbolicName>
+						<Bundle-Name>${pom.name}</Bundle-Name>
+						<Bundle-Version>${pom.version}</Bundle-Version>
+						<Bundle-Activator>
+							org.pathvisio.launcher.PathVisioMain
+						</Bundle-Activator>
+						<Private-Package>
+							org.pathvisio.launcher
+						</Private-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<!-- OSGI framework -->
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.framework</artifactId>
+			<version>1.10.0</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
 </project>

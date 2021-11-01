@@ -36,10 +36,10 @@ import org.pathvisio.data.ISample;
 import org.pathvisio.desktop.gex.GexManager;
 
 /**
- * A SampleCheckList with buttons on the right side to
- * change the order of the samples.
+ * A SampleCheckList with buttons on the right side to change the order of the
+ * samples.
+ * 
  * @author thomas
- *
  */
 public class SortSampleCheckList extends JPanel implements ActionListener {
 	static final String ACTION_TOP = "Top";
@@ -57,10 +57,7 @@ public class SortSampleCheckList extends JPanel implements ActionListener {
 	public SortSampleCheckList(List<? extends ISample> selected, GexManager gexManager) {
 		checkList = new SampleCheckList(selected, gexManager);
 
-		setLayout(new FormLayout(
-				"fill:pref:grow, 2dlu, pref",
-				"fill:pref:grow"
-		));
+		setLayout(new FormLayout("fill:pref:grow, 2dlu, pref", "fill:pref:grow"));
 
 		CellConstraints cc = new CellConstraints();
 		add(new JScrollPane(checkList), cc.xy(1, 1));
@@ -69,7 +66,7 @@ public class SortSampleCheckList extends JPanel implements ActionListener {
 		top.setActionCommand(ACTION_TOP);
 		top.addActionListener(this);
 		top.setIcon(new ImageIcon(ICON_TOP));
-	    top.setHorizontalTextPosition(SwingConstants.CENTER);
+		top.setHorizontalTextPosition(SwingConstants.CENTER);
 
 		JButton up = new JButton();
 		up.setActionCommand(ACTION_UP);
@@ -90,10 +87,8 @@ public class SortSampleCheckList extends JPanel implements ActionListener {
 		bottom.setHorizontalTextPosition(SwingConstants.CENTER);
 
 		JPanel btnPanel = new JPanel();
-
-		ButtonStackBuilder builder = new ButtonStackBuilder(
-				new FormLayout("28px"), btnPanel
-		);
+	
+		ButtonStackBuilder builder = new ButtonStackBuilder(new FormLayout("28px"), btnPanel);
 		builder.addGridded(top);
 		builder.addUnrelatedGap();
 		builder.addGridded(up);
@@ -102,7 +97,7 @@ public class SortSampleCheckList extends JPanel implements ActionListener {
 		builder.addRelatedGap();
 		builder.addGridded(bottom);
 
-		add(btnPanel, cc.xy(3,1, "c, c"));
+		add(btnPanel, cc.xy(3, 1, "c, c"));
 	}
 
 	public SampleCheckList getList() {
@@ -112,14 +107,14 @@ public class SortSampleCheckList extends JPanel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		ISample s = checkList.getSelectedSample();
 		String action = e.getActionCommand();
-		if(s != null) {
-			if(ACTION_TOP.equals(action)) {
+		if (s != null) {
+			if (ACTION_TOP.equals(action)) {
 				checkList.moveToTop(s);
-			} else if(ACTION_UP.equals(action)) {
+			} else if (ACTION_UP.equals(action)) {
 				checkList.moveUp(s);
-			} else if(ACTION_DOWN.equals(action)) {
+			} else if (ACTION_DOWN.equals(action)) {
 				checkList.moveDown(s);
-			} else if(ACTION_BOTTOM.equals(action)) {
+			} else if (ACTION_BOTTOM.equals(action)) {
 				checkList.moveToBottom(s);
 			}
 		}

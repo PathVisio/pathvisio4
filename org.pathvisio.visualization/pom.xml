@@ -36,21 +36,15 @@
 		</dependency>
 		<!-- OSGI framework -->
 		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.framework</artifactId>
-			<version>1.10.0</version>
-			<scope>provided</scope>
+			<groupId>org.eclipse.osgi</groupId>
+			<artifactId>org.eclipse.osgi</artifactId>
+			<version>3.7.1</version>
 		</dependency>
 		<!-- JGoodies Forms -->
 		<dependency>
 			<groupId>com.jgoodies</groupId>
-			<artifactId>jgoodies-forms</artifactId>
-			<version>1.8.0</version> <!-- -->
-		</dependency>
-		<dependency>
-			<groupId>com.jgoodies</groupId>
-			<artifactId>jgoodies-forms</artifactId>
-			<version>1.6.0</version> <!-- ButtonStackBuilder -->
+			<artifactId>forms</artifactId>
+			<version>1.2.0</version>
 		</dependency>
 		<!-- BridgeDb -->
 		<dependency>
