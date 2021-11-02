@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -20,8 +20,8 @@ package org.pathvisio.core.model;
  * Exception that occurs during import, export, save or load of a Patway.
  * @see PathwayExporter#doExport
  * @see PathwayImporter#doImport
- * @see Pathway#readFromXml
- * @see Pathway#writeToXml
+ * @see PathwayModel#readFromXml
+ * @see PathwayModel#writeToXml
  */
 public class ConverterException extends Exception {
 

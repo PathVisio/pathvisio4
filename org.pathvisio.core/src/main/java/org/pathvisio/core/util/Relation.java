@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -22,28 +22,33 @@ import java.util.Map;
 import java.util.Set;
 
 import org.pathvisio.core.debug.Logger;
-import org.pathvisio.core.model.LineType;
-import org.pathvisio.core.model.ObjectType;
-import org.pathvisio.core.model.Pathway;
-import org.pathvisio.core.model.PathwayElement;
-import org.pathvisio.core.model.GraphLink.GraphRefContainer;
-import org.pathvisio.core.model.PathwayElement.MAnchor;
-import org.pathvisio.core.model.PathwayElement.MPoint;
+import org.pathvisio.model.type.ArrowHeadType;
+import org.pathvisio.model.PathwayModel;
+import org.pathvisio.model.PathwayElement;
+import org.pathvisio.model.GraphLink.LinkableFrom;
+import org.pathvisio.model.Group;
+import org.pathvisio.model.Groupable;
+import org.pathvisio.model.LineElement;
+import org.pathvisio.model.LineElement.Anchor;
+import org.pathvisio.model.LineElement.LinePoint;
 
 /**
+ * <p>
  * Class to parse a relation between GPML objects, e.g. a biochemical reaction.
- * A relation can be created from a line that connects two objects
- * of type datanode, shape or label.
- * The following fields will be created:
- * - LEFT: an element that acts on the left side of an interaction
- * - RIGHT: an element that acts on the right side of an interaction
- * - MEDIATOR: an element that acts as mediator of an interaction
- * - SOURCE: the pathway containing the relation
- *
+ * A relation can be created from a line that connects two objects of type
+ * datanode, shape or label. The following fields will be created:
+ * <ol>
+ * <li>- LEFT: an element that acts on the left side of an interaction
+ * <li>- RIGHT: an element that acts on the right side of an interaction
+ * <li>- MEDIATOR: an element that acts as mediator of an interaction
+ * <li>- SOURCE: the pathway containing the relation
+ * </ol>
+ * 
  * The following example illustrates how the fields will be assigned.
  *
  * Consider the following interaction:
- *
+ * 
+ * <pre>
  *            F      E
  *            |	    /
  *            v    /
@@ -51,35 +56,38 @@ import org.pathvisio.core.model.PathwayElement.MPoint;
  *     /      T
  *    /       |
  *   D        C(C1, C2)
- *
+ * </pre>
+ * 
  * Where C is a group that contains C1 and C2.
  *
- * The line A-B will serve as base for the relation, A will be
- * added to the LEFT field, B to the RIGHT field.
- * For all other elements that are connected to anchors of this line, the
- * following rules apply:
+ * The line A-B will serve as base for the relation, A will be added to the LEFT
+ * field, B to the RIGHT field. For all other elements that are connected to
+ * anchors of this line, the following rules apply:
  *
- * - If the line starts at the anchor and ends at the element, the element will
- * be added to the LEFT field
- * - If the line starts at the element, ends at the anchor and has *no* end
- * linetype (no arrow, T-bar or other shape), the element will be added to the RIGHT
- * field
- * - Else, the element will be added to the MEDIATOR field.
- *
+ * <ol>
+ * <li>- If the line starts at the anchor and ends at the element, the element
+ * will be added to the LEFT field
+ * <li>- If the line starts at the element, ends at the anchor and has *no* end
+ * arrowHeadType (no arrow, T-bar or other shape), the element will be added to
+ * the RIGHT field
+ * <li>- Else, the element will be added to the MEDIATOR field.
+ * </ol>
  * Additionally, if the element to be added is a group, all nested elements will
  * be added recursively.
  *
  * So in the example, the following fields will be created:
- * A: LEFT
- * D: LEFT
- * F: MEDIATOR
- * C: MEDIATOR
- * C1:MEDIATOR
- * C2:MEDIATOR
- * E: RIGHT
- * B: RIGHT
- *
- * @author thomas
+ * <ol>
+ * <li>A: LEFT
+ * <li>D: LEFT
+ * <li>F: MEDIATOR
+ * <li>C: MEDIATOR
+ * <li>C1:MEDIATOR
+ * <li>C2:MEDIATOR
+ * <li>E: RIGHT
+ * <li>B: RIGHT
+ * </ol>
+ * 
+ * @author thomas, finterly
  */
 public class Relation {
 	private Set<PathwayElement> lefts = new HashSet<PathwayElement>();
@@ -87,49 +95,46 @@ public class Relation {
 	private Set<PathwayElement> mediators = new HashSet<PathwayElement>();
 
 	private Map<PathwayElement, PathwayElement> mediatorLines = new HashMap<PathwayElement, PathwayElement>();
-	
+
 	/**
 	 * Parse a relation.
+	 * 
 	 * @param relationLine The line that defines the relation.
 	 */
-	public Relation(PathwayElement relationLine) {
-		if(relationLine.getObjectType() != ObjectType.LINE) {
-			throw new IllegalArgumentException("Object type should be line!");
-		}
-		Pathway pathway = relationLine.getParent();
-		if(pathway == null) {
+	public Relation(LineElement relationLine) {
+//		if (relationLine() != ObjectType.LINE) { // TODO LINE as in Interaction or LineElement????
+//			throw new IllegalArgumentException("Object type should be line!");
+//		}
+		PathwayModel pathway = relationLine.getPathwayModel();
+		if (pathway == null) {
 			throw new IllegalArgumentException("Object has no parent pathway");
 		}
-		//Add obvious left and right
-		addLeft(pathway.getElementById(
-				relationLine.getMStart().getGraphRef()
-		));
-		addRight(pathway.getElementById(
-				relationLine.getMEnd().getGraphRef()
-		));
-		//Find all connecting lines (via anchors)
-		for(MAnchor ma : relationLine.getMAnchors()) {
-			for(GraphRefContainer grc : ma.getReferences()) {
-				if(grc instanceof MPoint) {
-					MPoint mp = (MPoint)grc;
-					PathwayElement line = mp.getParent();
-					if(line.getMStart() == mp) {
-						//Start linked to anchor, make it a 'right'
-						if(line.getMEnd().isLinked()) {
-							addRight(pathway.getElementById(line.getMEnd().getGraphRef()));
+		// Add obvious left and right
+		addLeft(pathway.getElementById(relationLine.getStartLinePoint().getGraphRef()));
+		addRight(pathway.getElementById(relationLine.getEndLinePoint().getGraphRef()));
+		// Find all connecting lines (via anchors)
+		for (Anchor ma : ((LineElement) relationLine).getAnchors()) {
+			for (LinkableFrom grc : ma.getLinkableFroms()) {
+				if (grc instanceof LinePoint) {
+					LinePoint mp = (LinePoint) grc;
+					LineElement line = mp.getLineElement();
+					if (line.getStartLinePoint() == mp) {
+						// Start linked to anchor, make it a 'right'
+						if (line.getEndLinePoint().isLinked()) {
+							addRight(pathway.getElementById(line.getEndLinePoint().getGraphRef()));
 						}
 					} else {
-						//End linked to anchor
-						if(line.getEndLineType() == LineType.LINE) {
-							//Add as 'left'
-							addLeft(pathway.getElementById(line.getMStart().getGraphRef()));
+						// End linked to anchor
+						if (line.getEndLineType() == ArrowHeadType.UNDIRECTED) {
+							// Add as 'left'
+							addLeft(pathway.getElementById(line.getStartLinePoint().getGraphRef()));
 						} else {
-							//Add as 'mediator'
-							addMediator(line, pathway.getElementById(line.getMStart().getGraphRef()));
+							// Add as 'mediator'
+							addMediator(line, pathway.getElementById(line.getStartLinePoint().getGraphRef()));
 						}
 					}
 				} else {
-					Logger.log.warn("unsupported GraphRefContainer: " + grc);
+					Logger.log.warn("unsupported LinkableFrom: " + grc);
 				}
 			}
 		}
@@ -145,17 +150,18 @@ public class Relation {
 
 	void addMediator(PathwayElement line, PathwayElement pwe) {
 		Set<PathwayElement> added = addElement(pwe, mediators);
-		for(PathwayElement m : added) mediatorLines.put(m, line);
+		for (PathwayElement m : added)
+			mediatorLines.put(m, line);
 	}
 
 	Set<PathwayElement> addElement(PathwayElement pwe, Set<PathwayElement> set) {
 		Set<PathwayElement> added = new HashSet<PathwayElement>();
-		
-		if(pwe != null) {
-			//If it's a group, add all subelements
-			if(pwe.getObjectType() == ObjectType.GROUP) {
-				for(PathwayElement ge : pwe.getParent().getGroupElements(pwe.getGroupId())) {
-					added.addAll(addElement(ge, set));
+
+		if (pwe != null) {
+			// If it's a group, add all subelements
+			if (pwe.getClass() == Group.class) {
+				for (Groupable ge : ((Group) pwe).getPathwayElements()) {
+					added.addAll(addElement((PathwayElement) ge, set)); // TODO groupable?
 				}
 			}
 			set.add(pwe);
@@ -164,13 +170,22 @@ public class Relation {
 		return added;
 	}
 
-	public Set<PathwayElement> getLefts() { return lefts; }
-	public Set<PathwayElement> getRights() { return rights; }
-	public Set<PathwayElement> getMediators() { return mediators; }
-	
+	public Set<PathwayElement> getLefts() {
+		return lefts;
+	}
+
+	public Set<PathwayElement> getRights() {
+		return rights;
+	}
+
+	public Set<PathwayElement> getMediators() {
+		return mediators;
+	}
+
 	/**
 	 * Get the line that connects the given mediator to the relation. This can be
-	 * used to determine how the mediator influences the relation (e.g. inhibition or activation).
+	 * used to determine how the mediator influences the relation (e.g. inhibition
+	 * or activation).
 	 */
 	public PathwayElement getMediatorLine(PathwayElement mediator) {
 		return mediatorLines.get(mediator);

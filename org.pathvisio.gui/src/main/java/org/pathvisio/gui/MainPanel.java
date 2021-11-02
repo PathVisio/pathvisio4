@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -53,16 +53,16 @@ import javax.swing.table.TableCellRenderer;
 import org.pathvisio.core.ApplicationEvent;
 import org.pathvisio.core.Engine.ApplicationEventListener;
 import org.pathvisio.core.debug.Logger;
-import org.pathvisio.core.model.PathwayElement;
+import org.pathvisio.model.PathwayElement;
 import org.pathvisio.core.util.Utils;
-import org.pathvisio.core.view.Graphics;
-import org.pathvisio.core.view.Handle;
-import org.pathvisio.core.view.Label;
-import org.pathvisio.core.view.SelectionBox;
-import org.pathvisio.core.view.VPathway;
-import org.pathvisio.core.view.VPathwayElement;
-import org.pathvisio.core.view.VPathwayEvent;
-import org.pathvisio.core.view.VPathwayListener;
+import org.pathvisio.core.view.model.Handle;
+import org.pathvisio.core.view.model.SelectionBox;
+import org.pathvisio.core.view.model.VElement;
+import org.pathvisio.core.view.model.VLabel;
+import org.pathvisio.core.view.model.VPathwayEvent;
+import org.pathvisio.core.view.model.VPathwayListener;
+import org.pathvisio.core.view.model.VPathwayModel;
+import org.pathvisio.core.view.model.VPathwayObject;
 import org.pathvisio.gui.BackpageTextProvider.BackpageAttributes;
 import org.pathvisio.gui.BackpageTextProvider.BackpageXrefs;
 import org.pathvisio.gui.CommonActions.ZoomAction;
@@ -276,7 +276,7 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 	/** update the value in the zoom combo to the actual zoom percentage of the active pathway */
 	public void updateZoomCombo()
 	{
-		VPathway vpwy = swingEngine.getEngine().getActiveVPathway();
+		VPathwayModel vpwy = swingEngine.getEngine().getActiveVPathway();
 		if (vpwy != null)
 		{
 			DecimalFormat df = new DecimalFormat("###.#");
@@ -460,17 +460,17 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 	}
 
 	public void vPathwayEvent(VPathwayEvent e) {
-		VPathway vp = (VPathway)e.getSource();
+		VPathwayModel vp = (VPathwayModel)e.getSource();
 		switch(e.getType()) {
 		case ELEMENT_DOUBLE_CLICKED:
-			VPathwayElement pwe = e.getAffectedElement();
+			VElement pwe = e.getAffectedElement();
 			if(pwe instanceof Handle)
 			{
 				pwe = ((Handle)pwe).getParent();
 			}
-			if(pwe instanceof Graphics &&
+			if(pwe instanceof VPathwayObject &&
 					!(pwe instanceof SelectionBox)) {
-				PathwayElement p = ((Graphics)pwe).getPathwayElement();
+				PathwayElement p = ((VPathwayObject)pwe).getPathwayElement();
 				if(p != null) {
 					swingEngine.getPopupDialogHandler().getInstance(p, !vp.isEditMode(), null, this).setVisible(true);
 				}
@@ -487,9 +487,9 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 			}
 			break;
 		case HREF_ACTIVATED:
-			if(e.getAffectedElement() instanceof Label) {
+			if(e.getAffectedElement() instanceof VLabel) {
 				try {
-					hyperlinkUpdate(new HyperlinkEvent(e.getSource(), HyperlinkEvent.EventType.ACTIVATED, new URL(((Label)e.getAffectedElement()).getPathwayElement().getHref())));
+					hyperlinkUpdate(new HyperlinkEvent(e.getSource(), HyperlinkEvent.EventType.ACTIVATED, new URL(((VLabel)e.getAffectedElement()).getPathwayElement().getHref())));
 				} catch (MalformedURLException e1) {
 					swingEngine.getEngine().getActiveVPathway().selectObject(e.getAffectedElement());
 					swingEngine.handleMalformedURLException("The specified link address is not valid.", this, e1);
@@ -506,7 +506,7 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 		switch(e.getType()) {
 		case VPATHWAY_CREATED:
 			{
-				VPathway vp = (VPathway)e.getSource();
+				VPathwayModel vp = (VPathwayModel)e.getSource();
 				vp.addVPathwayListener(this);
 				vp.addVPathwayListener(pathwayElementMenuListener);
 				for(Component b : getToolbarGroup(TB_GROUP_SHOW_IF_VPATHWAY)) {
@@ -516,7 +516,7 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 			break;
 		case VPATHWAY_DISPOSED:
 			{
-				VPathway vp = (VPathway)e.getSource();
+				VPathwayModel vp = (VPathwayModel)e.getSource();
 				vp.removeVPathwayListener(this);
 				vp.removeVPathwayListener(pathwayElementMenuListener);
 			}

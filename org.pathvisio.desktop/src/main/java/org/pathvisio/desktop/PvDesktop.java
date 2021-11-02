@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -34,10 +34,10 @@ import org.pathvisio.core.Engine.ApplicationEventListener;
 import org.pathvisio.core.data.GdbEvent;
 import org.pathvisio.core.data.GdbManager.GdbEventListener;
 import org.pathvisio.core.debug.Logger;
-import org.pathvisio.core.model.Pathway;
+import org.pathvisio.core.model.PathwayModel;
 import org.pathvisio.core.preferences.GlobalPreference;
 import org.pathvisio.core.preferences.PreferenceManager;
-import org.pathvisio.core.view.VPathway;
+import org.pathvisio.core.view.model.VPathwayModel;
 import org.pathvisio.desktop.data.DBConnDerby;
 import org.pathvisio.desktop.data.DBConnectorSwing;
 import org.pathvisio.desktop.plugin.IPluginManager;

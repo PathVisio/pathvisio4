@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -28,9 +28,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.pathvisio.core.view.GenMAPPShapes;
-import org.pathvisio.core.view.GenMAPPShapes.Internal;
-import org.pathvisio.core.view.ShapeRegistry;
+import org.pathvisio.core.view.shape.GenMAPPShapes;
+import org.pathvisio.core.view.shape.ShapeRegistry;
+import org.pathvisio.core.view.shape.GenMAPPShapes.Internal;
 
 /**
    Extensible enum

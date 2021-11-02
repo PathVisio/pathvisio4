@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -15,6 +15,8 @@
  * the License.
  ******************************************************************************/
 package org.pathvisio.core.view;
+
+import org.pathvisio.core.view.model.Handle;
 
 /**
  * Any object that has handles and can be adjusted by them

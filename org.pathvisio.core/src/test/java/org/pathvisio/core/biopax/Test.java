@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -24,19 +24,19 @@ import junit.framework.TestCase;
 
 import org.pathvisio.core.model.ConverterException;
 import org.pathvisio.core.model.ObjectType;
-import org.pathvisio.core.model.Pathway;
-import org.pathvisio.core.model.PathwayElement;
+import org.pathvisio.core.model.PathwayModel;
+import org.pathvisio.model.PathwayElement;
 import org.pathvisio.core.model.PathwayEvent;
 
 public class Test extends TestCase {
-	Pathway data;
+	PathwayModel data;
 	List<PathwayEvent> received;
 	BiopaxElement elementManager;
 	BiopaxReferenceManager pwRefManager;
 
 	public void setUp()
 	{
-		data = new Pathway();
+		data = new PathwayModel();
 		PathwayElement o = PathwayElement.createPathwayElement(ObjectType.DATANODE);
 		data.add (o);
 
@@ -45,7 +45,7 @@ public class Test extends TestCase {
 
 	public void testEmpty()
 	{
-		data = new Pathway();
+		data = new PathwayModel();
 		PathwayElement o = PathwayElement.createPathwayElement(ObjectType.DATANODE);
 		data.add (o);
 		elementManager = data.getBiopax();
@@ -159,7 +159,7 @@ public class Test extends TestCase {
 		
 		System.out.println (f.getAbsolutePath());
 		assertTrue (f.exists());
-		Pathway pwy = new Pathway();
+		PathwayModel pwy = new PathwayModel();
 		pwy.readFromXml(f, true);
 	}
 
@@ -169,7 +169,7 @@ public class Test extends TestCase {
 		
 		System.out.println (f.getAbsolutePath());
 		assertTrue (f.exists());
-		Pathway pwy = new Pathway();
+		PathwayModel pwy = new PathwayModel();
 		pwy.readFromXml(f, true);
 		
 		BiopaxNode elt = pwy.getBiopaxElementManager().getElement("e4d");
@@ -177,7 +177,7 @@ public class Test extends TestCase {
 		assertTrue (elt instanceof PublicationXref);
 	}
 
-	public void writeRead(Pathway data) throws IOException
+	public void writeRead(PathwayModel data) throws IOException
 	{
 		File f = File.createTempFile("test-biopax-", ".xml");
 		write(f);
@@ -185,7 +185,7 @@ public class Test extends TestCase {
 	}
 
 	public void read(File f) {
-		data = new Pathway();
+		data = new PathwayModel();
 		try {
 			data.readFromXml(f, true);
 		} catch(ConverterException e) {

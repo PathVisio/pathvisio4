@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -25,7 +25,8 @@ import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.pathvisio.core.model.GroupStyle;
+import org.pathvisio.core.model.GroupType;
+import org.pathvisio.core.view.model.VGroup;
 
 /**
  * Keeps track of all GroupPainters.
@@ -36,7 +37,7 @@ public class GroupPainterRegistry {
 
 	/**
 	 * Register a painter that will be used for the given group style.
-	 * @param name The name of the group style (use {@link GroupStyle#toString()}.
+	 * @param name The name of the group style (use {@link GroupType#toString()}.
 	 * @param painter The painter that will draw the group style
 	 */
 	public static void registerPainter(String name, GroupPainter painter) {
@@ -45,7 +46,7 @@ public class GroupPainterRegistry {
 
 	/**
 	 * Get the registered painter for the given group style.
-	 * @param name The name of the group style (use {@link GroupStyle#toString()}.
+	 * @param name The name of the group style (use {@link GroupType#toString()}.
 	 * @return The registered painter, or the default painter if no custom painters
 	 * are registered for the given group style.
 	 */
@@ -58,10 +59,10 @@ public class GroupPainterRegistry {
 	private static final int TRANSLUCENCY_LEVEL = (int) (255 * .10);
 
 	private static GroupPainter defaultPainter = new GroupPainter() {
-		public void drawGroup(Graphics2D g, Group group, int flags) {
-			boolean mouseover = (flags & Group.FLAG_MOUSEOVER) != 0;
-			boolean anchors = (flags & Group.FLAG_ANCHORSVISIBLE) != 0;
-			boolean selected = (flags & Group.FLAG_SELECTED) != 0;
+		public void drawGroup(Graphics2D g, VGroup group, int flags) {
+			boolean mouseover = (flags & VGroup.FLAG_MOUSEOVER) != 0;
+			boolean anchors = (flags & VGroup.FLAG_ANCHORSVISIBLE) != 0;
+			boolean selected = (flags & VGroup.FLAG_SELECTED) != 0;
 
 			// Draw group outline
 			int sw = 1;
@@ -96,10 +97,10 @@ public class GroupPainterRegistry {
 	};
 
 	private static GroupPainter complexPainter = new GroupPainter() {
-		public void drawGroup(Graphics2D g, Group group, int flags) {
-			boolean mouseover = (flags & Group.FLAG_MOUSEOVER) != 0;
-			boolean anchors = (flags & Group.FLAG_ANCHORSVISIBLE) != 0;
-			boolean selected = (flags & Group.FLAG_SELECTED) != 0;
+		public void drawGroup(Graphics2D g, VGroup group, int flags) {
+			boolean mouseover = (flags & VGroup.FLAG_MOUSEOVER) != 0;
+			boolean anchors = (flags & VGroup.FLAG_ANCHORSVISIBLE) != 0;
+			boolean selected = (flags & VGroup.FLAG_SELECTED) != 0;
 
 			// Draw group outline
 			int sw = 1;
@@ -111,7 +112,7 @@ public class GroupPainterRegistry {
 			
 			float vMargin = (float)Math.min (
 					Math.min(vRect.getWidth() / 2.5, vRect.getHeight() / 2.5), 
-					group.vFromM (GroupStyle.COMPLEX_M_MARGIN * 1.5)); 
+					group.vFromM (GroupType.COMPLEX_M_MARGIN * 1.5)); 
 		
 			GeneralPath outline = new GeneralPath();
 			outline.moveTo(vLeft + vMargin, vTop);
@@ -147,10 +148,10 @@ public class GroupPainterRegistry {
 	};
 
 	private static GroupPainter groupPainter = new GroupPainter() {
-		public void drawGroup(Graphics2D g, Group group, int flags) {
-			boolean mouseover = (flags & Group.FLAG_MOUSEOVER) != 0;
-			boolean anchors = (flags & Group.FLAG_ANCHORSVISIBLE) != 0;
-			boolean selected = (flags & Group.FLAG_SELECTED) != 0;
+		public void drawGroup(Graphics2D g, VGroup group, int flags) {
+			boolean mouseover = (flags & VGroup.FLAG_MOUSEOVER) != 0;
+			boolean anchors = (flags & VGroup.FLAG_ANCHORSVISIBLE) != 0;
+			boolean selected = (flags & VGroup.FLAG_SELECTED) != 0;
 
 			Rectangle2D rect = group.getVBounds();
 
@@ -187,10 +188,10 @@ public class GroupPainterRegistry {
 
 		
 	private static GroupPainter pathwayPainter = new GroupPainter() {
-		public void drawGroup(Graphics2D g, Group group, int flags) {
-			boolean mouseover = (flags & Group.FLAG_MOUSEOVER) != 0;
-			boolean anchors = (flags & Group.FLAG_ANCHORSVISIBLE) != 0;
-			boolean selected = (flags & Group.FLAG_SELECTED) != 0;
+		public void drawGroup(Graphics2D g, VGroup group, int flags) {
+			boolean mouseover = (flags & VGroup.FLAG_MOUSEOVER) != 0;
+			boolean anchors = (flags & VGroup.FLAG_ANCHORSVISIBLE) != 0;
+			boolean selected = (flags & VGroup.FLAG_SELECTED) != 0;
 
 			Rectangle2D rect = group.getVBounds();
 			
@@ -229,9 +230,9 @@ public class GroupPainterRegistry {
 	
 	//Register default painters
 	static {
-		registerPainter(GroupStyle.COMPLEX.toString(), complexPainter);
-		registerPainter(GroupStyle.NONE.toString(), defaultPainter);
-		registerPainter(GroupStyle.GROUP.toString(), groupPainter);
-		registerPainter(GroupStyle.PATHWAY.toString(), pathwayPainter);
+		registerPainter(GroupType.COMPLEX.toString(), complexPainter);
+		registerPainter(GroupType.NONE.toString(), defaultPainter);
+		registerPainter(GroupType.GROUP.toString(), groupPainter);
+		registerPainter(GroupType.PATHWAY.toString(), pathwayPainter);
 	}
 }

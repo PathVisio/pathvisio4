@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -30,23 +30,23 @@ import org.pathvisio.core.data.XrefWithSymbol;
 import org.pathvisio.core.preferences.PreferenceManager;
 import org.pathvisio.core.util.Utils;
 
-public class Test extends TestCase implements PathwayListener, PathwayElementListener {
+public class Test extends TestCase implements PathwayListener, PathwayObjectListener {
 
-	Pathway data;
+	PathwayModel data;
 	PathwayElement o;
 	List<PathwayEvent> received;
-	List<PathwayElementEvent> receivedElementEvents;
+	List<PathwayObjectEvent> receivedElementEvents;
 	PathwayElement l;
 
 	private static final File PATHVISIO_BASEDIR = new File("../..");
 
 	public void setUp() {
 		PreferenceManager.init();
-		data = new Pathway();
+		data = new PathwayModel();
 		data.addListener(this);
 		o = PathwayElement.createPathwayElement(ObjectType.DATANODE);
 		received = new ArrayList<PathwayEvent>();
-		receivedElementEvents = new ArrayList<PathwayElementEvent>();
+		receivedElementEvents = new ArrayList<PathwayObjectEvent>();
 		o.addListener(this);
 		data.add(o);
 		l = PathwayElement.createPathwayElement(ObjectType.LINE);
@@ -130,7 +130,7 @@ public class Test extends TestCase implements PathwayListener, PathwayElementLis
 		data.writeToXml(temp, false);
 
 		// and read back
-		Pathway p2 = new Pathway();
+		PathwayModel p2 = new PathwayModel();
 		p2.readFromXml(temp, true);
 
 		// get same datanode back
@@ -561,7 +561,7 @@ public class Test extends TestCase implements PathwayListener, PathwayElementLis
 		received.add(e);
 	}
 
-	public void gmmlObjectModified(PathwayElementEvent e) {
+	public void gmmlObjectModified(PathwayObjectEvent e) {
 		receivedElementEvents.add(e);
 	}
 

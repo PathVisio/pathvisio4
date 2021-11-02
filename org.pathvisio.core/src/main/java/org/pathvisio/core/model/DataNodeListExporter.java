@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -97,7 +97,7 @@ public class DataNodeListExporter implements PathwayExporter {
 		return resultDs;
 	}
 
-	public void doExport(File file, Pathway pathway) throws ConverterException {
+	public void doExport(File file, PathwayModel pathway) throws ConverterException {
 		if(!DB_ORIGINAL.equals(getResultCode())) {
 			//Check gene database connection
 			if(gdbManager == null || !gdbManager.isConnected()) {
@@ -187,7 +187,7 @@ public class DataNodeListExporter implements PathwayExporter {
 	}
 
 	@Override
-	public void doExport(File file, Pathway pathway, int zoom)
+	public void doExport(File file, PathwayModel pathway, int zoom)
 			throws ConverterException {
 		// TODO Auto-generated method stub
 		

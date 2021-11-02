@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -43,7 +43,7 @@ import org.pathvisio.core.biopax.BiopaxElement;
 import org.pathvisio.core.biopax.BiopaxReferenceManager;
 import org.pathvisio.core.biopax.PublicationXref;
 import org.pathvisio.core.debug.Logger;
-import org.pathvisio.core.model.PathwayElement;
+import org.pathvisio.model.PathwayElement;
 import org.pathvisio.core.util.Resources;
 import org.pathvisio.gui.SwingEngine;
 import org.pathvisio.gui.dialogs.PublicationXRefDialog;

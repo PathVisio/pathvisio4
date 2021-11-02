@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -25,9 +25,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
-import org.pathvisio.core.model.PathwayElement;
+import org.pathvisio.model.PathwayElement;
 import org.pathvisio.core.model.Property;
-import org.pathvisio.core.view.VPathway;
+import org.pathvisio.core.view.model.VPathwayModel;
 import org.pathvisio.gui.SwingEngine;
 
 /**
@@ -35,7 +35,7 @@ import org.pathvisio.gui.SwingEngine;
  * on one or more PathwayElements at the same time.
  */
 public class PropertyView implements Comparable<PropertyView> {
-	private VPathway vPathway;
+	private VPathwayModel vPathway;
 	Collection<PathwayElement> elements;
 	private Object value;
 	private Object type;
@@ -49,7 +49,7 @@ public class PropertyView implements Comparable<PropertyView> {
 	 * @param aVPathway is used to register undo actions when setting a value
 	 * to this property. May be null, in which case no undo actions are registered.
 	 */
-	public PropertyView(VPathway aVPathway, Object aType) {
+	public PropertyView(VPathwayModel aVPathway, Object aType) {
 		type = aType;
 		if (!(type instanceof String || type instanceof Property))
 		{

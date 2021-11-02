@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -18,6 +18,8 @@ package org.pathvisio.core.view;
 
 import java.awt.Graphics2D;
 
+import org.pathvisio.core.view.model.VGroup;
+
 /**
  * Interface to implement group style specific
  * appearances.
@@ -29,7 +31,7 @@ public interface GroupPainter {
 	 * @param g The {@link Graphics2D} object to draw on
 	 * @param group The group to draw
 	 * @param flags Several flags that provide information about the
-	 * group state. These include the {@link Group}.FLAG_* constants.
+	 * group state. These include the {@link VGroup}.FLAG_* constants.
 	 */
-	public void drawGroup(Graphics2D g, Group group, int flags);
+	public void drawGroup(Graphics2D g, VGroup group, int flags);
 }

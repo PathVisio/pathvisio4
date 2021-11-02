@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -32,16 +32,16 @@ import org.pathvisio.core.model.BatikImageExporter;
 import org.pathvisio.core.model.ConverterException;
 import org.pathvisio.core.model.DataNodeListExporter;
 import org.pathvisio.core.model.EUGeneExporter;
-import org.pathvisio.core.model.GpmlFormat;
+import org.pathvisio.io.GpmlFormat;
 import org.pathvisio.core.model.ImageExporter;
 import org.pathvisio.core.model.MappFormat;
-import org.pathvisio.core.model.Pathway;
-import org.pathvisio.core.model.PathwayExporter;
-import org.pathvisio.core.model.PathwayImporter;
+import org.pathvisio.model.PathwayModel;
+import org.pathvisio.event.PathwayExporter;
+import org.pathvisio.event.PathwayImporter;
 import org.pathvisio.core.model.RasterImageExporter;
 import org.pathvisio.core.preferences.GlobalPreference;
 import org.pathvisio.core.preferences.PreferenceManager;
-import org.pathvisio.core.view.MIMShapes;
+import org.pathvisio.core.view.shape.MIMShapes;
 
 /**
  * @author Thomas Kelder (t.a.j.kelder@student.tue.nl)
@@ -84,8 +84,8 @@ public class Converter {
         PreferenceManager.init();
     	Engine engine = new Engine();
     	engine.addPathwayImporter(new GpmlFormat());
-    	engine.addPathwayImporter(new MappFormat());
-		engine.addPathwayExporter(new MappFormat());
+//    	engine.addPathwayImporter(new MappFormat()); TODO
+//		engine.addPathwayExporter(new MappFormat()); TODO 
     	engine.addPathwayExporter(new GpmlFormat());
 		engine.addPathwayExporter(new BatikImageExporter(ImageExporter.TYPE_SVG));
 		engine.addPathwayExporter(new RasterImageExporter(ImageExporter.TYPE_PNG));
@@ -152,7 +152,7 @@ public class Converter {
 		{
 			try {
 				engine.importPathway(inputFile);
-				Pathway pathway = engine.getActivePathway();
+				PathwayModel pathway = engine.getActivePathway();
 				if (args.length == 2)				
 					engine.exportPathway(outputFile, pathway);
 				if (args.length == 3){			

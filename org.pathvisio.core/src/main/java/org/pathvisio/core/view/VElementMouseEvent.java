@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -18,6 +18,9 @@ package org.pathvisio.core.view;
 
 import java.util.EventObject;
 
+import org.pathvisio.core.view.model.VElement;
+import org.pathvisio.core.view.model.VPathwayModel;
+
 /**
  * An event for mouse events that apply to a single VPathwayElement
  * @author thomas
@@ -32,17 +35,17 @@ public class VElementMouseEvent extends EventObject {
 	public static final int TYPE_MOUSE_NOTSHOWHAND = 3;
 
 	public int type;
-	public VPathwayElement element;
+	public VElement element;
 	public MouseEvent mouseEvent;
 
-	public VElementMouseEvent(VPathway source, int type, VPathwayElement element, MouseEvent mouseEvent) {
+	public VElementMouseEvent(VPathwayModel source, int type, VElement element, MouseEvent mouseEvent) {
 		super(source);
 		this.type = type;
 		this.element = element;
 		this.mouseEvent = mouseEvent;
 	}
 	
-	public VElementMouseEvent(VPathway source, int type, VPathwayElement element) {
+	public VElementMouseEvent(VPathwayModel source, int type, VElement element) {
 		super(source);
 		this.type = type;
 		this.element = element;
@@ -52,7 +55,7 @@ public class VElementMouseEvent extends EventObject {
 		return type;
 	}
 
-	public VPathwayElement getElement() {
+	public VElement getElement() {
 		return element;
 	}
 

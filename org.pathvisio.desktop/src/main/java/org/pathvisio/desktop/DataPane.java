@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -28,15 +28,15 @@ import org.bridgedb.Xref;
 import org.pathvisio.core.ApplicationEvent;
 import org.pathvisio.core.Engine;
 import org.pathvisio.core.Engine.ApplicationEventListener;
-import org.pathvisio.core.model.PathwayElement;
-import org.pathvisio.core.model.PathwayElementEvent;
-import org.pathvisio.core.model.PathwayElementListener;
+import org.pathvisio.model.PathwayElement;
+import org.pathvisio.event.PathwayObjectEvent;
+import org.pathvisio.event.PathwayObjectListener;
 import org.pathvisio.core.model.StaticProperty;
-import org.pathvisio.core.view.Graphics;
-import org.pathvisio.core.view.SelectionBox.SelectionEvent;
-import org.pathvisio.core.view.SelectionBox.SelectionListener;
-import org.pathvisio.core.view.VPathway;
-import org.pathvisio.core.view.VPathwayElement;
+import org.pathvisio.core.view.model.VElement;
+import org.pathvisio.core.view.model.VPathwayModel;
+import org.pathvisio.core.view.model.VPathwayObject;
+import org.pathvisio.core.view.model.SelectionBox.SelectionEvent;
+import org.pathvisio.core.view.model.SelectionBox.SelectionListener;
 import org.pathvisio.gui.DataPaneTextProvider;
 
 /**
@@ -55,7 +55,7 @@ import org.pathvisio.gui.DataPaneTextProvider;
  * method, otherwise the background thread is not killed.
  */
 public class DataPane extends JEditorPane implements ApplicationEventListener,
-		SelectionListener, PathwayElementListener {
+		SelectionListener, PathwayObjectListener {
 	private final DataPaneTextProvider dpt;
 	private Engine engine;
 	private ExecutorService executor;
@@ -64,7 +64,7 @@ public class DataPane extends JEditorPane implements ApplicationEventListener,
 		super();
 
 		engine.addApplicationEventListener(this);
-		VPathway vp = engine.getActiveVPathway();
+		VPathwayModel vp = engine.getActiveVPathway();
 		if (vp != null)
 			vp.addSelectionListener(this);
 
@@ -138,14 +138,14 @@ public class DataPane extends JEditorPane implements ApplicationEventListener,
 		switch (e.type) {
 		case SelectionEvent.OBJECT_ADDED:
 			// Just take the first DataNode in the selection
-			Iterator<VPathwayElement> it = e.selection.iterator();
+			Iterator<VElement> it = e.selection.iterator();
 			while (it.hasNext()) {
-				VPathwayElement o = it.next();
+				VElement o = it.next();
 				// works for all Graphics object
 				// the backpage checks and gives the correct error if
 				// it's not a datanode or line
-				if (o instanceof Graphics) {
-					setInput(((Graphics) o).getPathwayElement());
+				if (o instanceof VPathwayObject) {
+					setInput(((VPathwayObject) o).getPathwayElement());
 					break;
 				}
 			}
@@ -162,10 +162,10 @@ public class DataPane extends JEditorPane implements ApplicationEventListener,
 	public void applicationEvent(ApplicationEvent e) {
 		switch (e.getType()) {
 		case VPATHWAY_CREATED:
-			((VPathway) e.getSource()).addSelectionListener(this);
+			((VPathwayModel) e.getSource()).addSelectionListener(this);
 			break;
 		case VPATHWAY_DISPOSED:
-			((VPathway) e.getSource()).removeSelectionListener(this);
+			((VPathwayModel) e.getSource()).removeSelectionListener(this);
 			// remove content of backpage when pathway is closed
 			input = null;
 			setText(dpt.getAnnotationHTML(null));
@@ -175,7 +175,7 @@ public class DataPane extends JEditorPane implements ApplicationEventListener,
 
 	Xref currRef;
 
-	public void gmmlObjectModified(PathwayElementEvent e) {
+	public void gmmlObjectModified(PathwayObjectEvent e) {
 		PathwayElement pe = e.getModifiedPathwayElement();
 		if (input != null
 				&& (e.affectsProperty(StaticProperty.GENEID) || e
@@ -192,7 +192,7 @@ public class DataPane extends JEditorPane implements ApplicationEventListener,
 	public void dispose() {
 		assert (!disposed);
 		engine.removeApplicationEventListener(this);
-		VPathway vpwy = engine.getActiveVPathway();
+		VPathwayModel vpwy = engine.getActiveVPathway();
 		if (vpwy != null)
 			vpwy.removeSelectionListener(this);
 		executor.shutdown();

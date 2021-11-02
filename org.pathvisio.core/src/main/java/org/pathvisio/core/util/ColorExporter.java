@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -32,16 +32,16 @@ import org.pathvisio.core.model.BatikImageExporter;
 import org.pathvisio.core.model.ConverterException;
 import org.pathvisio.core.model.ImageExporter;
 import org.pathvisio.core.model.ObjectType;
-import org.pathvisio.core.model.Pathway;
-import org.pathvisio.core.model.PathwayElement;
+import org.pathvisio.core.model.PathwayModel;
+import org.pathvisio.model.PathwayElement;
 import org.pathvisio.core.preferences.PreferenceManager;
-import org.pathvisio.core.view.Graphics;
-import org.pathvisio.core.view.MIMShapes;
-import org.pathvisio.core.view.VPathway;
-import org.pathvisio.core.view.VPathwayElement;
-import org.pathvisio.core.view.VPathwayEvent;
-import org.pathvisio.core.view.VPathwayEvent.VPathwayEventType;
-import org.pathvisio.core.view.VPathwayListener;
+import org.pathvisio.core.view.model.VElement;
+import org.pathvisio.core.view.model.VPathwayEvent;
+import org.pathvisio.core.view.model.VPathwayListener;
+import org.pathvisio.core.view.model.VPathwayModel;
+import org.pathvisio.core.view.model.VPathwayObject;
+import org.pathvisio.core.view.model.VPathwayEvent.VPathwayEventType;
+import org.pathvisio.core.view.shape.MIMShapes;
 
 /**
  * Utility that takes a set of graphId/Color pairs and exports a pathway
@@ -50,11 +50,11 @@ import org.pathvisio.core.view.VPathwayListener;
  */
 public class ColorExporter implements VPathwayListener {
 	Map<PathwayElement, List<Color>> colors;
-	VPathway vPathway;
+	VPathwayModel vPathway;
 
-	public ColorExporter(Pathway pathway, Map<PathwayElement, List<Color>> colors) {
+	public ColorExporter(PathwayModel pathway, Map<PathwayElement, List<Color>> colors) {
 		this.colors = colors;
-		vPathway = new VPathway(null);
+		vPathway = new VPathwayModel(null);
 		vPathway.fromModel(pathway);
 	}
 
@@ -70,19 +70,19 @@ public class ColorExporter implements VPathwayListener {
 
 	public void vPathwayEvent(VPathwayEvent e) {
 		if(e.getType() == VPathwayEventType.ELEMENT_DRAWN) {
-			VPathwayElement vpwe = e.getAffectedElement();
-			if(vpwe instanceof Graphics) {
-				PathwayElement pwe = ((Graphics)vpwe).getPathwayElement();
+			VElement vpwe = e.getAffectedElement();
+			if(vpwe instanceof VPathwayObject) {
+				PathwayElement pwe = ((VPathwayObject)vpwe).getPathwayElement();
 				List<Color> elmColors = colors.get(pwe);
 				if(elmColors != null && elmColors.size() > 0) {
 					Logger.log.info("Coloring " + pwe + " with " + elmColors);
 					switch(pwe.getObjectType()) {
 					case DATANODE:
-						doColor(e.getGraphics2D(), (Graphics)vpwe, elmColors);
-						drawLabel(e.getGraphics2D(), (Graphics)vpwe);
+						doColor(e.getGraphics2D(), (VPathwayObject)vpwe, elmColors);
+						drawLabel(e.getGraphics2D(), (VPathwayObject)vpwe);
 						break;
 					case GROUP:
-						doColor(e.getGraphics2D(), (Graphics)vpwe, elmColors);
+						doColor(e.getGraphics2D(), (VPathwayObject)vpwe, elmColors);
 						break;
 					}
 				}
@@ -90,7 +90,7 @@ public class ColorExporter implements VPathwayListener {
 		}
 	}
 
-	private void drawLabel(Graphics2D g, Graphics pwe) {
+	private void drawLabel(Graphics2D g, VPathwayObject pwe) {
 		Graphics2D g2d = (Graphics2D)g.create();
 		Rectangle2D area = pwe.getVBounds();
 		g2d.setClip(area);
@@ -106,7 +106,7 @@ public class ColorExporter implements VPathwayListener {
 		}
 	}
 
-	private void doColor(Graphics2D g, Graphics vpe, List<Color> colors) {
+	private void doColor(Graphics2D g, VPathwayObject vpe, List<Color> colors) {
 		Graphics2D g2d = (Graphics2D)g.create();
 		g2d.setClip(vpe.getVBounds());
 
@@ -132,9 +132,9 @@ public class ColorExporter implements VPathwayListener {
 	 * from the hashmap will be used.
 	 */
 	private void doHighlight() {
-		for(VPathwayElement vpe : vPathway.getDrawingObjects()) {
-			if(vpe instanceof Graphics) {
-				PathwayElement pwe = ((Graphics)vpe).getPathwayElement();
+		for(VElement vpe : vPathway.getDrawingObjects()) {
+			if(vpe instanceof VPathwayObject) {
+				PathwayElement pwe = ((VPathwayObject)vpe).getPathwayElement();
 				List<Color> elmColors = colors.get(pwe);
 				if(elmColors != null && elmColors.size() > 0) {
 					ObjectType ot = pwe.getObjectType();
@@ -166,7 +166,7 @@ public class ColorExporter implements VPathwayListener {
 
 			File inputFile = new File(inStr);
 			File outputFile = new File(outStr);
-			Pathway pathway = new Pathway();
+			PathwayModel pathway = new PathwayModel();
 			pathway.readFromXml(inputFile, true);
 
 			//Parse commandline arguments

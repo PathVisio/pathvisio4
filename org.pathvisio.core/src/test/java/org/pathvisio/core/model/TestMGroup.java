@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -26,9 +26,9 @@ public class TestMGroup extends TestCase
 	 */
 	public void testUngroup()
 	{
-		Pathway pwy = new Pathway();
-		MLine line = (MLine)PathwayElement.createPathwayElement(ObjectType.LINE);
-		MGroup group = (MGroup)PathwayElement.createPathwayElement(ObjectType.GROUP);
+		PathwayModel pwy = new PathwayModel();
+		LineElement line = (LineElement)PathwayElement.createPathwayElement(ObjectType.LINE);
+		VGroup group = (VGroup)PathwayElement.createPathwayElement(ObjectType.GROUP);
 		PathwayElement node = PathwayElement.createPathwayElement(ObjectType.DATANODE);
 		pwy.add(line);
 		pwy.add(node);

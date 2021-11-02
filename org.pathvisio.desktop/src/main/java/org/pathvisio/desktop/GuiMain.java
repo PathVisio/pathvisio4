@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -47,7 +47,7 @@ import org.pathvisio.core.debug.Logger;
 import org.pathvisio.core.model.BatikImageExporter;
 import org.pathvisio.core.model.DataNodeListExporter;
 import org.pathvisio.core.model.EUGeneExporter;
-import org.pathvisio.core.model.GpmlFormat;
+import org.pathvisio.io.GpmlFormat;
 import org.pathvisio.core.model.ImageExporter;
 import org.pathvisio.core.model.MappFormat;
 import org.pathvisio.core.model.RasterImageExporter;

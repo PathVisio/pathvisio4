@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -39,8 +39,8 @@ import org.pathvisio.core.gui.PathwayTransferable;
 import org.pathvisio.core.model.ConverterException;
 import org.pathvisio.core.model.GpmlFormat;
 import org.pathvisio.core.model.ObjectType;
-import org.pathvisio.core.model.Pathway;
-import org.pathvisio.core.model.PathwayElement;
+import org.pathvisio.core.model.PathwayModel;
+import org.pathvisio.model.PathwayElement;
 import org.pathvisio.gui.view.VPathwaySwing;
 
 public class PathwayImportHandler extends TransferHandler implements ClipboardOwner {
@@ -96,7 +96,7 @@ public class PathwayImportHandler extends TransferHandler implements ClipboardOw
 	 * new parameter p is just used for paste with the right click menu
 	 */
 	private boolean importGpml(JComponent comp, String xml, Point p) throws UnsupportedFlavorException, IOException, ConverterException {
-		Pathway pnew = new Pathway();
+		PathwayModel pnew = new PathwayModel();
 		GpmlFormat.readFromXml(pnew, new StringReader(xml), true);
 
 		List<PathwayElement> elements = new ArrayList<PathwayElement>();

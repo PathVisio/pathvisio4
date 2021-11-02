@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -25,12 +25,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.pathvisio.core.debug.Logger;
-import org.pathvisio.core.model.Pathway;
-import org.pathvisio.core.model.PathwayElement;
+import org.pathvisio.core.model.PathwayModel;
+import org.pathvisio.model.PathwayElement;
 import org.pathvisio.core.util.Utils;
-import org.pathvisio.core.view.Graphics;
-import org.pathvisio.core.view.VPathway;
-import org.pathvisio.core.view.VPathwayElement;
+import org.pathvisio.core.view.model.VElement;
+import org.pathvisio.core.view.model.VPathwayModel;
+import org.pathvisio.core.view.model.VPathwayObject;
 
 /**
  * Outputs a pathway diff to two VPathways, highlighting the elements
@@ -41,14 +41,14 @@ import org.pathvisio.core.view.VPathwayElement;
  */
 public class PanelOutputter extends DiffOutputter
 {
-	VPathway vpwy[] = new VPathway[2];
+	VPathwayModel vpwy[] = new VPathwayModel[2];
 
-	Pathway pwy[] = new Pathway[2];
+	PathwayModel pwy[] = new PathwayModel[2];
 
 	private static final int PWY_OLD = 0;
 	private static final int PWY_NEW = 1;
 
-	public PanelOutputter (VPathway aOld, VPathway aNew)
+	public PanelOutputter (VPathwayModel aOld, VPathwayModel aNew)
 	{
 		vpwy[PWY_OLD] = aOld;
 		vpwy[PWY_NEW] = aNew;
@@ -60,7 +60,7 @@ public class PanelOutputter extends DiffOutputter
 
 	public void insert(PathwayElement newElt)
 	{
-		VPathwayElement velt = findElt (newElt, vpwy[PWY_NEW]);
+		VElement velt = findElt (newElt, vpwy[PWY_NEW]);
  		//assert (velt != null || newElt.getObjectType () == ObjectType.INFOBOX);
 		if (velt == null)
 		{
@@ -87,7 +87,7 @@ public class PanelOutputter extends DiffOutputter
 
 	public void delete(PathwayElement oldElt)
 	{
-		VPathwayElement velt = findElt (oldElt, vpwy[PWY_OLD]);
+		VElement velt = findElt (oldElt, vpwy[PWY_OLD]);
  		//assert (velt != null || oldElt.getObjectType () == ObjectType.INFOBOX);
 		if (velt == null)
 		{
@@ -181,13 +181,13 @@ public class PanelOutputter extends DiffOutputter
 	/**
 	   helper to find a VPathwayElt that corresponds to a certain PathwayElement
 	*/
-	private VPathwayElement findElt (PathwayElement target, VPathway vpwy)
+	private VElement findElt (PathwayElement target, VPathwayModel vpwy)
 	{
-		for (VPathwayElement velt : vpwy.getDrawingObjects())
+		for (VElement velt : vpwy.getDrawingObjects())
 		{
-			if (velt instanceof Graphics)
+			if (velt instanceof VPathwayObject)
 			{
-				Graphics g = (Graphics)velt;
+				VPathwayObject g = (VPathwayObject)velt;
 				if (g.getPathwayElement() == target)
 				{
 					return velt;
@@ -214,12 +214,12 @@ public class PanelOutputter extends DiffOutputter
 
 	public void modifyEnd ()
 	{
-		VPathwayElement veltOld = findElt (curOldElt, vpwy[PWY_OLD]);
+		VElement veltOld = findElt (curOldElt, vpwy[PWY_OLD]);
 		assert (veltOld != null);
 		veltOld.highlight (Color.YELLOW);
 		Rectangle2D r1 = veltOld.getVBounds();
 
-		VPathwayElement veltNew = findElt (curNewElt, vpwy[PWY_NEW]);
+		VElement veltNew = findElt (curNewElt, vpwy[PWY_NEW]);
 		assert (veltNew != null);
 		veltNew.highlight (Color.YELLOW);
 		Rectangle2D r2 = veltNew.getVBounds();
@@ -242,7 +242,7 @@ public class PanelOutputter extends DiffOutputter
 	private List <ModData> modifications = new ArrayList<ModData>();
 
 	// TODO: accessors
-	public Map <VPathwayElement, ModData> modsByElt = new HashMap<VPathwayElement, ModData>();
+	public Map <VElement, ModData> modsByElt = new HashMap<VElement, ModData>();
 
 	public void modifyAttr(String attr, String oldVal, String newVal)
 	{

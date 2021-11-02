@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -24,11 +24,11 @@ import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 
-import org.pathvisio.core.model.Pathway;
-import org.pathvisio.core.model.PathwayElement;
+import org.pathvisio.core.model.PathwayModel;
+import org.pathvisio.model.PathwayElement;
 import org.pathvisio.core.model.StaticProperty;
-import org.pathvisio.core.view.UndoAction;
-import org.pathvisio.core.view.VPathway;
+import org.pathvisio.core.view.model.UndoAction;
+import org.pathvisio.core.view.model.VPathwayModel;
 import org.pathvisio.gui.SwingEngine;
 import org.pathvisio.gui.panels.CommentPanel;
 import org.pathvisio.gui.panels.LitReferencePanel;
@@ -48,7 +48,7 @@ public class PathwayElementDialog extends OkCancelDialog {
 	private JTabbedPane dialogPane;
 	private Map<String, PathwayElementPanel> panels;
 	private Map<StaticProperty, Object> state = new HashMap<StaticProperty, Object>();
-	private Pathway originalPathway; //Used for undo event
+	private PathwayModel originalPathway; //Used for undo event
 
 	protected boolean readonly;
 	protected SwingEngine swingEngine;
@@ -103,7 +103,7 @@ public class PathwayElementDialog extends OkCancelDialog {
 	 */
 	protected void storeState() {
 		PathwayElement e = getInput();
-		originalPathway = (Pathway) e.getParent().clone();
+		originalPathway = (PathwayModel) e.getParent().clone();
 		for(StaticProperty t : e.getStaticPropertyKeys()) {
 			state.put(t, e.getStaticProperty(t));
 		}
@@ -183,7 +183,7 @@ public class PathwayElementDialog extends OkCancelDialog {
 			}
 		}
 		if(done) {
-			VPathway p = swingEngine.getEngine().getActiveVPathway();
+			VPathwayModel p = swingEngine.getEngine().getActiveVPathway();
 			p.getUndoManager().newAction(
 					new UndoAction("Modified element properties", originalPathway)
 			);

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -44,8 +44,8 @@ import org.bridgedb.DataSource;
 import org.bridgedb.IDMapperException;
 import org.bridgedb.IDMapperStack;
 import org.bridgedb.Xref;
-import org.pathvisio.core.model.LineType;
-import org.pathvisio.core.model.PathwayElement;
+import org.pathvisio.core.model.ArrowHeadType;
+import org.pathvisio.model.PathwayElement;
 import org.pathvisio.gui.DataSourceModel;
 import org.pathvisio.gui.SwingEngine;
 import org.pathvisio.gui.completer.CompleterQueryTextField;
@@ -80,7 +80,7 @@ public class LineDialog extends PathwayElementDialog implements ItemListener {
 		idText.setText(getInput().getElementID());
 		dsm.setSelectedItem(input.getDataSource());
 		String lType = getInput().getEndLineType().toString();
-		typeCombo.setSelectedItem(LineType.fromName(lType));
+		typeCombo.setSelectedItem(ArrowHeadType.fromName(lType));
 		dsm.setInteractionFilter(true);
 		pack();
 	}
@@ -147,7 +147,7 @@ public class LineDialog extends PathwayElementDialog implements ItemListener {
 		dsm.setPrimaryFilter(true);
 		dsm.setSpeciesFilter(swingEngine.getCurrentOrganism());
 		dbCombo = new PermissiveComboBox(dsm);
-		typeCombo = new PermissiveComboBox(LineType.getValues());
+		typeCombo = new PermissiveComboBox(ArrowHeadType.getValues());
 
 		GridBagConstraints c = new GridBagConstraints();
 		c.ipadx = c.ipady = 5;
@@ -200,7 +200,7 @@ public class LineDialog extends PathwayElementDialog implements ItemListener {
 
 		typeCombo.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
-				LineType item = (LineType) typeCombo.getSelectedItem();
+				ArrowHeadType item = (ArrowHeadType) typeCombo.getSelectedItem();
 				getInput().setEndLineType(item);
 				refresh();
 			}

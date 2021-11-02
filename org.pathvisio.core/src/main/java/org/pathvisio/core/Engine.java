@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -32,13 +32,13 @@ import javax.swing.SwingUtilities;
 
 import org.pathvisio.core.debug.Logger;
 import org.pathvisio.core.model.ConverterException;
-import org.pathvisio.core.model.Pathway;
-import org.pathvisio.core.model.PathwayExporter;
-import org.pathvisio.core.model.PathwayImporter;
+import org.pathvisio.model.PathwayModel;
+import org.pathvisio.event.PathwayExporter;
+import org.pathvisio.event.PathwayImporter;
 import org.pathvisio.core.util.FileUtils;
 import org.pathvisio.core.util.Utils;
-import org.pathvisio.core.view.VPathway;
-import org.pathvisio.core.view.VPathwayWrapper;
+import org.pathvisio.core.view.model.VPathwayModel;
+import org.pathvisio.core.view.model.VPathwayWrapper;
 
 /**
  * This class manages loading, importing and exporting a Pathway and VPathway
@@ -48,9 +48,9 @@ import org.pathvisio.core.view.VPathwayWrapper;
  * to move them away in the future.
  */
 public class Engine {
-	private VPathway vPathway; // may be null
+	private VPathwayModel vPathway; // may be null
 	// TODO: standalone below is a hack to make Converter work
-	private Pathway standalone = null; // only used when vPathway is null
+	private PathwayModel standalone = null; // only used when vPathway is null
 	private VPathwayWrapper wrapper; // may also be null in case you
 										// don't need to interact with
 										// the pathway.
@@ -79,14 +79,14 @@ public class Engine {
 	/**
 	 * Gets the currently open drawing
 	 */
-	public VPathway getActiveVPathway() {
+	public VPathwayModel getActiveVPathway() {
 		return vPathway;
 	}
 
 	/**
 	 * Returns the currently open Pathway
 	 */
-	public Pathway getActivePathway() {
+	public PathwayModel getActivePathway() {
 		if (vPathway == null) {
 			return standalone;
 		} else {
@@ -104,7 +104,7 @@ public class Engine {
 	 * @returns a list of warnings that occurred during export, or an empty list if
 	 *          there were none.
 	 */
-	public List<String> exportPathway(File file, Pathway pathway) throws ConverterException {
+	public List<String> exportPathway(File file, PathwayModel pathway) throws ConverterException {
 		Logger.log.trace("Exporting pathway to " + file);
 
 		Set<PathwayExporter> set = getPathwayExporters(file);
@@ -129,7 +129,7 @@ public class Engine {
 	 * @returns a list of warnings that occurred during export, or an empty list if
 	 *          there were none.
 	 */
-	public List<String> exportPathway(File file, Pathway pathway, int zoom) throws ConverterException {
+	public List<String> exportPathway(File file, PathwayModel pathway, int zoom) throws ConverterException {
 		Logger.log.trace("Exporting pathway to " + file);
 
 		Set<PathwayExporter> set = getPathwayExporters(file);
@@ -154,7 +154,7 @@ public class Engine {
 	 * @returns a list of warnings that occurred during export, or an empty list if
 	 *          there were none.
 	 */
-	public List<String> exportPathway(File file, Pathway pathway, String exporterName) throws ConverterException {
+	public List<String> exportPathway(File file, PathwayModel pathway, String exporterName) throws ConverterException {
 		Logger.log.trace("Exporting pathway to " + file);
 
 		Set<PathwayExporter> set = getPathwayExporters(file);
@@ -189,7 +189,7 @@ public class Engine {
 		Set<PathwayImporter> set = getPathwayImporters(file);
 		if (set != null && set.size() == 1) {
 			PathwayImporter importer = Utils.oneOf(set);
-			Pathway pathway = importer.doImport(file);
+			PathwayModel pathway = importer.doImport(file);
 			pathway.setSourceFile(file);
 			newPathwayHelper(pathway);
 		} else
@@ -201,7 +201,7 @@ public class Engine {
 	 * After loading a pathway from disk, run createVPathway on EDT thread to
 	 * prevent concurrentModificationException
 	 */
-	private void newPathwayHelper(final Pathway pathway) throws ConverterException {
+	private void newPathwayHelper(final PathwayModel pathway) throws ConverterException {
 		try {
 			// switch back to EDT
 			SwingUtilities.invokeAndWait(new Runnable() {
@@ -220,7 +220,7 @@ public class Engine {
 		}
 	}
 
-	public void openPathwayFromMemory(Pathway pathway) throws ConverterException {
+	public void openPathwayFromMemory(PathwayModel pathway) throws ConverterException {
 		newPathwayHelper(pathway);
 	}
 
@@ -231,7 +231,7 @@ public class Engine {
 		String pwf = pathwayFile.toString();
 
 		// initialize new JDOM gpml representation and read the file
-		final Pathway pathway = new Pathway();
+		final PathwayModel pathway = new PathwayModel();
 		pathway.readFromXml(new File(pwf), true);
 		// Only set the pathway field after the data is loaded
 		// (Exception thrown on error, this part will not be reached)
@@ -264,9 +264,9 @@ public class Engine {
 	 * @param toFile The file to save to
 	 * @throws ConverterException
 	 */
-	public void savePathway(Pathway p, File toFile) throws ConverterException {
+	public void savePathway(PathwayModel p, File toFile) throws ConverterException {
 		// make sure there are no problems with references.
-		p.fixReferences();
+		// p.fixReferences(); TODO not needed anymore?
 		p.writeToXml(toFile, true);
 		fireApplicationEvent(new ApplicationEvent(p, ApplicationEvent.Type.PATHWAY_SAVE));
 	}
@@ -295,7 +295,7 @@ public class Engine {
 	/**
 	 * Try to make a vpathway, replacing pathway with a new one.
 	 */
-	public void createVPathway(Pathway p) {
+	public void createVPathway(PathwayModel p) {
 		if (wrapper == null) {
 			standalone = p;
 		} else {
@@ -320,18 +320,18 @@ public class Engine {
 	/**
 	 * used by undo manager
 	 */
-	public void replacePathway(Pathway p) {
+	public void replacePathway(PathwayModel p) {
 		vPathway.replacePathway(p);
 		fireApplicationEvent(new ApplicationEvent(vPathway, ApplicationEvent.Type.VPATHWAY_CREATED));
 	}
 
 	/**
-	 * Create a new pathway and view (Pathay and VPathway)
+	 * Creates a new {@link PathwayModel} and view {@link VPathwayModel}. Pathway
+	 * model has {@link Pathway} initialized with default values.
 	 */
 	public void newPathway() {
-		Pathway pathway = new Pathway();
-		pathway.initMappInfo();
-
+		PathwayModel pathway = new PathwayModel();
+//		pathway.initMappInfo();
 		createVPathway(pathway);
 		fireApplicationEvent(new ApplicationEvent(pathway, ApplicationEvent.Type.PATHWAY_NEW));
 		if (vPathway != null) {

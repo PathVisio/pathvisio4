@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -32,7 +32,7 @@ public class TestGpml extends TestCase
 		File in = new File (PATHVISIO_BASEDIR, "testData/WP248_2008a.gpml");
 		assertTrue (in.exists());
 		
-		Pathway pwy = new Pathway();
+		PathwayModel pwy = new PathwayModel();
 		pwy.readFromXml(in, true);
 		
 		File tmp = File.createTempFile("test", "gpml");
@@ -47,7 +47,7 @@ public class TestGpml extends TestCase
 		File in = new File (PATHVISIO_BASEDIR, "testData/WP248_2010a.gpml");
 		assertTrue (in.exists());
 		
-		Pathway pwy = new Pathway();
+		PathwayModel pwy = new PathwayModel();
 		pwy.readFromXml(in, true);
 	}
 	
@@ -59,7 +59,7 @@ public class TestGpml extends TestCase
 		File in = new File (PATHVISIO_BASEDIR, "testData/WP248_2008a.gpml");
 		assertTrue (in.exists());
 		
-		Pathway pwy = new Pathway();
+		PathwayModel pwy = new PathwayModel();
 		pwy.readFromXml(in, true);
 		
 		File tmp = File.createTempFile("test", "gpml");
@@ -74,7 +74,7 @@ public class TestGpml extends TestCase
 		File in = new File (PATHVISIO_BASEDIR, "testData/WP248_2010a.gpml");
 		assertTrue (in.exists());
 		
-		Pathway pwy = new Pathway();
+		PathwayModel pwy = new PathwayModel();
 		pwy.readFromXml(in, true);
 		
 		File tmp = File.createTempFile("test", "gpml");
@@ -90,7 +90,7 @@ public class TestGpml extends TestCase
 	{
 		assertTrue (FILE1.exists());
 		
-		Pathway pwy = new Pathway();
+		PathwayModel pwy = new PathwayModel();
 		GpmlFormat.readFromXml(pwy, FILE1, true);
 		
 		PathwayElement dn = pwy.getElementById("e4fa1");

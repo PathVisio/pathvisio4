@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -20,7 +20,7 @@ import java.io.File;
 
 import junit.framework.TestCase;
 
-import org.pathvisio.core.model.PathwayElement.MPoint;
+import org.pathvisio.model.LineElement.LinePoint;
 
 /**
  * test graph properties of a pathway model
@@ -29,13 +29,13 @@ public class TestGraph extends TestCase
 {
 	private static final File PATHVISIO_BASEDIR = new File ("../..");
 
-	Pathway p;
+	PathwayModel p;
 	PathwayElement l, n1, n2;
 	MPoint start, end;
 
 	public void setUp()
 	{
-		p = new Pathway();
+		p = new PathwayModel();
 
 		l = new PathwayElement (ObjectType.LINE);
 
@@ -133,7 +133,7 @@ public class TestGraph extends TestCase
 	{
 		File fTest = new File (PATHVISIO_BASEDIR, "testData/mpoint-test.gpml");
 		assertTrue (fTest.exists());
-		Pathway q = new Pathway();
+		PathwayModel q = new PathwayModel();
 		q.readFromXml(fTest, true);
 
 		PathwayElement base1 = q.getElementById("bad0f");

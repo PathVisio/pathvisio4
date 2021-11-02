@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -38,7 +38,9 @@ import org.bridgedb.DataSource;
 import org.bridgedb.bio.Organism;
 import org.pathvisio.core.debug.Logger;
 import org.pathvisio.core.util.Utils;
-import org.pathvisio.core.view.ShapeRegistry;
+import org.pathvisio.core.view.shape.ShapeRegistry;
+import org.pathvisio.model.PathwayElement;
+import org.pathvisio.model.PathwayModel;
 
 /**
  * The class MappFormat is responsible for all interaction with
@@ -144,7 +146,7 @@ public class MappFormat extends AbstractPathwayFormat
      */
 	private static String mappTemplateFile = "MAPPTmpl.gtp";
 
-    static void readFromMapp (String filename, Pathway data)
+    static void readFromMapp (String filename, PathwayModel data)
     	throws ConverterException
     {
     	String database = DATABASE_BEFORE + filename + DATABASE_AFTER;
@@ -299,7 +301,7 @@ public class MappFormat extends AbstractPathwayFormat
         }
     }
 
-	public static String[] uncopyMappInfo (Pathway data)
+	public static String[] uncopyMappInfo (PathwayModel data)
 	{
 		String[] mappInfo = new String[15];
 
@@ -343,7 +345,7 @@ public class MappFormat extends AbstractPathwayFormat
 
 	// This method copies the Info table of the genmapp mapp to a new gpml
 	// pathway
-	public static void copyMappInfo(String[] row, Pathway data, String filename)
+	public static void copyMappInfo(String[] row, PathwayModel data, String filename)
 	{
 
 		/* Data is lost when converting from GenMAPP to GPML:
@@ -393,7 +395,7 @@ public class MappFormat extends AbstractPathwayFormat
 		}
 	}
 
-	public static List<String[]> uncopyMappObjects(Pathway data) throws ConverterException
+	public static List<String[]> uncopyMappObjects(PathwayModel data) throws ConverterException
 	{
 		List<String[]> result = new ArrayList<String[]>();
 
@@ -521,7 +523,7 @@ public class MappFormat extends AbstractPathwayFormat
 
 	// This list adds the elements from the OBJECTS table to the new gpml
 	// pathway
-    public static void copyMappObjects(String[] row, Pathway data) throws ConverterException
+    public static void copyMappObjects(String[] row, PathwayModel data) throws ConverterException
     {
 
 		// Create the GenMAPP --> GPML mappings list for use in the switch
@@ -609,12 +611,12 @@ public class MappFormat extends AbstractPathwayFormat
     private static void unmapLineType (PathwayElement o, String[] mappObject)
     {
     	int lineStyle = o.getLineStyle();
-		LineType lineType = o.getEndLineType();
+		ArrowHeadType lineType = o.getEndLineType();
 		String style = lineType.getMappName();
 		if(style == null) {
-			style = LineType.LINE.getMappName();
+			style = ArrowHeadType.LINE.getMappName();
 		}
-		if (lineStyle == LineStyle.DASHED && (lineType == LineType.ARROW || lineType == LineType.LINE))
+		if (lineStyle == LineStyleType.DASHED && (lineType == ArrowHeadType.ARROW || lineType == ArrowHeadType.LINE))
 			style = "Dotted" + style;
 
 		mappObject[COL_TYPE] = style;
@@ -625,14 +627,14 @@ public class MappFormat extends AbstractPathwayFormat
 		mappObject[COL_COLOR] = toMappColor(o.getColor(), false);
     }
 
-	private static Map<String,LineType> mappLineTypes = initMappLineTypes();
+	private static Map<String,ArrowHeadType> mappLineTypes = initMappLineTypes();
 
-	static private Map<String,LineType> initMappLineTypes()
+	static private Map<String,ArrowHeadType> initMappLineTypes()
 	{
-		Map<String,LineType> result = new HashMap<String,LineType>();
-		result.put ("DottedLine", LineType.LINE);
-		result.put ("DottedArrow", LineType.ARROW);
-		for (LineType l : LineType.getValues())
+		Map<String,ArrowHeadType> result = new HashMap<String,ArrowHeadType>();
+		result.put ("DottedLine", ArrowHeadType.LINE);
+		result.put ("DottedArrow", ArrowHeadType.ARROW);
+		for (ArrowHeadType l : ArrowHeadType.getValues())
 		{
 			result.put (l.getMappName(), l);
 		}
@@ -646,11 +648,11 @@ public class MappFormat extends AbstractPathwayFormat
 		String type = mappObject[COL_TYPE];
     	if(type.startsWith("Dotted"))
     	{
-			o.setLineStyle(LineStyle.DASHED);
+			o.setLineStyle(LineStyleType.DASHED);
     	}
     	else
     	{
-    		o.setLineStyle(LineStyle.SOLID);
+    		o.setLineStyle(LineStyleType.SOLID);
     	}
 
     	o.setEndLineType(mappLineTypes.get(type));
@@ -778,7 +780,7 @@ public class MappFormat extends AbstractPathwayFormat
         return o;
 	}
 
-	private static PathwayElement mapInfoBoxType (String[] mappObject, Pathway data)
+	private static PathwayElement mapInfoBoxType (String[] mappObject, PathwayModel data)
 	{
     	PathwayElement o = data.getInfoBox();
 
@@ -1053,7 +1055,7 @@ public class MappFormat extends AbstractPathwayFormat
 		return extensions;
 	}
 
-	public void doExport(File file, Pathway pathway) throws ConverterException 
+	public void doExport(File file, PathwayModel pathway) throws ConverterException 
 	{
 		if (Utils.getOS() != Utils.OS_WINDOWS)
 		{
@@ -1065,8 +1067,8 @@ public class MappFormat extends AbstractPathwayFormat
 		MappFormat.exportMapp (file.getAbsolutePath(), mappInfo, mappObjects);
 	}
 
-	public Pathway doImport(File file) throws ConverterException {
-        Pathway pathway = new Pathway();
+	public PathwayModel doImport(File file) throws ConverterException {
+        PathwayModel pathway = new PathwayModel();
 		String inputString = file.getAbsolutePath();
 
         MappFormat.readFromMapp (inputString, pathway);
@@ -1106,7 +1108,7 @@ public class MappFormat extends AbstractPathwayFormat
 	}
 
 	@Override
-	public void doExport(File file, Pathway pathway, int zoom)
+	public void doExport(File file, PathwayModel pathway, int zoom)
 			throws ConverterException {
 		// TODO Auto-generated method stub
 		

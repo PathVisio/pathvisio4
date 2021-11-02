@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -29,7 +29,7 @@ import org.bridgedb.DataSource;
 import org.pathvisio.core.biopax.BiopaxNode;
 import org.pathvisio.core.debug.StopWatch;
 import org.pathvisio.core.preferences.PreferenceManager;
-import org.pathvisio.core.view.MIMShapes;
+import org.pathvisio.core.view.shape.MIMShapes;
 
 public class TestParser extends TestCase 
 {
@@ -44,10 +44,10 @@ public class TestParser extends TestCase
 	}
 	
 	/** centralized helper makes it convenient to toggle parser and validation */
-	private Pathway readHelper(File f) throws FileNotFoundException, ConverterException
+	private PathwayModel readHelper(File f) throws FileNotFoundException, ConverterException
 	{
 		assert (f.exists());
-		Pathway data = new Pathway();
+		PathwayModel data = new PathwayModel();
 		data.readFromXml(f, true);
 		return data;
 	}
@@ -58,7 +58,7 @@ public class TestParser extends TestCase
 		
 		sw = new StopWatch();
 		sw.start();
-		Pathway data = readHelper (test);
+		PathwayModel data = readHelper (test);
 
 		long result = sw.stop();
 		System.out.println ("Timing: " + result + " msec");
@@ -111,7 +111,7 @@ public class TestParser extends TestCase
 	public void testParser1() throws ConverterException, FileNotFoundException
 	{
 		File test = new File (PATHVISIO_BASEDIR, "testData/2010a/parsetest1.gpml");
-		Pathway data = readHelper (test);
+		PathwayModel data = readHelper (test);
 		
 		assertEquals (ObjectType.INFOBOX, data.getInfoBox().getObjectType());
 		assertEquals (ObjectType.MAPPINFO, data.getMappInfo().getObjectType());
@@ -133,7 +133,7 @@ public class TestParser extends TestCase
 	public void testParser2() throws ConverterException, FileNotFoundException
 	{
 		File test = new File (PATHVISIO_BASEDIR, "testData/2010a/parsetest2.gpml");
-		Pathway data = readHelper (test);
+		PathwayModel data = readHelper (test);
 
 		assertEquals (19.0, data.getInfoBox().getMCenterX(), 0.01);
 		assertEquals (31.0, data.getInfoBox().getMCenterY(), 0.01);
@@ -153,7 +153,7 @@ public class TestParser extends TestCase
 	public void testParser3() throws ConverterException, FileNotFoundException
 	{
 		File test = new File (PATHVISIO_BASEDIR, "testData/2010a/parsetest3.gpml");
-		Pathway data = readHelper (test);
+		PathwayModel data = readHelper (test);
 		
 		PathwayElement elt;
 		
@@ -183,46 +183,46 @@ public class TestParser extends TestCase
 	{
 		PreferenceManager.init();
 		File test = new File (PATHVISIO_BASEDIR, "testData/2010a/parsetest4.gpml");
-		Pathway data = readHelper (test);
+		PathwayModel data = readHelper (test);
 
 		PathwayElement elt;
 		elt = data.getElementById("id37eeec26");
 		assertEquals (ObjectType.LINE, elt.getObjectType());
 		assertEquals (12288, elt.getZOrder());
-		assertEquals (LineStyle.DASHED, elt.getLineStyle());
+		assertEquals (LineStyleType.DASHED, elt.getLineStyle());
 		assertEquals (1.0, elt.getLineThickness(), 0.01);
 		assertEquals (ConnectorType.STRAIGHT, elt.getConnectorType());
 		assertEquals (229.0, elt.getMPoints().get(0).getX(), 0.01);
 		assertEquals (173.0, elt.getMPoints().get(0).getY(), 0.01);
 		assertEquals (304.0, elt.getMPoints().get(1).getX(), 0.01);
 		assertEquals (183.0, elt.getMPoints().get(1).getY(), 0.01);
-		assertEquals (LineType.LINE, elt.getStartLineType());
-		assertEquals (LineType.LINE, elt.getEndLineType());
+		assertEquals (ArrowHeadType.LINE, elt.getStartLineType());
+		assertEquals (ArrowHeadType.LINE, elt.getEndLineType());
 		assertEquals (0, elt.getMAnchors().size()); 
 				
 		elt = data.getElementById("ida7a6255a");
-		assertEquals (LineType.LINE, elt.getStartLineType());
-		assertEquals (LineType.ARROW, elt.getEndLineType());
+		assertEquals (ArrowHeadType.LINE, elt.getStartLineType());
+		assertEquals (ArrowHeadType.ARROW, elt.getEndLineType());
 		assertEquals (2, elt.getMAnchors().size()); 
 		assertEquals (0.4, elt.getMAnchors().get(0).getPosition(), 0.01);
-		assertEquals (AnchorType.NONE, elt.getMAnchors().get(0).getShape());
+		assertEquals (AnchorShapeType.NONE, elt.getMAnchors().get(0).getShape());
 		assertEquals (0.6, elt.getMAnchors().get(1).getPosition(), 0.01);
-		assertEquals (AnchorType.CIRCLE, elt.getMAnchors().get(1).getShape());
+		assertEquals (AnchorShapeType.CIRCLE, elt.getMAnchors().get(1).getShape());
 
 		elt = data.getElementById("idb5761669");
 		assertEquals (ConnectorType.ELBOW, elt.getConnectorType());
 		
 		elt = data.getElementById("a3686");
-		assertEquals (LineType.TBAR, elt.getStartLineType());
-		assertEquals (LineType.RECEPTOR, elt.getEndLineType());
+		assertEquals (ArrowHeadType.TBAR, elt.getStartLineType());
+		assertEquals (ArrowHeadType.RECEPTOR, elt.getEndLineType());
 
 		elt = data.getElementById("d6034");
-		assertEquals (LineType.LIGAND_SQUARE, elt.getStartLineType());
-		assertEquals (LineType.RECEPTOR_SQUARE, elt.getEndLineType());
+		assertEquals (ArrowHeadType.LIGAND_SQUARE, elt.getStartLineType());
+		assertEquals (ArrowHeadType.RECEPTOR_SQUARE, elt.getEndLineType());
 		
 		elt = data.getElementById("c4eb9");
-		assertEquals (LineType.LIGAND_ROUND, elt.getStartLineType());
-		assertEquals (LineType.RECEPTOR_ROUND, elt.getEndLineType());
+		assertEquals (ArrowHeadType.LIGAND_ROUND, elt.getStartLineType());
+		assertEquals (ArrowHeadType.RECEPTOR_ROUND, elt.getEndLineType());
 		
 		elt = data.getElementById("a6d48");
 		assertEquals (MIMShapes.MIM_NECESSARY_STIMULATION, elt.getStartLineType());
@@ -275,7 +275,7 @@ public class TestParser extends TestCase
 	public void testParser5() throws ConverterException, FileNotFoundException
 	{
 		File test = new File (PATHVISIO_BASEDIR, "testData/2010a/parsetest5.gpml");
-		Pathway data = readHelper (test);
+		PathwayModel data = readHelper (test);
 		
 		PathwayElement elt;
 		elt = data.getElementById("a8a81");
@@ -288,8 +288,8 @@ public class TestParser extends TestCase
 		assertEquals (84.0, elt.getMWidth(), 0.01);
 		assertEquals (20.5, elt.getMHeight(), 0.01);
 		assertEquals (10.0, elt.getMFontSize(), 0.01);
-		assertEquals (ValignType.TOP, elt.getValign());
-		assertEquals (AlignType.CENTER, elt.getAlign());
+		assertEquals (VAlignType.TOP, elt.getValign());
+		assertEquals (HAlignType.CENTER, elt.getAlign());
 		assertEquals ("Arial", elt.getFontName());
 		assertEquals (Color.BLACK, elt.getColor());
 		assertFalse (elt.isTransparent());
@@ -298,15 +298,15 @@ public class TestParser extends TestCase
 		assertFalse (elt.isStrikethru());
 		assertFalse (elt.isUnderline());
 		assertEquals ("", elt.getElementID());
-		assertEquals (LineStyle.SOLID, elt.getLineStyle());
+		assertEquals (LineStyleType.SOLID, elt.getLineStyle());
 		assertEquals (DataSource.getExistingByFullName("EC Number"), elt.getDataSource());
 		
 		elt = data.getElementById("ec886");
 		assertEquals (32767, elt.getZOrder());
 		assertEquals ("GeneProduct", elt.getDataNodeType());
 		assertEquals ("", elt.getTextLabel());
-		assertEquals (ValignType.MIDDLE, elt.getValign());
-		assertEquals (AlignType.LEFT, elt.getAlign());
+		assertEquals (VAlignType.MIDDLE, elt.getValign());
+		assertEquals (HAlignType.LEFT, elt.getAlign());
 		assertEquals ("", elt.getElementID());
 		assertNull (elt.getDataSource());
 
@@ -314,8 +314,8 @@ public class TestParser extends TestCase
 		assertEquals (32768, elt.getZOrder());
 		assertEquals ("Unknown", elt.getDataNodeType());
 		assertEquals ("Fructose", elt.getTextLabel());
-		assertEquals (ValignType.MIDDLE, elt.getValign());
-		assertEquals (AlignType.CENTER, elt.getAlign());
+		assertEquals (VAlignType.MIDDLE, elt.getValign());
+		assertEquals (HAlignType.CENTER, elt.getAlign());
 		assertEquals ("Comic Sans MS", elt.getFontName());
 		assertEquals (Color.BLACK, elt.getColor());
 		assertEquals (12.0, elt.getMFontSize(), 0.01);
@@ -331,7 +331,7 @@ public class TestParser extends TestCase
 		assertEquals ("multi-\nline", elt.getTextLabel());
 		assertEquals (Color.BLUE, elt.getFillColor());
 		assertEquals (ShapeType.ROUNDED_RECTANGLE, elt.getShapeType());
-		assertEquals (LineStyle.DASHED, elt.getLineStyle());
+		assertEquals (LineStyleType.DASHED, elt.getLineStyle());
 		assertEquals (DataSource.getExistingByFullName("Entrez Gene"), elt.getDataSource());
 		assertEquals ("3643", elt.getElementID());
 		
@@ -353,13 +353,13 @@ public class TestParser extends TestCase
 	public void testParser6() throws ConverterException, FileNotFoundException
 	{
 		File test = new File (PATHVISIO_BASEDIR, "testData/2010a/parsetest6.gpml");
-		Pathway data = readHelper (test);
+		PathwayModel data = readHelper (test);
 	}
 
 	public void testParser7() throws ConverterException, FileNotFoundException
 	{
 		File test = new File (PATHVISIO_BASEDIR, "testData/2010a/parsetest7.gpml");
-		Pathway data = readHelper (test);
+		PathwayModel data = readHelper (test);
 		
 		PathwayElement elt = data.getMappInfo();
 		assertEquals (1, elt.getBiopaxRefs().size());
@@ -385,7 +385,7 @@ public class TestParser extends TestCase
 
 	public void testParser8() throws ConverterException, FileNotFoundException
 	{
-		Pathway data = readHelper (new File (PATHVISIO_BASEDIR, "testData/2010a/parsetest8.gpml"));
+		PathwayModel data = readHelper (new File (PATHVISIO_BASEDIR, "testData/2010a/parsetest8.gpml"));
 		
 		PathwayElement elt;
 		elt = data.getElementById("a8d1a");
@@ -400,7 +400,7 @@ public class TestParser extends TestCase
 		assertEquals ("", elt.getTextLabel());
 		assertEquals (0, elt.getBiopaxRefs().size());
 		assertEquals (0, elt.getComments().size());
-		assertEquals (GroupStyle.GROUP, elt.getGroupStyle());
+		assertEquals (GroupType.GROUP, elt.getGroupStyle());
 		assertNull (elt.getGroupRef());
 
 		elt = data.getElementById("d8371");
@@ -411,7 +411,7 @@ public class TestParser extends TestCase
 		assertEquals ("a7a", elt.getBiopaxRefs().get(0));
 		assertEquals (1, elt.getComments().size());
 		assertEquals ("Blah comment", elt.getComments().get(0).getComment());
-		assertEquals (GroupStyle.COMPLEX, elt.getGroupStyle());
+		assertEquals (GroupType.COMPLEX, elt.getGroupStyle());
 		assertEquals ("fb6cc", elt.getGroupRef());
 	}
 

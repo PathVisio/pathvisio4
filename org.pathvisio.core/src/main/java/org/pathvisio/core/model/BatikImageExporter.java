@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -37,7 +37,8 @@ import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.apache.batik.transcoder.image.TIFFTranscoder;
 import org.pathvisio.core.preferences.GlobalPreference;
 import org.pathvisio.core.preferences.PreferenceManager;
-import org.pathvisio.core.view.VPathway;
+import org.pathvisio.core.view.model.VPathwayModel;
+import org.pathvisio.model.PathwayModel;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
@@ -51,57 +52,58 @@ public class BatikImageExporter extends ImageExporter {
 		super(type);
 	}
 
-	public void doExport(File file, VPathway vPathway) throws ConverterException {
+	public void doExport(File file, VPathwayModel vPathway) throws ConverterException {
 		doExport(file, vPathway, null);
 	}
 
-	public void doExport(File file, VPathway vPathway, TranscodingHints hints) throws ConverterException {
+	public void doExport(File file, VPathwayModel vPathway, TranscodingHints hints) throws ConverterException {
 		DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
-		Document svg = domImpl.createDocument ("http://www.w3.org/2000/svg", "svg", null);
+		Document svg = domImpl.createDocument("http://www.w3.org/2000/svg", "svg", null);
 
 		SVGGeneratorContext ctx = SVGGeneratorContext.createDefault(svg);
-		
+
 		boolean textAsPath = PreferenceManager.getCurrent().getBoolean(GlobalPreference.SVG_TEXT_AS_PATH);
 		SVGGraphics2D svgG2d = new SVGGraphics2D(ctx, textAsPath);
-		
+
 		vPathway.draw(svgG2d);
 
-		//Force recalculation of size after drawing once, this allows size of text
-		//to be calculated correctly
+		// Force recalculation of size after drawing once, this allows size of text
+		// to be calculated correctly
 		Dimension size = vPathway.calculateVSize();
 		svgG2d.setSVGCanvasSize(size);
 
 		Transcoder t = null;
-		if			(getType().equals(TYPE_SVG)) {
+		if (getType().equals(TYPE_SVG)) {
 			try {
 				Writer out = new FileWriter(file);
 				svgG2d.stream(out, true);
 				out.flush();
 				out.close();
-			} catch(Exception e) {
+			} catch (Exception e) {
 				throw new ConverterException(e);
 			}
 			return;
-		} else if	(getType().equals(TYPE_PNG)) {
+		} else if (getType().equals(TYPE_PNG)) {
 			t = new PNGTranscoder();
 			System.out.println("hi");
-		} else if	(getType().equals(TYPE_TIFF)) {
+		} else if (getType().equals(TYPE_TIFF)) {
 			t = new TIFFTranscoder();
-		} else if	(getType().equals(TYPE_PDF)) {
+		} else if (getType().equals(TYPE_PDF)) {
 			try {
-                 Class<?> pdfClass = Class.forName("org.apache.fop.svg.PDFTranscoder");
-                 t = (Transcoder)pdfClass.newInstance();
-             } catch(Exception e) {
-            	 noExporterException();
-             }
+				Class<?> pdfClass = Class.forName("org.apache.fop.svg.PDFTranscoder");
+				t = (Transcoder) pdfClass.newInstance();
+			} catch (Exception e) {
+				noExporterException();
+			}
 		}
-		if(t == null) noExporterException();
+		if (t == null)
+			noExporterException();
 
 		svgG2d.getRoot(svg.getDocumentElement());
 		t.addTranscodingHint(ImageTranscoder.KEY_BACKGROUND_COLOR, java.awt.Color.WHITE);
-		if(hints != null) {
-			for(Object o : hints.keySet()) {
-				t.addTranscodingHint((TranscodingHints.Key)o, hints.get(o));
+		if (hints != null) {
+			for (Object o : hints.keySet()) {
+				t.addTranscodingHint((TranscodingHints.Key) o, hints.get(o));
 			}
 		}
 		try {
@@ -114,17 +116,16 @@ public class BatikImageExporter extends ImageExporter {
 			// Save the image.
 			t.transcode(input, output);
 
-		    // Flush and close the stream.
-	        ostream.flush();
-	        ostream.close();
-		} catch(Exception e) {
+			// Flush and close the stream.
+			ostream.flush();
+			ostream.close();
+		} catch (Exception e) {
 			throw new ConverterException(e);
 		}
 	}
 
-	public void doExport(File file, Pathway pathway) throws ConverterException
-	{
-		VPathway vPathway = new VPathway(null);
+	public void doExport(File file, PathwayModel pathway) throws ConverterException {
+		VPathwayModel vPathway = new VPathwayModel(null);
 		vPathway.fromModel(pathway);
 
 		doExport(file, vPathway);

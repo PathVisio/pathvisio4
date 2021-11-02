@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -25,84 +25,68 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import org.pathvisio.core.view.VPathway;
+import org.pathvisio.core.view.model.VPathwayModel;
+import org.pathvisio.model.PathwayModel;
 
 /**
- * A Pathway exporter for Bitmap formats,
- * based on the javax.imageio library
+ * A Pathway exporter for Bitmap formats, based on the javax.imageio library
  */
-public class RasterImageExporter extends ImageExporter
-{
-	
-	
+public class RasterImageExporter extends ImageExporter {
 
 	private static final double MAX_ZOOM = 500;
-	
+
 	private static final int DEFAULT_RESOLUTION = 600;
-	private static final List<Integer> RESOLUTION_VALUES = Arrays.asList(
-			new Integer[] { DEFAULT_RESOLUTION, 100, 150, 300, 600 });
+	private static final List<Integer> RESOLUTION_VALUES = Arrays
+			.asList(new Integer[] { DEFAULT_RESOLUTION, 100, 150, 300, 600 });
 
 	public int widthInPixels;
 	public double widthInInches;
-	
+
 	public int heightInPixels;
 	public double heightInInches;
 
-	public int initialWPixel, initialHPixel; 
-	
+	public int initialWPixel, initialHPixel;
+
 	public double zoom;
-	
+
 	/**
 	 * Use a buffered image for exporting
 	 *
-	 * @param type must be one of javax.imageio.ImageIO.getWriterFormatNames(),
-	 * 	e.g. "gif", "png" or "jpeg". Throws an IllegalArgumentException otherwise
+	 * @param type must be one of javax.imageio.ImageIO.getWriterFormatNames(), e.g.
+	 *             "gif", "png" or "jpeg". Throws an IllegalArgumentException
+	 *             otherwise
 	 */
-	public RasterImageExporter(String type)
-	{
+	public RasterImageExporter(String type) {
 		super(type);
-		List<String> formatNames = Arrays.asList (ImageIO.getWriterFormatNames());
-		if (!formatNames.contains (type))
-			throw new IllegalArgumentException ("Unkown Image type " + type);
+		List<String> formatNames = Arrays.asList(ImageIO.getWriterFormatNames());
+		if (!formatNames.contains(type))
+			throw new IllegalArgumentException("Unkown Image type " + type);
 	}
 
-	public void doExport(File file, Pathway pathway) throws ConverterException
-	{		
-		try
-		{
+	public void doExport(File file, PathwayModel pathway) throws ConverterException {
+		try {
 			BufferedImage image = exportAsImage(pathway);
 			ImageIO.write(image, getType(), file);
-		}
-		catch (IOException ex)
-		{
+		} catch (IOException ex) {
 			throw new ConverterException(ex);
 		}
 	}
-	
-	
+
 	@Override
-	public void doExport(File file, Pathway pathway, int zoom)
-			throws ConverterException {
+	public void doExport(File file, PathwayModel pathway, int zoom) throws ConverterException {
 		// TODO Auto-generated method stub
-		try
-		{
-			
-			
+		try {
+
 			BufferedImage image = exportAsImage(pathway, zoom);
 			ImageIO.write(image, getType(), file);
-		}
-		catch (IOException ex)
-		{
+		} catch (IOException ex) {
 			throw new ConverterException(ex);
 		}
 	}
-	
-	
-	public BufferedImage exportAsImage(Pathway pathway)
-	{
-		VPathway vPathway = new VPathway(null);
-		try
-		{
+
+	public BufferedImage exportAsImage(PathwayModel pathway) {
+		VPathwayModel vPathway = new VPathwayModel(null);
+		try {
 			vPathway.fromModel(pathway);
 			BufferedImage image = new BufferedImage(vPathway.getVWidth(), vPathway.getVHeight(),
 					BufferedImage.TYPE_INT_RGB);
@@ -110,27 +94,23 @@ public class RasterImageExporter extends ImageExporter
 			vPathway.draw(g2);
 			g2.dispose();
 			return image;
-		}
-		finally
-		{
+		} finally {
 			vPathway.dispose();
 		}
 	}
 
-	public BufferedImage exportAsImage(Pathway pathway, int zoom)
-	{
-		VPathway vPathway = new VPathway(null);
-		try
-		{		
+	public BufferedImage exportAsImage(PathwayModel pathway, int zoom) {
+		VPathwayModel vPathway = new VPathwayModel(null);
+		try {
 			vPathway.fromModel(pathway);
-			
+
 			initialWPixel = vPathway.getVWidth();
 			initialHPixel = vPathway.getVHeight();
-			
+
 			// update height
-			heightInPixels = (int) (( zoom / 100 ) * initialHPixel);
+			heightInPixels = (int) ((zoom / 100) * initialHPixel);
 			// update width
-			widthInPixels = (int) (( zoom / 100 ) * initialWPixel);
+			widthInPixels = (int) ((zoom / 100) * initialWPixel);
 
 			final double scale = zoom / 100.0;
 			final BufferedImage image = new BufferedImage(widthInPixels, heightInPixels, BufferedImage.TYPE_INT_RGB);
@@ -139,9 +119,7 @@ public class RasterImageExporter extends ImageExporter
 			vPathway.draw(g2);
 			g2.dispose();
 			return image;
-		}
-		finally
-		{
+		} finally {
 			vPathway.dispose();
 		}
 	}

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -57,20 +57,20 @@ import org.pathvisio.core.gui.PathwayTransferable;
 import org.pathvisio.core.gui.SwingKeyEvent;
 import org.pathvisio.core.gui.SwingMouseEvent;
 import org.pathvisio.core.gui.ToolTipProvider;
-import org.pathvisio.core.model.Pathway;
-import org.pathvisio.core.model.PathwayElement;
+import org.pathvisio.core.model.PathwayModel;
+import org.pathvisio.model.PathwayElement;
 import org.pathvisio.core.preferences.GlobalPreference;
 import org.pathvisio.core.preferences.PreferenceManager;
-import org.pathvisio.core.view.GraphicsShape;
-import org.pathvisio.core.view.Handle;
-import org.pathvisio.core.view.Label;
 import org.pathvisio.core.view.VElementMouseEvent;
 import org.pathvisio.core.view.VElementMouseListener;
-import org.pathvisio.core.view.VPathway;
-import org.pathvisio.core.view.VPathwayElement;
-import org.pathvisio.core.view.VPathwayEvent;
-import org.pathvisio.core.view.VPathwayListener;
-import org.pathvisio.core.view.VPathwayWrapper;
+import org.pathvisio.core.view.model.Handle;
+import org.pathvisio.core.view.model.VElement;
+import org.pathvisio.core.view.model.VLabel;
+import org.pathvisio.core.view.model.VPathwayEvent;
+import org.pathvisio.core.view.model.VPathwayListener;
+import org.pathvisio.core.view.model.VPathwayModel;
+import org.pathvisio.core.view.model.VPathwayWrapper;
+import org.pathvisio.core.view.model.VShapedElement;
 import org.pathvisio.gui.MainPanel;
 import org.pathvisio.gui.dnd.PathwayImportHandler;
 
@@ -81,7 +81,7 @@ import org.pathvisio.gui.dnd.PathwayImportHandler;
 public class VPathwaySwing extends JPanel implements VPathwayWrapper,
 MouseMotionListener, MouseListener, KeyListener, VPathwayListener, VElementMouseListener, MouseWheelListener {
 
-	protected VPathway child;
+	protected VPathwayModel child;
 
 	protected JScrollPane container;
 
@@ -104,13 +104,13 @@ MouseMotionListener, MouseListener, KeyListener, VPathwayListener, VElementMouse
 						GlobalPreference.ENABLE_DOUBLE_BUFFERING));
 	}
 
-	public void setChild(VPathway c) {
+	public void setChild(VPathwayModel c) {
 		child = c;
 		child.addVPathwayListener(this);
 		child.addVElementMouseListener(this);
 	}
 
-	public VPathway getChild() {
+	public VPathwayModel getChild() {
 		return child;
 	}
 
@@ -231,8 +231,8 @@ MouseMotionListener, MouseListener, KeyListener, VPathwayListener, VElementMouse
 		//super.registerKeyboardAction(a, k, WHEN_IN_FOCUSED_WINDOW);
 	}
 
-	public VPathway createVPathway() {
-		setChild(new VPathway(this));
+	public VPathwayModel createVPathway() {
+		setChild(new VPathwayModel(this));
 		return child;
 	}
 
@@ -275,7 +275,7 @@ MouseMotionListener, MouseListener, KeyListener, VPathwayListener, VElementMouse
 
 	List<PathwayElement> lastCopied;
 
-	public void copyToClipboard(Pathway source, List<PathwayElement> copyElements) {
+	public void copyToClipboard(PathwayModel source, List<PathwayElement> copyElements) {
 		Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clip.setContents(new PathwayTransferable(source, copyElements),
 				(PathwayImportHandler)getTransferHandler());
@@ -292,7 +292,7 @@ MouseMotionListener, MouseListener, KeyListener, VPathwayListener, VElementMouse
 		if(toolTipProviders.size() == 0) return;
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				List<VPathwayElement> elements = e.getAffectedElements();
+				List<VElement> elements = e.getAffectedElements();
 				if(elements.size() > 0) {
 					PathwayToolTip tip = new PathwayToolTip(elements);
 
@@ -330,7 +330,7 @@ MouseMotionListener, MouseListener, KeyListener, VPathwayListener, VElementMouse
 	class PathwayToolTip extends JPanel {
 		private boolean hasContent;
 
-		public PathwayToolTip(List<VPathwayElement> elements) {
+		public PathwayToolTip(List<VElement> elements) {
 			applyToolTipStyle(this);
 			setLayout(new BorderLayout());
 			DefaultFormBuilder builder = new DefaultFormBuilder(new FormLayout("pref"));
@@ -389,7 +389,7 @@ MouseMotionListener, MouseListener, KeyListener, VPathwayListener, VElementMouse
 			} else if(e.getType() == VElementMouseEvent.TYPE_MOUSEEXIT) {
 				setCursor(Cursor.getDefaultCursor());
 			}
-		} else if (e.getElement() instanceof Label) {
+		} else if (e.getElement() instanceof VLabel) {
 			if(e.getType() == VElementMouseEvent.TYPE_MOUSE_SHOWHAND) {
 				setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			} else if(e.getType() == VElementMouseEvent.TYPE_MOUSE_NOTSHOWHAND) {
@@ -407,8 +407,8 @@ MouseMotionListener, MouseListener, KeyListener, VPathwayListener, VElementMouse
 	 */
 	private int calculateCursorStyle(VElementMouseEvent e) {
 		Handle h = (Handle) e.getElement();
-		if(h.getParent() instanceof GraphicsShape) {
-			GraphicsShape gs = (GraphicsShape) h.getParent();
+		if(h.getParent() instanceof VShapedElement) {
+			VShapedElement gs = (VShapedElement) h.getParent();
 			double rotation = gs.getPathwayElement().getRotation();
 			double degrees = h.getAngle() + (rotation * (180 / Math.PI));
 			

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -25,21 +25,21 @@ import java.util.Set;
 
 import org.bridgedb.bio.Organism;
 import org.pathvisio.core.debug.Logger;
-import org.pathvisio.core.model.AlignType;
+import org.pathvisio.core.model.HAlignType;
 import org.pathvisio.core.model.CellularComponentType;
 import org.pathvisio.core.model.DataNodeType;
-import org.pathvisio.core.model.GroupStyle;
-import org.pathvisio.core.model.LineStyle;
-import org.pathvisio.core.model.LineType;
+import org.pathvisio.core.model.GroupType;
+import org.pathvisio.core.model.LineStyleType;
+import org.pathvisio.core.model.ArrowHeadType;
 import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.core.model.OrientationType;
-import org.pathvisio.core.model.PathwayElement;
+import org.pathvisio.model.PathwayElement;
 import org.pathvisio.core.model.Property;
 import org.pathvisio.core.model.PropertyType;
 import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.model.StaticProperty;
 import org.pathvisio.core.model.StaticPropertyType;
-import org.pathvisio.core.model.ValignType;
+import org.pathvisio.core.model.VAlignType;
 import org.pathvisio.core.preferences.GlobalPreference;
 import org.pathvisio.core.preferences.Preference;
 import org.pathvisio.core.preferences.PreferenceManager;
@@ -74,14 +74,14 @@ public class PropertyDisplayManager {
 		registerTypeHandler(new DataSourceHandler());
 		registerTypeHandler(new FontHandler());
 		registerTypeHandler(new ComboHandler(StaticPropertyType.GENETYPE, DataNodeType.getNames(), false));
-		registerTypeHandler(new ComboHandler(StaticPropertyType.GROUPSTYLETYPE, GroupStyle.getNames(), false));
-		registerTypeHandler(new ComboHandler(StaticPropertyType.LINESTYLE, LineStyle.getNames(), true));
-		registerTypeHandler(new ComboHandler(StaticPropertyType.LINETYPE, LineType.getVisibleNames(), LineType.getVisibleValues()));
+		registerTypeHandler(new ComboHandler(StaticPropertyType.GROUPSTYLETYPE, GroupType.getNames(), false));
+		registerTypeHandler(new ComboHandler(StaticPropertyType.LINESTYLE, LineStyleType.getNames(), true));
+		registerTypeHandler(new ComboHandler(StaticPropertyType.LINETYPE, ArrowHeadType.getVisibleNames(), ArrowHeadType.getVisibleValues()));
 		registerTypeHandler(new ComboHandler(StaticPropertyType.ORGANISM, Organism.latinNames(), false));
 		registerTypeHandler(new ComboHandler(StaticPropertyType.ORIENTATION, OrientationType.getNames(), true));
 		registerTypeHandler(new ComboHandler(StaticPropertyType.SHAPETYPE, ShapeType.getVisibleNames(), ShapeType.getVisibleValues()));
-		registerTypeHandler(new ComboHandler(StaticPropertyType.VALIGNTYPE, ValignType.getNames(), ValignType.values()));
-		registerTypeHandler(new ComboHandler(StaticPropertyType.ALIGNTYPE, AlignType.getNames(), AlignType.values()));
+		registerTypeHandler(new ComboHandler(StaticPropertyType.VALIGNTYPE, VAlignType.getNames(), VAlignType.values()));
+		registerTypeHandler(new ComboHandler(StaticPropertyType.ALIGNTYPE, HAlignType.getNames(), HAlignType.values()));
 		registerTypeHandler(new ComboHandler(CellularComponentType.CELL_COMPONENT_TYPE, CellularComponentType.getNames(), false));
 
 		// register core properties

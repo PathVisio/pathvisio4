@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -25,21 +25,25 @@ import junit.framework.TestCase;
 import org.pathvisio.core.biopax.BiopaxReferenceManager;
 import org.pathvisio.core.biopax.PublicationXref;
 import org.pathvisio.core.model.ObjectType;
-import org.pathvisio.core.model.Pathway;
-import org.pathvisio.core.model.PathwayElement;
+import org.pathvisio.core.model.PathwayModel;
+import org.pathvisio.model.PathwayElement;
 import org.pathvisio.core.preferences.PreferenceManager;
+import org.pathvisio.core.view.model.VDataNode;
+import org.pathvisio.core.view.model.VElement;
+import org.pathvisio.core.view.model.VPathwayModel;
+import org.pathvisio.core.view.model.VPathwayObject;
 
 public class Test extends TestCase {
 
-	Pathway pwy = null;
-	VPathway vPwy = null;
+	PathwayModel pwy = null;
+	VPathwayModel vPwy = null;
 	PathwayElement eltDn = null, eltSh = null, eltLi = null, eltLa = null;
-	Graphics vDn = null, vSh = null, vLi = null, vLa = null;
+	VPathwayObject vDn = null, vSh = null, vLi = null, vLa = null;
 
 	public void setUp()
 	{
 		PreferenceManager.init();
-    	pwy = new Pathway();
+    	pwy = new PathwayModel();
     	eltDn = PathwayElement.createPathwayElement(ObjectType.DATANODE);
     	eltDn.setMCenterX(3000);
     	eltDn.setMCenterY(3000);
@@ -67,21 +71,21 @@ public class Test extends TestCase {
     	pwy.add(eltSh);
     	pwy.add(eltLi);
     	pwy.add(eltLa);
-    	vPwy = new VPathway(null);
+    	vPwy = new VPathwayModel(null);
     	vPwy.fromModel(pwy);
 
-    	for(VPathwayElement e : vPwy.getDrawingObjects())
+    	for(VElement e : vPwy.getDrawingObjects())
     	{
-    		if(e instanceof Graphics) {
-    			PathwayElement pe = ((Graphics)e).getPathwayElement();
+    		if(e instanceof VPathwayObject) {
+    			PathwayElement pe = ((VPathwayObject)e).getPathwayElement();
     			if			(pe == eltDn) {
-    				vDn = (Graphics)e;
+    				vDn = (VPathwayObject)e;
     			} else if 	(pe == eltSh) {
-    				vSh = (Graphics)e;
+    				vSh = (VPathwayObject)e;
     			} else if	(pe == eltLi) {
-    				vLi = (Graphics)e;
+    				vLi = (VPathwayObject)e;
     			} else if	(pe == eltLa) {
-    				vLa = (Graphics)e;
+    				vLa = (VPathwayObject)e;
     			}
     		}
     	}
@@ -94,8 +98,8 @@ public class Test extends TestCase {
 
 	public void testCopyPaste()
 	{
-    	Pathway pTarget = new Pathway();
-    	VPathway vpTarget = new VPathway(null);
+    	PathwayModel pTarget = new PathwayModel();
+    	VPathwayModel vpTarget = new VPathwayModel(null);
     	vpTarget.fromModel(pTarget);
 
 		vPwy.selectObject(vDn);
@@ -130,8 +134,8 @@ public class Test extends TestCase {
     	assertTrue(eltLa.getZOrder() > eltSh.getZOrder());
     	assertTrue(eltSh.getZOrder() > eltLi.getZOrder());
 
-    	vPwy.moveGraphicsTop(Arrays.asList(new Graphics[] {vLa}));
-    	vPwy.moveGraphicsBottom(Arrays.asList(new Graphics[] {vSh}));
+    	vPwy.moveGraphicsTop(Arrays.asList(new VPathwayObject[] {vLa}));
+    	vPwy.moveGraphicsBottom(Arrays.asList(new VPathwayObject[] {vSh}));
 
     	assertTrue(eltLa.getZOrder() > eltDn.getZOrder());
     	assertTrue(eltDn.getZOrder() > eltLi.getZOrder());
@@ -151,28 +155,28 @@ public class Test extends TestCase {
     	assertTrue(eltSh.getZOrder() > eltLi.getZOrder());
 
     	vDn.select();
-    	VPathwayElement h = ((GeneProduct)vDn).getHandles()[0];
+    	VElement h = ((VDataNode)vDn).getHandles()[0];
 //    	VPoint pnt = ((Line)vLi).getEnd();
 
     	vPwy.addScheduled();
-    	List<VPathwayElement> elements = vPwy.getDrawingObjects();
+    	List<VElement> elements = vPwy.getDrawingObjects();
 
     	//Test natural / z order
     	Collections.sort(elements);
-    	checkDrawingOrder(new VPathwayElement[] { vLi, vSh, vLa, vDn, h }, elements);
+    	checkDrawingOrder(new VElement[] { vLi, vSh, vLa, vDn, h }, elements);
 
     	//order should not change when selecting
     	vLi.select();
     	Collections.sort(elements);
-    	checkDrawingOrder(new VPathwayElement[] { vLi, vSh, vLa, vDn, h }, elements);
+    	checkDrawingOrder(new VElement[] { vLi, vSh, vLa, vDn, h }, elements);
 
     	//Test reset after unselected
     	vLi.deselect();
     	Collections.sort(elements);
-    	checkDrawingOrder(new VPathwayElement[] { vLi, vSh, vLa, vDn, h }, elements);
+    	checkDrawingOrder(new VElement[] { vLi, vSh, vLa, vDn, h }, elements);
     }
 
-    public void checkDrawingOrder(VPathwayElement[] order, List<VPathwayElement> elements) {
+    public void checkDrawingOrder(VElement[] order, List<VElement> elements) {
     	int[] indices = new int[order.length];
     	for(int i = 0; i < order.length; i++) {
     		indices[i] = elements.indexOf(order[i]);
@@ -198,7 +202,7 @@ public class Test extends TestCase {
     	assertTrue (vPwy.getDrawingObjects().contains(vLi));
     	assertTrue (pwy.getDataObjects().contains(eltLi));
 
-    	vPwy.removeDrawingObjects (Arrays.asList(new VPathwayElement[] { vLa, vLi } ), true);
+    	vPwy.removeDrawingObjects (Arrays.asList(new VElement[] { vLa, vLi } ), true);
     	
     	assertFalse (vPwy.getDrawingObjects().contains(vLa));
     	assertFalse (pwy.getDataObjects().contains(eltLa));
@@ -208,7 +212,7 @@ public class Test extends TestCase {
     	assertTrue (vPwy.getDrawingObjects().contains(vDn));
     	assertTrue (pwy.getDataObjects().contains(eltDn));
 
-    	vPwy.removeDrawingObjects (Arrays.asList(new VPathwayElement[] { vDn } ));
+    	vPwy.removeDrawingObjects (Arrays.asList(new VElement[] { vDn } ));
     	
     	assertFalse (vPwy.getDrawingObjects().contains(vDn));
     	assertTrue (pwy.getDataObjects().contains(eltDn));

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -19,6 +19,9 @@ package org.pathvisio.core.model;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+
+import org.pathvisio.event.PathwayExporter;
+import org.pathvisio.model.PathwayModel;
 
 /**
  * Base class for a couple of image exporters.
@@ -73,7 +76,7 @@ public abstract class ImageExporter implements PathwayExporter {
 //		
 //	}
 
-	public void doExport(File file, Pathway pathway, int zoom)
+	public void doExport(File file, PathwayModel pathway, int zoom)
 			throws ConverterException {
 		// TODO Auto-generated method stub
 		

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -40,30 +40,41 @@ import org.pathvisio.core.Engine;
 import org.pathvisio.core.Engine.ApplicationEventListener;
 import org.pathvisio.core.model.ConnectorShape;
 import org.pathvisio.core.model.FreeConnectorShape;
-import org.pathvisio.core.model.GroupStyle;
-import org.pathvisio.core.model.MLine;
-import org.pathvisio.core.model.MState;
+import org.pathvisio.core.model.GroupType;
+import org.pathvisio.core.model.LineElement;
+import org.pathvisio.core.model.State;
 import org.pathvisio.core.model.ObjectType;
-import org.pathvisio.core.model.PathwayElement;
-import org.pathvisio.core.model.PathwayElement.MPoint;
+import org.pathvisio.model.PathwayElement;
+import org.pathvisio.model.LineElement.LinePoint;
 import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.util.Resources;
 import org.pathvisio.core.util.Utils;
-import org.pathvisio.core.view.SelectionBox.SelectionEvent;
-import org.pathvisio.core.view.SelectionBox.SelectionListener;
+import org.pathvisio.core.view.model.SelectionBox;
+import org.pathvisio.core.view.model.UndoManager;
+import org.pathvisio.core.view.model.VDataNode;
+import org.pathvisio.core.view.model.VElement;
+import org.pathvisio.core.view.model.VGroup;
+import org.pathvisio.core.view.model.VLineElement;
+import org.pathvisio.core.view.model.VPathwayEvent;
+import org.pathvisio.core.view.model.VPathwayListener;
+import org.pathvisio.core.view.model.VPathwayModel;
+import org.pathvisio.core.view.model.VPathwayObject;
+import org.pathvisio.core.view.model.VState;
+import org.pathvisio.core.view.model.SelectionBox.SelectionEvent;
+import org.pathvisio.core.view.model.SelectionBox.SelectionListener;
 
 import static org.pathvisio.core.model.ObjectType.STATE;
 
 /**
  * A collection of {@link Action}s related to the pathway view. An instance of this class contains
- * actions bound to one instance of a {@link VPathway} (non-static fields). The static inner classes are not bound to a particular {@link VPathway},
+ * actions bound to one instance of a {@link VPathwayModel} (non-static fields). The static inner classes are not bound to a particular {@link VPathwayModel},
  * but act on the currently active pathway by calling {@link Engine#getActiveVPathway()}.
  *
  * Instances of actions may be registered to one or more groups, which changes the action's property on
  * certain events (see GROUP* constants). The {@link Action} instances that are fields of this class are
  * already registered to the proper groups.
  *
- * An instance of this class belonging to a {@link VPathway} can be obtained using {@link VPathway#getViewActions()}.
+ * An instance of this class belonging to a {@link VPathwayModel} can be obtained using {@link VPathwayModel#getViewActions()}.
  *
  * @author thomas
  */
@@ -92,7 +103,7 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 	static final int SMALL_INCREMENT = 2;
 	static final int LARGE_INCREMENT = 20;
 
-	VPathway vPathway;
+	VPathwayModel vPathway;
 
 	public final SelectClassAction selectDataNodes;
 	public final SelectObjectAction selectInteractions;
@@ -123,14 +134,14 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 
 	private final Engine engine;
 
-	ViewActions(Engine engine, VPathway vp) {
+	ViewActions(Engine engine, VPathwayModel vp) {
 		this.engine = engine;
 		vPathway = vp;
 
 		vp.addSelectionListener(this);
 		vp.addVPathwayListener(this);
 
-		selectDataNodes = new SelectClassAction("DataNode", GeneProduct.class);
+		selectDataNodes = new SelectClassAction("DataNode", VDataNode.class);
 		selectInteractions = new SelectObjectAction("Interactions", ObjectType.LINE);
 		selectLines = new SelectObjectAction("Graphical Lines", ObjectType.GRAPHLINE);
 		selectShapes = new SelectObjectAction("Shapes", ObjectType.SHAPE);
@@ -230,7 +241,7 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 	 * edit mode, and disabled when not.
 	 * @param v The VPathway of which the state will be determined
 	 */
-	private void resetGroupStates(VPathway v) {
+	private void resetGroupStates(VPathwayModel v) {
 		groupState.put(GROUP_ENABLE_VPATHWAY_LOADED, true);
 		groupState.put(GROUP_ENABLE_EDITMODE, vPathway.isEditMode());
 		groupState.put(GROUP_ENABLE_WHEN_SELECTION, vPathway.getSelectedPathwayElements().size() > 0);
@@ -257,7 +268,7 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 //	}
 
 	public void vPathwayEvent(VPathwayEvent e) {
-		VPathway vp = (VPathway)e.getSource();
+		VPathwayModel vp = (VPathwayModel)e.getSource();
 		//Don't refresh at object redraw / move
 		switch(e.getType()) {
 		case EDIT_MODE_OFF:
@@ -272,7 +283,7 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 	}
 
 	public void selectionEvent(SelectionEvent e) {
-		VPathway vp = ((SelectionBox)e.getSource()).getDrawing();
+		VPathwayModel vp = ((SelectionBox)e.getSource()).getDrawing();
 		resetGroupStates(vp);
 	}
 
@@ -303,7 +314,7 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			VPathway vp = engine.getActiveVPathway();
+			VPathwayModel vp = engine.getActiveVPathway();
 			if(vp != null) vp.copyToClipboard();
 		}
 	}
@@ -325,7 +336,7 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			VPathway vp = engine.getActiveVPathway();
+			VPathwayModel vp = engine.getActiveVPathway();
 			if(isEnabled() && vp != null) vp.pasteFromClipboard();
 		}
 	}
@@ -349,7 +360,7 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			VPathway vp = engine.getActiveVPathway();
+			VPathwayModel vp = engine.getActiveVPathway();
 			if(isEnabled() && vp != null) {
 				vp.positionPasteFromClipboard(position);
 			}
@@ -384,7 +395,7 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 			{ moveIncrement = LARGE_INCREMENT;}
 			else {moveIncrement = SMALL_INCREMENT;}
 
-			VPathway vp = engine.getActiveVPathway();
+			VPathwayModel vp = engine.getActiveVPathway();
 			vp.moveByKey(key, moveIncrement);
 		}
 	}
@@ -455,9 +466,9 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 		public void selectionEvent(SelectionEvent e) {
 			boolean enable = false;
 			if(e.selection.size() == 1) {
-				VPathwayElement ve = e.selection.iterator().next();
-				if(ve instanceof Line) {
-					ConnectorShape s = ((MLine)((Line)ve).getPathwayElement()).getConnectorShape();
+				VElement ve = e.selection.iterator().next();
+				if(ve instanceof VLineElement) {
+					ConnectorShape s = ((LineElement)((VLineElement)ve).getPathwayElement()).getConnectorShape();
 					enable = s instanceof FreeConnectorShape;
 				} else {
 					enable = false;
@@ -467,25 +478,25 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			List<Graphics> selection = vPathway.getSelectedGraphics();
+			List<VPathwayObject> selection = vPathway.getSelectedGraphics();
 			if(selection.size() == 1) {
-				Graphics g = selection.get(0);
-				if(g instanceof Line) {
-					Line l = (Line)g;
-					ConnectorShape s = ((MLine)l.getPathwayElement()).getConnectorShape();
+				VPathwayObject g = selection.get(0);
+				if(g instanceof VLineElement) {
+					VLineElement l = (VLineElement)g;
+					ConnectorShape s = ((LineElement)l.getPathwayElement()).getConnectorShape();
 					if(s instanceof FreeConnectorShape) {
 						vPathway.getUndoManager().newAction("" + getValue(NAME));
 						if(add) {
-							addWaypoint((FreeConnectorShape)s, (MLine)l.getPathwayElement());
+							addWaypoint((FreeConnectorShape)s, (LineElement)l.getPathwayElement());
 						} else {
-							removeWaypoint((MLine)l.getPathwayElement());
+							removeWaypoint((LineElement)l.getPathwayElement());
 						}
 					}
 				}
 			}
 		}
 		
-		private void removeWaypoint(MLine l) {
+		private void removeWaypoint(LineElement l) {
 			//TODO: Instead of removing the last point, it would be better to adjust the context
 			//menu to remove a specific point (like with anchors). This could be done by making 
 			//VPoint extend VPathwayElement so we can directly get the selected waypoint here.
@@ -494,7 +505,7 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 			l.setMPoints(newPoints);
 		}
 		
-		private void addWaypoint(FreeConnectorShape s, MLine l) {
+		private void addWaypoint(FreeConnectorShape s, LineElement l) {
 			//TODO: It would be nice to have access to the mouse position here, so
 			//we can add the waypoint to where the user clicked
 			//Point2D mp = new Point2D.Double(vPathway.mFromV(p.getX()), vPathway.mFromV(p.getY()));
@@ -531,8 +542,8 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 
 		public void selectionEvent(SelectionEvent e) {
 			boolean enable= false;
-			for(VPathwayElement ve : e.selection) {
-				if(ve instanceof Line) {
+			for(VElement ve : e.selection) {
+				if(ve instanceof VLineElement) {
 					enable = true;
 				} else {
 					enable = false;
@@ -543,12 +554,12 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			List<Graphics> selection = vPathway.getSelectedGraphics();
+			List<VPathwayObject> selection = vPathway.getSelectedGraphics();
 			if(selection.size() > 0) {
 				vPathway.getUndoManager().newAction("Add anchor");
-				for(Graphics g : selection) {
-					if(g instanceof Line) {
-						Line l = (Line)g;
+				for(VPathwayObject g : selection) {
+					if(g instanceof VLineElement) {
+						VLineElement l = (VLineElement)g;
 						l.gdata.addMAnchor(0.4);
 					}
 				}
@@ -565,15 +576,15 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 		
 		public void actionPerformed(ActionEvent arg0)
 		{
-			List<Graphics> selection = vPathway.getSelectedGraphics();
+			List<VPathwayObject> selection = vPathway.getSelectedGraphics();
 			if(selection.size() > 0) {
 				vPathway.getUndoManager().newAction("Add State");
-				for(Graphics g : selection) {
-					if(g instanceof GeneProduct) {
-						GeneProduct gp = (GeneProduct)g;
+				for(VPathwayObject g : selection) {
+					if(g instanceof VDataNode) {
+						VDataNode gp = (VDataNode)g;
 						PathwayElement elt = PathwayElement.createPathwayElement(STATE);
 						elt.setInitialSize();
-						((MState)elt).linkTo (gp.getPathwayElement(), 1.0, 1.0); 
+						((VState)elt).linkTo (gp.getPathwayElement(), 1.0, 1.0); 
 						elt.setShapeType(ShapeType.OVAL);
 						engine.getActivePathway().add(elt);
 						elt.setGeneratedGraphId();
@@ -593,11 +604,11 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 		public void actionPerformed(ActionEvent arg0)
 		{
 			vPathway.getUndoManager().newAction("Remove State");
-			List<VPathwayElement> toRemove = new ArrayList<VPathwayElement>();
-			List<Graphics> selection = vPathway.getSelectedGraphics();
+			List<VElement> toRemove = new ArrayList<VElement>();
+			List<VPathwayObject> selection = vPathway.getSelectedGraphics();
 			if(selection.size() > 0) {
-				for(Graphics g : selection) {
-					if(g instanceof State) {
+				for(VPathwayObject g : selection) {
+					if(g instanceof VState) {
 						toRemove.add(g);
 					}
 				}
@@ -617,7 +628,7 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 				"Create complex", "Break complex",
 				"Create a complex from selected elements",
 				"Break selected complex",
-				GroupStyle.COMPLEX,
+				GroupType.COMPLEX,
 				KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_P,
 						Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())
 				);
@@ -630,7 +641,7 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 				"Group", "Ungroup",
 				"Group selected elements",
 				"Ungroup selected group",
-				GroupStyle.GROUP,
+				GroupType.GROUP,
 				KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_G,
 						Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())
 			);
@@ -638,11 +649,11 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 	}
 	private class GroupActionBase extends AbstractAction implements SelectionListener {
 		private String groupLbl, ungroupLbl, groupTt, ungroupTt;
-		private GroupStyle groupStyle;
+		private GroupType groupStyle;
 
 		public GroupActionBase(String groupLbl, String ungroupLbl,
 				String groupTt, String ungroupTt,
-				GroupStyle style, KeyStroke keyStroke) {
+				GroupType style, KeyStroke keyStroke) {
 			super();
 			this.groupStyle = style;
 			this.groupLbl = groupLbl;
@@ -658,7 +669,7 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 
 		public void actionPerformed(ActionEvent e) {
 			if(!isEnabled()) return; //Don't perform action if not enabled
-			Group g = vPathway.toggleGroup(vPathway.getSelectedGraphics());
+			VGroup g = vPathway.toggleGroup(vPathway.getSelectedGraphics());
 			if(g != null) {
 				g.getPathwayElement().setGroupStyle(groupStyle);
 			}
@@ -675,8 +686,8 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 
 		private void setLabel() {
 			int unGrouped = 0;
-			List<Graphics> selection = vPathway.getSelectedGraphics();
-			for(Graphics g : selection) {
+			List<VPathwayObject> selection = vPathway.getSelectedGraphics();
+			for(VPathwayObject g : selection) {
 				if(g.getPathwayElement().getGroupRef() == null) {
 					unGrouped++;
 				}
@@ -703,8 +714,8 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 		public void actionPerformed(ActionEvent e) {
 			if(!isEnabled()) return; //Don't perform action if not enabled
 
-			List<VPathwayElement> toRemove = new ArrayList<VPathwayElement>();
-			for(VPathwayElement o : vPathway.getDrawingObjects())
+			List<VElement> toRemove = new ArrayList<VElement>();
+			for(VElement o : vPathway.getDrawingObjects())
 			{
 				if (!o.isSelected() || o == vPathway.selection || o == vPathway.getMappInfo())
 					continue; // Object not selected, skip
@@ -736,7 +747,7 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			VPathway vp = engine.getActiveVPathway();
+			VPathwayModel vp = engine.getActiveVPathway();
 			if (vp != null)
 			{
 				vp.undo();
@@ -753,10 +764,10 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 		{
 			switch (e.getType()) {
 			case VPATHWAY_CREATED:
-				((VPathway)e.getSource()).getUndoManager().addListener(this);
+				((VPathwayModel)e.getSource()).getUndoManager().addListener(this);
 				break;
 			case VPATHWAY_DISPOSED:
-				((VPathway)e.getSource()).getUndoManager().removeListener(this);
+				((VPathwayModel)e.getSource()).getUndoManager().removeListener(this);
 				break;
 			default:
 				break;
@@ -782,7 +793,7 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 
 		public void actionPerformed(ActionEvent e)
 		{
-			VPathway vp = engine.getActiveVPathway();
+			VPathwayModel vp = engine.getActiveVPathway();
 			if(vp != null) {
 				vp.moveGraphicsTop(vp.getSelectedGraphics());
 				vp.redraw();
@@ -808,7 +819,7 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 
 		public void actionPerformed(ActionEvent e)
 		{
-			VPathway vp = engine.getActiveVPathway();
+			VPathwayModel vp = engine.getActiveVPathway();
 			if(vp != null)
 			{
 				vp.moveGraphicsBottom(vp.getSelectedGraphics());
@@ -833,7 +844,7 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			VPathway vp = engine.getActiveVPathway();
+			VPathwayModel vp = engine.getActiveVPathway();
 			if(vp != null) {
 				vp.moveGraphicsUp(vp.getSelectedGraphics());
 				vp.redraw();
@@ -858,7 +869,7 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			VPathway vp = engine.getActiveVPathway();
+			VPathwayModel vp = engine.getActiveVPathway();
 			if(vp != null) {
 				vp.moveGraphicsDown(vp.getSelectedGraphics());
 				vp.redraw();
@@ -882,7 +893,7 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 			vPathway.resetHighlight();
 				for(PathwayElement pe : vPathway.getPathwayModel().getDataObjects()) {
 					if(pe.getObjectType() == ObjectType.LINE) {
-						Line vl = (Line)vPathway.getPathwayElementView(pe);
+						VLineElement vl = (VLineElement)vPathway.getPathwayElementView(pe);
 						String grs = pe.getStartGraphRef();
 						String gre = pe.getEndGraphRef();
 						if(grs == null || "".equals(grs)) {
@@ -911,17 +922,17 @@ public class ViewActions implements VPathwayListener, SelectionListener {
 		}
 		
 		public void actionPerformed(ActionEvent e) {
-			VPathway vp = engine.getActiveVPathway();
-			Set<VPathwayElement> changeTextFormat = new HashSet<VPathwayElement>();
+			VPathwayModel vp = engine.getActiveVPathway();
+			Set<VElement> changeTextFormat = new HashSet<VElement>();
 			changeTextFormat = vp.getSelectedPathwayElements();
-			for(VPathwayElement velt : changeTextFormat) {
-				if (velt instanceof Graphics){
-					PathwayElement o = ((Graphics)velt).getPathwayElement();
-					if(key.equals (VPathway.KEY_BOLD)) {
+			for(VElement velt : changeTextFormat) {
+				if (velt instanceof VPathwayObject){
+					PathwayElement o = ((VPathwayObject)velt).getPathwayElement();
+					if(key.equals (VPathwayModel.KEY_BOLD)) {
                     				if(o.isBold()) o.setBold(false);
                     				else o.setBold(true);
                     }
-					else if(key.equals (VPathway.KEY_ITALIC)) {
+					else if(key.equals (VPathwayModel.KEY_ITALIC)) {
 						if(o.isItalic()) o.setItalic(false);
 						else o.setItalic(true);						
 					}

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * PathVisio, a tool for data visualization and analysis using biological pathways
- * Copyright 2006-2019 BiGCaT Bioinformatics
+ * Copyright 2006-2021 BiGCaT Bioinformatics, WikiPathways
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
@@ -22,9 +22,15 @@ import junit.framework.TestCase;
 
 import org.pathvisio.core.model.ConnectorType;
 import org.pathvisio.core.model.ObjectType;
-import org.pathvisio.core.model.Pathway;
-import org.pathvisio.core.model.PathwayElement;
+import org.pathvisio.core.model.PathwayModel;
+import org.pathvisio.model.PathwayElement;
 import org.pathvisio.core.preferences.PreferenceManager;
+import org.pathvisio.core.view.model.VDataNode;
+import org.pathvisio.core.view.model.VElement;
+import org.pathvisio.core.view.model.VGroup;
+import org.pathvisio.core.view.model.VLineElement;
+import org.pathvisio.core.view.model.VPathwayModel;
+import org.pathvisio.core.view.model.VPathwayObject;
 
 /**
  * Test various operations related to groups, such as 
@@ -37,8 +43,8 @@ public class TestGroups extends TestCase
 	public void setUp()
 	{
 		PreferenceManager.init();
-		vpwy = new VPathway(null);
-		pwy = new Pathway();
+		vpwy = new VPathwayModel(null);
+		pwy = new PathwayModel();
 		vpwy.fromModel(pwy);
 
 		for (int i = 0; i < DATANODE_COUNT; ++i)
@@ -48,11 +54,11 @@ public class TestGroups extends TestCase
 			dn[i].setMCenterY(3000);
 			dn[i].setMWidth(500);
 			dn[i].setMHeight(500);
-			vDn[i] = (GeneProduct)addElement (vpwy, dn[i]);
+			vDn[i] = (VDataNode)addElement (vpwy, dn[i]);
 			dn[i].setGeneratedGraphId();
 		}
-		vLn[0] = (Line)addConnector (vpwy, dn[0], dn[1]);
-		vLn[1] = (Line)addConnector (vpwy, dn[0], dn[2]);
+		vLn[0] = (VLineElement)addConnector (vpwy, dn[0], dn[1]);
+		vLn[1] = (VLineElement)addConnector (vpwy, dn[0], dn[2]);
 
 		vpwy.clearSelection();
 		assertNull (dn[0].getGroupRef());
@@ -66,31 +72,31 @@ public class TestGroups extends TestCase
 		assertNotNull(ref1);
 		assertEquals (ref1, dn[1].getGroupRef());
 		grp1 = vpwy.getPathwayModel().getGroupById(ref1);
-		vGrp1 = (Group)vpwy.getPathwayElementView(grp1);
+		vGrp1 = (VGroup)vpwy.getPathwayElementView(grp1);
 		grp1.setGeneratedGraphId();
 	}
 
-	private VPathway vpwy;
-	private Pathway pwy;
+	private VPathwayModel vpwy;
+	private PathwayModel pwy;
 
-	private GeneProduct[] vDn = new GeneProduct[DATANODE_COUNT];
-	private Line[] vLn = new Line[2];
+	private VDataNode[] vDn = new VDataNode[DATANODE_COUNT];
+	private VLineElement[] vLn = new VLineElement[2];
 	private PathwayElement[] dn = new PathwayElement[DATANODE_COUNT];
 	private PathwayElement grp1 = null;
-	private Group vGrp1 = null;
+	private VGroup vGrp1 = null;
 
 	/** helper for adding elements to a vpathway */
-	private VPathwayElement addElement(VPathway vpwy, PathwayElement pelt)
+	private VElement addElement(VPathwayModel vpwy, PathwayElement pelt)
 	{
 		vpwy.getPathwayModel().add(pelt);
 
-		Graphics result = vpwy.getPathwayElementView(pelt);
+		VPathwayObject result = vpwy.getPathwayElementView(pelt);
 		assertNotNull ("PathwayElement not found through view after adding it to the model.", result);
 		return result;
 	}
 
 	/** helper for adding connectors to a vpathway */
-	private VPathwayElement addConnector (VPathway vpwy, PathwayElement l1, PathwayElement l2)
+	private VElement addConnector (VPathwayModel vpwy, PathwayElement l1, PathwayElement l2)
 	{
 		PathwayElement elt = PathwayElement.createPathwayElement(ObjectType.LINE);
 		elt.setConnectorType(ConnectorType.ELBOW);
@@ -116,7 +122,7 @@ public class TestGroups extends TestCase
 		assertNotNull(ref2);
 		assertEquals (ref2, grp1.getGroupRef());
 		PathwayElement grp2 = vpwy.getPathwayModel().getGroupById(ref2);
-		Group vGrp2 = (Group)vpwy.getPathwayElementView(grp2);
+		VGroup vGrp2 = (VGroup)vpwy.getPathwayElementView(grp2);
 	}
 
 	public void testDrag()
@@ -163,7 +169,7 @@ public class TestGroups extends TestCase
 	 */
 	public void testDelete()
 	{
-		Line vLn3 = (Line)addConnector (vpwy, dn[0], grp1);
+		VLineElement vLn3 = (VLineElement)addConnector (vpwy, dn[0], grp1);
 		
 		double oldEx = vLn3.getVEndX();
 		double oldEy = vLn3.getVEndY();
