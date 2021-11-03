@@ -26,34 +26,30 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
-import org.pathvisio.core.debug.Logger;
-import org.pathvisio.core.model.ConverterException;
-import org.pathvisio.core.model.GpmlFormat;
+import org.pathvisio.debug.Logger;
+import org.pathvisio.io.ConverterException;
+import org.pathvisio.io.GpmlFormat;
 import org.pathvisio.model.PathwayElement;
 
 /**
-   Naive implementation of Outputter.
+ * Naive implementation of Outputter.
  */
-class DgpmlOutputter extends DiffOutputter
-{
+class DgpmlOutputter extends DiffOutputter {
 	Document doc = null;
 	OutputStream out;
 
-	DgpmlOutputter(File f) throws IOException
-	{
+	DgpmlOutputter(File f) throws IOException {
 		this();
 		out = new FileOutputStream(f);
 	}
 
-	DgpmlOutputter()
-	{
+	DgpmlOutputter() {
 		out = System.out;
 		doc = new Document();
-		doc.setRootElement (new Element("Delta"));
+		doc.setRootElement(new Element("Delta"));
 	}
 
-	public void flush() throws IOException
-	{
+	public void flush() throws IOException {
 		XMLOutputter xmlcode = new XMLOutputter(Format.getPrettyFormat());
 		Format f = xmlcode.getFormat();
 		f.setEncoding("ISO-8859-1");
@@ -61,33 +57,31 @@ class DgpmlOutputter extends DiffOutputter
 		f.setLineSeparator(System.getProperty("line.separator"));
 		xmlcode.setFormat(f);
 
-		//Open a filewriter
+		// Open a filewriter
 		PrintWriter writer = new PrintWriter(out);
 		xmlcode.output(doc, writer);
 		out.flush();
 	}
 
-	public void insert(PathwayElement newElt)
-	{
+	public void insert(PathwayElement newElt) {
 		Element e = (new Element("Insert"));
-		try
-		{
+		try {
 			Element f = GpmlFormat.createJdomElement(newElt);
-			e.addContent (f);
+			e.addContent(f);
+		} catch (ConverterException ex) {
+			Logger.log.error("Converter exception", ex);
 		}
-		catch (ConverterException ex) { Logger.log.error ("Converter exception", ex); }
 		doc.getRootElement().addContent(e);
 	}
 
-	public void delete(PathwayElement oldElt)
-	{
+	public void delete(PathwayElement oldElt) {
 		Element e = (new Element("Delete"));
-		try
-		{
+		try {
 			Element f = GpmlFormat.createJdomElement(oldElt);
-			e.addContent (f);
+			e.addContent(f);
+		} catch (ConverterException ex) {
+			Logger.log.error("Converter exception", ex);
 		}
-		catch (ConverterException ex) { Logger.log.error ("Converter exception", ex); }
 		doc.getRootElement().addContent(e);
 	}
 
@@ -95,36 +89,33 @@ class DgpmlOutputter extends DiffOutputter
 	PathwayElement curNewElt = null;
 	Element curModifyElement = null;
 
-	public void modifyStart (PathwayElement oldElt, PathwayElement newElt)
-	{
+	public void modifyStart(PathwayElement oldElt, PathwayElement newElt) {
 		curOldElt = oldElt;
 		curNewElt = newElt;
 
 		curModifyElement = (new Element("Modify"));
-		try
-		{
+		try {
 			Element f = GpmlFormat.createJdomElement(curOldElt);
-			curModifyElement.addContent (f);
+			curModifyElement.addContent(f);
+		} catch (ConverterException ex) {
+			Logger.log.error("Converter exception", ex);
 		}
-		catch (ConverterException ex) { Logger.log.error ("Converter exception", ex); }
 	}
 
-	public void modifyEnd ()
-	{
+	public void modifyEnd() {
 		doc.getRootElement().addContent(curModifyElement);
 		curOldElt = null;
 		curNewElt = null;
 	}
 
-	public void modifyAttr (String attr, String oldVal, String newVal)
-	{
+	public void modifyAttr(String attr, String oldVal, String newVal) {
 		assert (curOldElt != null);
 		assert (curNewElt != null);
 
-		Element e = new Element ("Change");
+		Element e = new Element("Change");
 		e.setAttribute("attr", attr);
 		e.setAttribute("old", oldVal);
 		e.setAttribute("new", newVal);
-		curModifyElement.addContent (e);
+		curModifyElement.addContent(e);
 	}
 }

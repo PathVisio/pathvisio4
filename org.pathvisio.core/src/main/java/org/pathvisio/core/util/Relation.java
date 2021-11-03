@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.pathvisio.core.debug.Logger;
+import org.pathvisio.debug.Logger;
 import org.pathvisio.model.type.ArrowHeadType;
 import org.pathvisio.model.PathwayModel;
 import org.pathvisio.model.PathwayElement;

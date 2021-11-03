@@ -36,7 +36,7 @@ import org.pathvisio.model.GraphLink.LinkableTo;
  */
 public interface VLinkableTo {
 
-	abstract int getZOrder();
+	public int getZOrder(); //TODO has to be public 
 
 	abstract PathwayObject getPathwayElement();
 

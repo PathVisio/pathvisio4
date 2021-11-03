@@ -979,7 +979,7 @@ public class VPathwayModel implements PathwayListener {
 	}
 
 	/**
-	 * Called by MouseDown, when we're in editting mode and we're not adding new
+	 * Called by MouseDown, when we're in editing mode and we're not adding new
 	 * objects prepares for dragging the object
 	 * 
 	 * @param pressedObject

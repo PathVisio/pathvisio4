@@ -28,48 +28,50 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
-import org.pathvisio.core.debug.Logger;
-import org.pathvisio.core.model.ConverterException;
-import org.pathvisio.core.model.GpmlFormat;
-import org.pathvisio.core.model.GpmlFormatReader;
+import org.pathvisio.debug.Logger;
+import org.pathvisio.io.ConverterException;
+import org.pathvisio.io.GpmlFormat;
+import org.pathvisio.io.GpmlFormatReader;
 import org.pathvisio.model.PathwayElement;
-import org.pathvisio.core.model.StaticProperty;
+import org.pathvisio.prop.StaticProperty;
 import org.pathvisio.core.view.shape.ShapeRegistry;
 
 /**
- * A patch contains a series of deletions, insertions and modifications
- * and can be read from an Dgpml XML file, and then applied to a Pathway object.
- * This class does not handle writing modifications, that is done by DgpmlOutputter.
+ * A patch contains a series of deletions, insertions and modifications and can
+ * be read from an Dgpml XML file, and then applied to a Pathway object. This
+ * class does not handle writing modifications, that is done by DgpmlOutputter.
  */
-class Patch
-{
-	private class Change
-	{
+class Patch {
+	
+	/**
+	 * @author unknown
+	 */
+	private class Change {
 		public String attr;
 		public String oldValue;
 		public String newValue;
 	}
 
-	private class ModDel
-	{
+	/**
+	 * @author unknown
+	 */
+	private class ModDel {
 		boolean isDeletion; // true when this is a deletion, false when this is a modification
 		public PathwayElement oldElt;
-		List<Change> changes = new ArrayList<Change> (); // only used when isDeletion == false
+		List<Change> changes = new ArrayList<Change>(); // only used when isDeletion == false
 
-		public PathwayElement makeNewElt()
-		{
-			if (isDeletion) throw new IllegalArgumentException();
+		public PathwayElement makeNewElt() {
+			if (isDeletion)
+				throw new IllegalArgumentException();
 			PathwayElement result = oldElt.copy();
-			for (Change ch : changes)
-			{
+			for (Change ch : changes) {
 				StaticProperty pt = StaticProperty.getByTag(ch.attr);
-				switch (pt.type())
-				{
+				switch (pt.type()) {
 				case STRING:
 					result.setStaticProperty(pt, ch.newValue);
 					break;
 				case DOUBLE:
-					result.setStaticProperty(pt, Double.parseDouble (ch.newValue));
+					result.setStaticProperty(pt, Double.parseDouble(ch.newValue));
 					break;
 				case SHAPETYPE:
 					// setProperty expects to get ShapeType for this Shape.
@@ -85,7 +87,7 @@ class Patch
 					result.setStaticProperty(pt, ch.newValue);
 					break;
 				default:
-					Logger.log.error (ch.attr + " of type " + pt.getType() + " not supported");
+					Logger.log.error(ch.attr + " of type " + pt.getType() + " not supported");
 					assert (false);
 				}
 			}
@@ -95,36 +97,28 @@ class Patch
 
 	// store deletions and modifications together,
 	// because they should both be looked up in the old Pwy
-	private Map <PathwayElement, ModDel> modifications = new HashMap <PathwayElement, ModDel>();
+	private Map<PathwayElement, ModDel> modifications = new HashMap<PathwayElement, ModDel>();
 
 	// store insertions separately, as they don't need to be looked up
 	// in the old Pwy, they just need to be added afterwards.
-	private List<PathwayElement> insertions = new ArrayList <PathwayElement>();
+	private List<PathwayElement> insertions = new ArrayList<PathwayElement>();
 
-	public void readFromReader (Reader in) throws JDOMException, IOException, ConverterException
-	{
-		SAXBuilder builder = new SAXBuilder ();
-		Document doc = builder.build (in);
+	public void readFromReader(Reader in) throws JDOMException, IOException, ConverterException {
+		SAXBuilder builder = new SAXBuilder();
+		Document doc = builder.build(in);
 
-		for (Object o : doc.getRootElement().getChildren())
-		{
-			Element e = ((Element)o);
-			if (e.getName().equals("Modify"))
-			{
+		for (Object o : doc.getRootElement().getChildren()) {
+			Element e = ((Element) o);
+			if (e.getName().equals("Modify")) {
 				ModDel mod = new ModDel();
 				mod.isDeletion = false;
 
-				for (Object p : ((Element)e).getChildren())
-				{
-					Element f = ((Element)p);
-					if (!f.getName().equals("Change"))
-					{
-						GpmlFormatReader reader = GpmlFormat.getReaderForNamespace(
-								f.getNamespace());
+				for (Object p : ((Element) e).getChildren()) {
+					Element f = ((Element) p);
+					if (!f.getName().equals("Change")) {
+						GpmlFormatReader reader = GpmlFormat.getReaderForNamespace(f.getNamespace());
 						mod.oldElt = reader.mapElement(f);
-					}
-					else
-					{
+					} else {
 						Change chg = new Change();
 						chg.attr = f.getAttributeValue("attr");
 						chg.oldValue = f.getAttributeValue("old");
@@ -132,86 +126,72 @@ class Patch
 						mod.changes.add(chg);
 					}
 				}
-				if (mod.oldElt == null)
-				{
+				if (mod.oldElt == null) {
 					// this doesn't have a valid gpml subelement. Ignore.
-					Logger.log.warn ("Skipping one invalid Modify element");
+					Logger.log.warn("Skipping one invalid Modify element");
 					continue; // skip
 				}
-				modifications.put (mod.oldElt, mod);
-			}
-			else if (e.getName().equals("Insert"))
-			{
-				Element f = (Element)e.getChildren().get(0);
+				modifications.put(mod.oldElt, mod);
+			} else if (e.getName().equals("Insert")) {
+				Element f = (Element) e.getChildren().get(0);
 				GpmlFormatReader reader = GpmlFormat.getReaderForNamespace(f.getNamespace());
-				PathwayElement ins = reader.mapElement (f);
-				insertions.add (ins);
-			}
-			else if (e.getName().equals("Delete"))
-			{
+				PathwayElement ins = reader.mapElement(f);
+				insertions.add(ins);
+			} else if (e.getName().equals("Delete")) {
 				ModDel mod = new ModDel();
 				mod.isDeletion = true;
 				mod.changes = null;
-				Element f = (Element)e.getChildren().get(0);
+				Element f = (Element) e.getChildren().get(0);
 				GpmlFormatReader reader = GpmlFormat.getReaderForNamespace(f.getNamespace());
-				mod.oldElt = reader.mapElement (f);
-				modifications.put (mod.oldElt, mod);
-			}
-			else
-			{
+				mod.oldElt = reader.mapElement(f);
+				modifications.put(mod.oldElt, mod);
+			} else {
 				assert (false); // no other options
 			}
 		}
 	}
 
-	void reverse()
-	{
+	void reverse() {
 	}
 
-	public void applyTo (PwyDoc aPwy, int fuzz)
-	{
+	public void applyTo(PwyDoc aPwy, int fuzz) {
 		SearchNode current = null;
 		SimilarityFunction simFun = new BasicSim();
 		CostFunction costFun = new BasicCost();
 
 		// scan modifications / deletions for correspondence
-		for (ModDel mod : modifications.values())
-		{
-			current = findCorrespondence (current, aPwy, mod.oldElt, simFun, costFun);
+		for (ModDel mod : modifications.values()) {
+			current = findCorrespondence(current, aPwy, mod.oldElt, simFun, costFun);
 		}
 
 		// insertions are easy, just add them
-		for (PathwayElement ins : insertions)
-		{
-			aPwy.add (ins);
+		for (PathwayElement ins : insertions) {
+			aPwy.add(ins);
 		}
 
-	    // now modifications and deletions:
+		// now modifications and deletions:
 		// Start back from current
-		while (current != null)
-		{
+		while (current != null) {
 			// check for modification
-			ModDel mod = modifications.get (current.oldElt);
+			ModDel mod = modifications.get(current.oldElt);
 			assert (mod != null);
 			// is this a deletion or a modification?)
-			if (mod.isDeletion)
-			{
+			if (mod.isDeletion) {
 				// mod goes to /dev/null
-				aPwy.remove (current.newElt);
-			}
-			else
-			{
+				aPwy.remove(current.newElt);
+			} else {
 				// remove the old element.
 
-				// Note that current.oldElt is the copy of the element in the Modification object,
+				// Note that current.oldElt is the copy of the element in the Modification
+				// object,
 				// and current.newElt is the matching element in the pathway.
-				aPwy.remove (current.newElt);
+				aPwy.remove(current.newElt);
 
 				// create new elt with applied modifications
 				PathwayElement newElt = mod.makeNewElt();
 
 				// and add it to the pwy.
-				aPwy.add (newElt);
+				aPwy.add(newElt);
 			}
 
 			current = current.getParent();
@@ -221,31 +201,27 @@ class Patch
 	}
 
 	/**
-	   This is very similar to PwyDoc.SearchCorrespondence, only
-	   it doesn't compare two pathways: it compares elements mentioned in the dgpml with pathways.
+	 * This is very similar to PwyDoc.SearchCorrespondence, only it doesn't compare
+	 * two pathways: it compares elements mentioned in the dgpml with pathways.
 	 */
-	private SearchNode findCorrespondence(SearchNode currentNode, PwyDoc oldDoc, PathwayElement newElt, SimilarityFunction simFun, CostFunction costFun)
-	{
+	private SearchNode findCorrespondence(SearchNode currentNode, PwyDoc oldDoc, PathwayElement newElt,
+			SimilarityFunction simFun, CostFunction costFun) {
 		int maxScore = 0;
 		PathwayElement maxOldElt = null;
-		for (PathwayElement oldElt : oldDoc.getElts())
-		{
+		for (PathwayElement oldElt : oldDoc.getElts()) {
 			// if it's the first node, or if the newElt is not yet in the searchpath
-			if (currentNode == null || !currentNode.ancestryHasElt (newElt))
-			{
-				int score = simFun.getSimScore (oldElt, newElt);
-				if (score > maxScore)
-				{
+			if (currentNode == null || !currentNode.ancestryHasElt(newElt)) {
+				int score = simFun.getSimScore(oldElt, newElt);
+				if (score > maxScore) {
 					maxOldElt = oldElt;
 					maxScore = score;
 				}
 			}
 		}
 
-		if (maxOldElt != null && maxScore > 70)
-		{
+		if (maxOldElt != null && maxScore > 70) {
 			// add pairing to search tree.
-			SearchNode newNode = new SearchNode (currentNode, newElt, maxOldElt, 0);
+			SearchNode newNode = new SearchNode(currentNode, newElt, maxOldElt, 0);
 			currentNode = newNode;
 		}
 		return currentNode;

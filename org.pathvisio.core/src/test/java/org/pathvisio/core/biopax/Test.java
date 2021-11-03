@@ -22,7 +22,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.pathvisio.core.model.ConverterException;
+import org.pathvisio.io.ConverterException;
 import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.core.model.PathwayModel;
 import org.pathvisio.model.PathwayElement;

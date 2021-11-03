@@ -210,10 +210,10 @@ public class VAnchor extends VElement implements VLinkableTo, LinkProvider, Adju
 	}
 
 	/**
-	 * Returns the z-order from the model
+	 * Returns the z-order from the model //TODO public? 
 	 */
 	@Override
-	protected int getZOrder() {
+	public int getZOrder() {
 		return line.getPathwayElement().getZOrder() + 1;
 	}
 

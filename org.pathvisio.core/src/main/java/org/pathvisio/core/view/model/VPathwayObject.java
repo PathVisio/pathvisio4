@@ -16,20 +16,13 @@
  ******************************************************************************/
 package org.pathvisio.core.view.model;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Area;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
-import org.pathvisio.core.biopax.PublicationXref;
-import org.pathvisio.core.debug.DebugList;
-import org.pathvisio.model.type.LineStyleType;
+import org.pathvisio.debug.DebugList;
 import org.pathvisio.model.PathwayElement;
 import org.pathvisio.event.PathwayObjectEvent;
 import org.pathvisio.event.PathwayObjectListener;

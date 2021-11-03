@@ -28,7 +28,7 @@ import org.bridgedb.DataSource;
 import org.bridgedb.Xref;
 import org.pathvisio.core.Engine;
 import org.pathvisio.core.debug.StopWatch;
-import org.pathvisio.core.model.ConverterException;
+import org.pathvisio.io.ConverterException;
 import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.model.PathwayModel;
 import org.pathvisio.model.type.DataNodeType;

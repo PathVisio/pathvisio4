@@ -26,7 +26,7 @@ import javax.swing.SwingUtilities;
 
 import org.pathvisio.core.Engine;
 import org.pathvisio.core.debug.Logger;
-import org.pathvisio.core.model.ConverterException;
+import org.pathvisio.io.ConverterException;
 import org.pathvisio.io.GpmlFormat;
 import org.pathvisio.model.PathwayModel;
 import org.pathvisio.gui.SwingEngine;

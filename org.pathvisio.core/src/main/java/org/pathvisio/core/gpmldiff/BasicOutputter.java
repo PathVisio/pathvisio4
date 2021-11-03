@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.PrintStream;
 
 import org.pathvisio.model.PathwayElement;
-import org.pathvisio.core.util.Utils;
+import org.pathvisio.util.Utils;
 
 /**
    Naive implementation of Outputter.

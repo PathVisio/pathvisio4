@@ -27,8 +27,9 @@ import java.util.Map;
 
 import org.bridgedb.DataSource;
 import org.bridgedb.Xref;
-import org.pathvisio.core.debug.Logger;
+import org.pathvisio.debug.Logger;
 import org.pathvisio.event.PathwayExporter;
+import org.pathvisio.io.ConverterException;
 import org.pathvisio.model.DataNode;
 import org.pathvisio.model.PathwayModel;
 import org.pathvisio.model.PathwayObject;

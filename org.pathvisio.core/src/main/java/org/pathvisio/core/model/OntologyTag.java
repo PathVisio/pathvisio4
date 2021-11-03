@@ -18,8 +18,8 @@
 package org.pathvisio.core.model;
 /**
  * Class storing information about ontology tags for pathways.
+ * 
  * @author jonathan
- *
  */
 public class OntologyTag {
 	private String id;

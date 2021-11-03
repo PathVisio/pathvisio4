@@ -20,58 +20,48 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.pathvisio.model.PathwayElement;
-import org.pathvisio.core.model.StaticProperty;
+import org.pathvisio.prop.StaticProperty;
 
 /**
-   Utility class for pathway element methods related to gpmldiff.
-*/
-class PwyElt
-{
-	static Map<String, String> getContents(PathwayElement elt)
-	{
+ * Utility class for pathway element methods related to gpmldiff.
+ */
+class PwyElt {
+	static Map<String, String> getContents(PathwayElement elt) {
 		Map<String, String> result = new HashMap<String, String>();
 
-		for (StaticProperty prop : elt.getStaticPropertyKeys())
-		{
+		for (StaticProperty prop : elt.getStaticPropertyKeys()) {
 			String attr = prop.tag();
-			String val = "" + elt.getStaticProperty (prop);
-			result.put (attr, val);
+			String val = "" + elt.getStaticProperty(prop);
+			result.put(attr, val);
 		}
 		return result;
 	}
+
 	/**
-	   Show detailed modifications compared to another elt
-	   call on oldElt.
+	 * Show detailed modifications compared to another elt call on oldElt.
 	 */
-	static void writeModifications (PathwayElement oldElt, PathwayElement newElt, DiffOutputter outputter)
-	{
-		Map<String, String> oldContents = getContents (oldElt);
-		Map<String, String> newContents = getContents (newElt);
+	static void writeModifications(PathwayElement oldElt, PathwayElement newElt, DiffOutputter outputter) {
+		Map<String, String> oldContents = getContents(oldElt);
+		Map<String, String> newContents = getContents(newElt);
 
 		boolean opened = false; // indicates if modifyStart has been
 								// sent already for current PwyElt.
-		for (String key : oldContents.keySet())
-		{
-			if (key.equals ("BoardWidth") || key.equals ("BoardHeight"))
-			{
+		for (String key : oldContents.keySet()) {
+			if (key.equals("BoardWidth") || key.equals("BoardHeight")) {
 				// ignore board width and height
 				continue;
 			}
-			if (newContents.containsKey(key))
-			{
-				if (!oldContents.get(key).equals(newContents.get(key)))
-				{
-					if (!opened)
-					{
-						outputter.modifyStart (oldElt, newElt);
+			if (newContents.containsKey(key)) {
+				if (!oldContents.get(key).equals(newContents.get(key))) {
+					if (!opened) {
+						outputter.modifyStart(oldElt, newElt);
 						opened = true;
 					}
-					outputter.modifyAttr (key, oldContents.get(key), newContents.get(key));
+					outputter.modifyAttr(key, oldContents.get(key), newContents.get(key));
 				}
 			}
 		}
-		if (opened)
-		{
+		if (opened) {
 			outputter.modifyEnd();
 			opened = false;
 		}

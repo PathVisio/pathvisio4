@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.pathvisio.model.Group;
+import org.pathvisio.model.Groupable;
 import org.pathvisio.model.PathwayElement;
 import org.pathvisio.core.view.Adjustable;
 
@@ -354,7 +356,7 @@ public class SelectionBox extends VElement implements Adjustable {
 		setHandleLocation();
 
 		// Keep track of objects that were selected via a group
-		// Don't unselect them if they're out of the selection bounds
+		// Don't deselect them if they're out of the selection bounds
 		Set<VPathwayObject> groupObjects = new HashSet<VPathwayObject>();
 
 		if (isSelecting) { // Selecting, so add containing objects to selection
@@ -364,11 +366,12 @@ public class SelectionBox extends VElement implements Adjustable {
 					continue;
 				}
 
+				
 				if (o.vIntersects(bounds)) { // && !(o instanceof Group)
 					// exclude objects in a group to avoid double selection
-					if (o instanceof VPathwayObject) {
-						PathwayElement pe = ((VPathwayObject) o).getPathwayElement();
-						String ref = pe.getGroupRef();
+					if (o instanceof VGroupable) {
+						Groupable pe = ((VGroupable) o).getPathwayElement();
+						Group ref = ((Groupable) pe).getGroupRef();
 						if (ref != null) {
 							continue;
 						}

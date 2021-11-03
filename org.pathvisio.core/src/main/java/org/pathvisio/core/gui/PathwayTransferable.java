@@ -37,7 +37,7 @@ import org.pathvisio.core.Engine;
 import org.pathvisio.core.biopax.BiopaxNode;
 import org.pathvisio.core.biopax.BiopaxReferenceManager;
 import org.pathvisio.core.debug.Logger;
-import org.pathvisio.core.model.ConverterException;
+import org.pathvisio.io.ConverterException;
 import org.pathvisio.io.GpmlFormat;
 import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.model.PathwayModel;
@@ -77,6 +77,9 @@ public class PathwayTransferable implements Transferable {
 		this.pathway = source;
 	}
 
+	/**
+	 *
+	 */
 	public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
 		Object out = null;
 
@@ -119,14 +122,15 @@ public class PathwayTransferable implements Transferable {
 		for (PathwayElement e : elements) {
 			// Check for valid graphRef (with respect to other copied elements)
 			PathwayElement enew = e.copy();
-			if (!ids.contains(enew.getStartGraphRef())) {
-				enew.setStartGraphRef(null);
-			}
-			if (!ids.contains(enew.getEndGraphRef())) {
-				enew.setEndGraphRef(null);
+			if (enew instanceof LineElement) {
+				if (!ids.contains(((LineElement) enew).getStartElementRef())) {
+					((LineElement) enew).setStartElementRef(null);
+				}
+				if (!ids.contains(((LineElement) enew).getEndElementRef())) {
+					((LineElement) enew).setEndElementRef(null);
+				}
 			}
 			pnew.add(enew);
-
 			if (biopax != null) {
 				if (e.getObjectType() == ObjectType.MAPPINFO) {
 					dummyParent.getMappInfo().copyValuesFrom(e);

@@ -18,23 +18,25 @@ package org.pathvisio.core.util;
 
 import java.net.URL;
 
-import org.pathvisio.core.debug.Logger;
+import org.pathvisio.debug.Logger;
 
 /**
- * Utility function related to getting Resources from the class path.
- * TODO: merge with org.pathvisio.util.Utils.
+ * Utility function related to getting Resources from the class path. TODO:
+ * merge with org.pathvisio.util.Utils.
+ * 
+ * @author unknown
  */
-public class Resources
-{
+public class Resources {
 	/**
 	 * Get the {@link URL} for the resource stored in a jar file in the classpath
-	 * @param name  the filename of the resource
+	 * 
+	 * @param name the filename of the resource
 	 * @return the URL pointing to the resource
 	 */
-	public static URL getResourceURL(String name)
-	{
+	public static URL getResourceURL(String name) {
 		URL url = Resources.class.getClassLoader().getResource(name);
-		if (url == null) Logger.log.error ("Couldn't load resource '" + name + "'");
+		if (url == null)
+			Logger.log.error("Couldn't load resource '" + name + "'");
 		return url;
 	}
 

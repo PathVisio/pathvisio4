@@ -52,7 +52,8 @@ import org.pathvisio.core.view.shape.ShapeRegistry;
  * 
  * @author unknown, finterly
  */
-public abstract class VShapedElement extends VPathwayElement implements VLinkableTo, LinkProvider, Adjustable {
+public abstract class VShapedElement extends VPathwayElement
+		implements VLinkableTo, VGroupable, LinkProvider, Adjustable {
 
 	private static final double M_ROTATION_HANDLE_POSITION = 20.0;
 
@@ -90,10 +91,10 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	}
 
 	/**
-	 * Returns the z-order from the model
+	 * Returns the z-order from the model //TODO public
 	 */
 	@Override
-	protected int getZOrder() {
+	public int getZOrder() {
 		return getPathwayElement().getZOrder();
 	}
 

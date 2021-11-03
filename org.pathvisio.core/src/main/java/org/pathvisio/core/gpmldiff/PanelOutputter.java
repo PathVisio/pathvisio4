@@ -24,10 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.pathvisio.core.debug.Logger;
-import org.pathvisio.core.model.PathwayModel;
+import org.pathvisio.debug.Logger;
+import org.pathvisio.model.PathwayModel;
 import org.pathvisio.model.PathwayElement;
-import org.pathvisio.core.util.Utils;
+import org.pathvisio.util.Utils;
 import org.pathvisio.core.view.model.VElement;
 import org.pathvisio.core.view.model.VPathwayModel;
 import org.pathvisio.core.view.model.VPathwayObject;

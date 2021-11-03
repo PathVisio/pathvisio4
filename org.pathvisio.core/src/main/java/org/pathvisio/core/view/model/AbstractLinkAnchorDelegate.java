@@ -14,19 +14,40 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
-package org.pathvisio.core.debug;
+package org.pathvisio.core.view.model;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Indicates that this class or method should only be accessed by threads
- * other than the Event Dispatch Thread
- * <p>
- * Add this annotation to methods that perform potentially blocking operations,
- * such as disk, network or database access.
- */
-@Target({ElementType.METHOD, ElementType.TYPE, ElementType.CONSTRUCTOR})
-public @interface WorkerThreadOnly {
+public abstract class AbstractLinkAnchorDelegate implements LinkProvider {
+	protected List<LinkAnchor> linkAnchors = new ArrayList<LinkAnchor>();
+
+	public void createLinkAnchors() {
+		linkAnchors.clear();
+	}
+
+	public void hideLinkAnchors() {
+		for (LinkAnchor la : linkAnchors) {
+			la.destroy();
+		}
+		linkAnchors.clear();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.pathvisio.core.view.LinkAnchorDelegate#getLinkAnchorAt(java.awt.geom.
+	 * Point2D)
+	 */
+	public LinkAnchor getLinkAnchorAt(Point2D p) {
+		for (LinkAnchor la : linkAnchors) {
+			if (la.getMatchArea().contains(p)) {
+				return la;
+			}
+		}
+		return null;
+	}
 
 }

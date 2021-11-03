@@ -30,26 +30,31 @@ import org.bridgedb.DataSource;
 import org.bridgedb.IDMapperException;
 import org.bridgedb.Xref;
 import org.pathvisio.core.data.GdbManager;
+import org.pathvisio.event.PathwayExporter;
+import org.pathvisio.io.ConverterException;
+import org.pathvisio.model.DataNode;
+import org.pathvisio.model.PathwayModel;
 
 /**
- * Exporter that writes a pathway as a list
- * of DataNodes, using their database references
+ * Exporter that writes a pathway as a list of DataNodes, using their database
+ * references
+ * 
  * @author thomas
  */
 public class DataNodeListExporter implements PathwayExporter {
 	/**
-	 * Use this String as argument in {@link #setResultCode(String)}
-	 * to indicate that the exporter has to keep the original database
-	 * code as used in the pathway
+	 * Use this String as argument in {@link #setResultCode(String)} to indicate
+	 * that the exporter has to keep the original database code as used in the
+	 * pathway
 	 */
-	public static final String DB_ORIGINAL = "original"; //Use the id/code as in database
+	public static final String DB_ORIGINAL = "original"; // Use the id/code as in database
 	private DataSource resultDs = DataSource.getExistingBySystemCode(DB_ORIGINAL);
 	private String multiRefSep = ", ";
 
 	/**
-	 * Set the separator used to separate multiple
-	 * references for a single DataNode on the pathway.
-	 * Default is ", ".
+	 * Set the separator used to separate multiple references for a single DataNode
+	 * on the pathway. Default is ", ".
+	 * 
 	 * @param sep
 	 */
 	public void setMultiRefSep(String sep) {
@@ -57,50 +62,65 @@ public class DataNodeListExporter implements PathwayExporter {
 	}
 
 	/**
-	 * Get the separator used to separate multiple
-	 * references for a single DataNode on the pathway.
-	 * Default is ", ".
+	 * Get the separator used to separate multiple references for a single DataNode
+	 * on the pathway. Default is ", ".
 	 */
 	public String getMultiRefSep() {
 		return multiRefSep;
 	}
 
 	/**
-	 * Set the database code to which every datanode
-	 * reference will be mapped to in the output file.
+	 * Set the database code to which every datanode reference will be mapped to in
+	 * the output file.
+	 * 
+	 * NB: replace the deprecated setResultCode(). TODO
+	 * 
 	 * @see #DB_ORIGINAL
 	 * @param code
-	 * @deprecated use setResultDataSource();
 	 */
-	public void setResultCode(String code)
-	{
-		resultDs = DataSource.getExistingBySystemCode (code);
-	}
-
-	public void setResultDataSource (DataSource value)
-	{
+	public void setResultDataSource(DataSource value) {
 		resultDs = value;
 	}
 
 	/**
-	 * Get the database code to which every datanode
-	 * reference will be mapped to in the output file.
-	 * @deprecated use getResultDataSouce()
+	 * Get the database code to which every datanode reference will be mapped to in
+	 * the output file.
+	 * 
+	 * NB: replaced the deprecated getResultCode() TODO
 	 */
-	public String getResultCode()
-	{
-		return resultDs.getSystemCode();
-	}
-
-	public DataSource getResultDataSource()
-	{
+	public DataSource getResultDataSource() {
 		return resultDs;
 	}
 
+	/**
+	 * Set the database code to which every datanode reference will be mapped to in
+	 * the output file.
+	 * 
+	 * @see #DB_ORIGINAL
+	 * @param code
+	 * @deprecated use setResultDataSource();
+	 */
+	public void setResultCode(String code) {
+		resultDs = DataSource.getExistingBySystemCode(code);
+	}
+
+	/**
+	 * Get the database code to which every datanode reference will be mapped to in
+	 * the output file.
+	 * 
+	 * @deprecated use getResultDataSouce()
+	 */
+	public String getResultCode() {
+		return resultDs.getSystemCode();
+	}
+
+	/**
+	 *
+	 */
 	public void doExport(File file, PathwayModel pathway) throws ConverterException {
-		if(!DB_ORIGINAL.equals(getResultCode())) {
-			//Check gene database connection
-			if(gdbManager == null || !gdbManager.isConnected()) {
+		if (!DB_ORIGINAL.equals(getResultCode())) { // TODO
+			// Check gene database connection
+			if (gdbManager == null || !gdbManager.isConnected()) {
 				throw new ConverterException("No gene database loaded");
 			}
 		}
@@ -111,46 +131,42 @@ public class DataNodeListExporter implements PathwayExporter {
 			throw new ConverterException(e);
 		}
 		printHeaders(out);
-		for(PathwayElement elm : pathway.getDataObjects()) {
-			if(elm.getObjectType() == ObjectType.DATANODE) {
-				String line = "";
-				String id = elm.getElementID();
-				DataSource ds = elm.getDataSource();
-				if(!checkString(id) || ds == null) {
-					continue; //Skip empty id/codes
-				}
-				//Use the original id, if code is already the one asked for
-				if(DB_ORIGINAL.equals(getResultCode()) || ds.equals(resultDs)) {
-					line = id + "\t" + ds.getFullName();
-				} else { //Lookup the cross-references for the wanted database code
-					try
-					{
-						Set<Xref> refs = gdbManager.getCurrentGdb().mapID(elm.getXref(), resultDs);
-						for(Xref ref : refs) {
-							line += ref.getId() + multiRefSep;
-						}
-						if(line.length() > multiRefSep.length()) { //Remove the last ', '
-							line = line.substring(0, line.length() - multiRefSep.length());
-							line += "\t" + resultDs.getFullName();
-						}
-					}
-					catch (IDMapperException ex)
-					{
-						throw new ConverterException (ex);
-					}
-				}
-				out.println(line);
+		for (DataNode elm : pathway.getDataNodes()) { // TODO datanodes instead of elm
+			String line = "";
+			String id = elm.getXref().getId();
+			DataSource ds = ((DataNode) elm).getXref().getDataSource();
+			if (!checkString(id) || ds == null) {
+				continue; // Skip empty id/codes
 			}
+			// Use the original id, if code is already the one asked for
+			if (DB_ORIGINAL.equals(getResultCode()) || ds.equals(resultDs)) { // TODO
+				line = id + "\t" + ds.getFullName();
+			} else { // Lookup the cross-references for the wanted database code
+				try {
+					Set<Xref> refs = gdbManager.getCurrentGdb().mapID(elm.getXref(), resultDs);
+					for (Xref ref : refs) {
+						line += ref.getId() + multiRefSep;
+					}
+					if (line.length() > multiRefSep.length()) { // Remove the last ', '
+						line = line.substring(0, line.length() - multiRefSep.length());
+						line += "\t" + resultDs.getFullName();
+					}
+				} catch (IDMapperException ex) {
+					throw new ConverterException(ex);
+				}
+			}
+			out.println(line);
 		}
 		out.close();
 	}
 
 	/**
 	 * Print the file headers.
+	 * 
 	 * @param out The output stream to print to
 	 */
 	protected void printHeaders(PrintStream out) {
-		//print headers
+		// print headers
 		out.println("Identifier\tDatabase");
 	}
 
@@ -169,11 +185,10 @@ public class DataNodeListExporter implements PathwayExporter {
 	private GdbManager gdbManager = null;
 
 	/**
-	 * Create an exporter that uses the given GdbManager
-	 * to lookup cross references for each datanode
+	 * Create an exporter that uses the given GdbManager to lookup cross references
+	 * for each datanode
 	 */
-	public DataNodeListExporter (GdbManager gdbManager)
-	{
+	public DataNodeListExporter(GdbManager gdbManager) {
 		this.gdbManager = gdbManager;
 	}
 
@@ -181,15 +196,13 @@ public class DataNodeListExporter implements PathwayExporter {
 	}
 
 	@Override
-	public List<String> getWarnings()
-	{
+	public List<String> getWarnings() {
 		return Collections.emptyList();
 	}
 
 	@Override
-	public void doExport(File file, PathwayModel pathway, int zoom)
-			throws ConverterException {
+	public void doExport(File file, PathwayModel pathway, int zoom) throws ConverterException {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

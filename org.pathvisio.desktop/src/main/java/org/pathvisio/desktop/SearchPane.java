@@ -51,7 +51,7 @@ import org.bridgedb.Xref;
 import org.pathvisio.core.Engine;
 import org.pathvisio.core.data.XrefWithSymbol;
 import org.pathvisio.core.debug.Logger;
-import org.pathvisio.core.model.ConverterException;
+import org.pathvisio.io.ConverterException;
 import org.pathvisio.core.preferences.GlobalPreference;
 import org.pathvisio.core.preferences.PreferenceManager;
 import org.pathvisio.core.util.ProgressKeeper;

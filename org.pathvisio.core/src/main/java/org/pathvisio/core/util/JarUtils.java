@@ -31,13 +31,12 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import org.pathvisio.core.Engine;
-import org.pathvisio.core.debug.Logger;
+import org.pathvisio.debug.Logger;
 
 /**
  * Collection of static functions to deal with Resources stored in Jar files.
  */
-public class JarUtils
-{
+public class JarUtils {
 	static final String PREFIX_TMP = "PVJAR";
 
 	public static File resourceToTempFile(String name) throws FileNotFoundException, IOException {
@@ -46,16 +45,16 @@ public class JarUtils
 		return tmp;
 	}
 
-	public static File resourceToNamedTempFile(String name, String fileName)
-											throws FileNotFoundException, IOException {
+	public static File resourceToNamedTempFile(String name, String fileName) throws FileNotFoundException, IOException {
 		return resourceToNamedTempFile(name, fileName, true);
 	}
 
 	public static File resourceToNamedTempFile(String name, String fileName, boolean overwrite)
-											throws FileNotFoundException, IOException {
+			throws FileNotFoundException, IOException {
 		File tmp = new File(System.getProperty("java.io.tmpdir"), fileName);
 
-		if(!overwrite && tmp.exists()) return tmp;
+		if (!overwrite && tmp.exists())
+			return tmp;
 
 		tmp.deleteOnExit();
 		resourceToFile(name, tmp);
@@ -64,7 +63,8 @@ public class JarUtils
 
 	public static void resourceToFile(String name, File f) throws IOException {
 		InputStream in = getResourceInputStream(name);
-		if(in == null) throw new IOException("Unable to load resource '" + name + "'");
+		if (in == null)
+			throw new IOException("Unable to load resource '" + name + "'");
 
 		OutputStream out = new FileOutputStream(f);
 		byte[] buf = new byte[1024];
@@ -80,14 +80,14 @@ public class JarUtils
 		List<String> resNames = new ArrayList<String>();
 
 		URL url = Engine.class.getClassLoader().getResource(path);
-		if(url != null) {
-			if(url.getProtocol().equals("jar")) {
-				JarURLConnection conn = (JarURLConnection)url.openConnection();
+		if (url != null) {
+			if (url.getProtocol().equals("jar")) {
+				JarURLConnection conn = (JarURLConnection) url.openConnection();
 				JarFile jf = conn.getJarFile();
 				Enumeration<?> e = jf.entries();
-				while(e.hasMoreElements()) {
-					JarEntry je = (JarEntry)e.nextElement();
-					if(!je.isDirectory() && je.getName().startsWith(path))
+				while (e.hasMoreElements()) {
+					JarEntry je = (JarEntry) e.nextElement();
+					if (!je.isDirectory() && je.getName().startsWith(path))
 						resNames.add(je.getName());
 				}
 			}
@@ -97,23 +97,28 @@ public class JarUtils
 
 	/**
 	 * Get the {@link URL} for the resource stored in a jar file in the classpath
-	 * @param name	the filename of the resource
+	 * 
+	 * @param name the filename of the resource
 	 * @return the URL pointing to the resource
 	 */
 	public static URL getResourceURL(String name) {
 		URL url = Engine.class.getClassLoader().getResource(name);
-		if(url == null) Logger.log.error("Couldn't load resource '" + name + "'");
+		if (url == null)
+			Logger.log.error("Couldn't load resource '" + name + "'");
 		return url;
 	}
 
 	/**
-	 * Get the {@link InputStream} for the resource stored in a jar file in the classpath
-	 * @param name	the filename of the resource
+	 * Get the {@link InputStream} for the resource stored in a jar file in the
+	 * classpath
+	 * 
+	 * @param name the filename of the resource
 	 * @return the URL pointing to the resource
 	 */
 	public static InputStream getResourceInputStream(String name) {
 		InputStream in = Engine.class.getClassLoader().getResourceAsStream(name);
-		if(in == null) Logger.log.error("Couldn't load resource '" + name + "'");
+		if (in == null)
+			Logger.log.error("Couldn't load resource '" + name + "'");
 		return in;
 	}
 }

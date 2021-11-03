@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.bridgedb.DataSource;
 import org.pathvisio.core.data.XrefWithSymbol;
-import org.pathvisio.core.debug.Logger;
+import org.pathvisio.debug.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -33,103 +33,89 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * This sax handler can be used to quickly parse pathway information from
- * a gpml file
+ * This sax handler can be used to quickly parse pathway information from a gpml
+ * file
+ * 
+ * @author unknown
  */
-public class PathwayParser extends DefaultHandler
-{
-	/** exception occuring during parsing of pathway, most likely because
-	 * the input file is not properly formatted */
-	public static class ParseException extends Exception
-	{
+public class PathwayParser extends DefaultHandler {
+	/**
+	 * exception occuring during parsing of pathway, most likely because the input
+	 * file is not properly formatted
+	 */
+	public static class ParseException extends Exception {
 
-		public ParseException (Exception e)
-		{
-			super (e);
+		public ParseException(Exception e) {
+			super(e);
 		}
 	}
 
 	String name;
 	private List<XrefWithSymbol> genes;
 
-	public PathwayParser()
-	{
+	public PathwayParser() {
 		name = "";
 		genes = new ArrayList<XrefWithSymbol>();
 	}
 
-	public PathwayParser(File f, XMLReader xmlReader) throws ParseException
-	{
+	public PathwayParser(File f, XMLReader xmlReader) throws ParseException {
 		this();
 		xmlReader.setContentHandler(this);
 		xmlReader.setEntityResolver(this);
 
-		try
-		{
-			xmlReader.parse(new InputSource (new FileReader(f)));
-		}
-		catch (IOException e)
-		{
-			throw new ParseException (e);
-		}
-		catch (SAXException e)
-		{
-			throw new ParseException (e);
+		try {
+			xmlReader.parse(new InputSource(new FileReader(f)));
+		} catch (IOException e) {
+			throw new ParseException(e);
+		} catch (SAXException e) {
+			throw new ParseException(e);
 			// ignore pathways that generate an exception (return empty list)
 		}
 	}
 
-	public List<XrefWithSymbol> getGenes() { return genes; }
+	public List<XrefWithSymbol> getGenes() {
+		return genes;
+	}
 
-	public String getName() { return name; }
+	public String getName() {
+		return name;
+	}
 
 	DataSource currentDs = null;
 	String currentSymbol = null;
 	String currentId = null;
 
-	public void startElement(String uri, String localName, String qName, Attributes attributes)
-			throws SAXException
-	{
-		if(localName.equals("DataNode"))
-		{
+	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+		if (localName.equals("DataNode")) {
 			currentId = null;
 			currentDs = null;
 			currentSymbol = attributes.getValue("TextLabel");
-		}
-		else if(localName.equals("Pathway"))
-		{
+		} else if (localName.equals("Pathway")) {
 			name = attributes.getValue("Name");
-		}
-		else if(localName.equals("Xref"))
-		{
+		} else if (localName.equals("Xref")) {
 			String sysName = attributes.getValue("Database");
 			assert (sysName != null);
-			currentDs = DataSource.getExistingByFullName (sysName);
+			currentDs = DataSource.getExistingByFullName(sysName);
 			currentId = attributes.getValue("ID");
 			assert (currentId != null);
 
-			XrefWithSymbol currentGene = new XrefWithSymbol (
-					currentId, currentDs, currentSymbol);
-			if(!genes.contains(currentGene)) //Don't add duplicate genes
+			XrefWithSymbol currentGene = new XrefWithSymbol(currentId, currentDs, currentSymbol);
+			if (!genes.contains(currentGene)) // Don't add duplicate genes
 				genes.add(currentGene);
 			currentGene = null;
 		}
 	}
 
-	public void error(SAXParseException e)
-	{
+	public void error(SAXParseException e) {
 		Logger.log.error("Error while parsing xml document", e);
 	}
 
-	public void fatalError(SAXParseException e) throws SAXParseException
-	{
+	public void fatalError(SAXParseException e) throws SAXParseException {
 		Logger.log.error("Fatal error while parsing xml document", e);
 		throw new SAXParseException("Fatal error, parsing of this document aborted", null);
 	}
 
-	public void warning(SAXParseException e)
-	{
+	public void warning(SAXParseException e) {
 		Logger.log.error("Warning while parsing xml document", e);
 	}
 }
-

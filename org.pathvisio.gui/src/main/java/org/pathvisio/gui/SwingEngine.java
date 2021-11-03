@@ -44,7 +44,7 @@ import org.pathvisio.core.Globals;
 import org.pathvisio.core.Engine.ApplicationEventListener;
 import org.pathvisio.core.data.GdbManager;
 import org.pathvisio.core.debug.Logger;
-import org.pathvisio.core.model.ConverterException;
+import org.pathvisio.io.ConverterException;
 import org.pathvisio.core.model.GpmlFormat;
 import org.pathvisio.core.model.PathwayModel;
 import org.pathvisio.core.model.PathwayModel.StatusFlagEvent;

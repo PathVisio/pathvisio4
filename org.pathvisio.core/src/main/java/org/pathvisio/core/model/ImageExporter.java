@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.pathvisio.event.PathwayExporter;
+import org.pathvisio.io.ConverterException;
 import org.pathvisio.model.PathwayModel;
 
 /**

@@ -65,7 +65,7 @@ import org.pathvisio.core.view.shape.ShapeRegistry;
  * 
  * @author unknown, finterly
  */
-public class VLineElement extends VPathwayElement implements Adjustable {
+public class VLineElement extends VPathwayElement implements VGroupable, Adjustable {
 
 	private List<VPoint> points;
 
@@ -331,9 +331,9 @@ public class VLineElement extends VPathwayElement implements Adjustable {
 	public ArrowShape[] getVHeads() {
 		Segment[] segments = getConnectorShape().getSegments();
 
-		ArrowShape he = getVHead(segments[segments.length - 1].getStartLinePoint(),
-				segments[segments.length - 1].getEndLinePoint(), getPathwayElement().getEndLineType());
-		ArrowShape hs = getVHead(segments[0].getEndLinePoint(), segments[0].getStartLinePoint(),
+		ArrowShape he = getVHead(segments[segments.length - 1].getMStart(), segments[segments.length - 1].getMEnd(),
+				getPathwayElement().getEndLineType());
+		ArrowShape hs = getVHead(segments[0].getMEnd(), segments[0].getMStart(),
 				getPathwayElement().getStartLineType());
 		return new ArrowShape[] { hs, he };
 	}
@@ -350,14 +350,13 @@ public class VLineElement extends VPathwayElement implements Adjustable {
 		// last segment in the Connector Shape
 		double lineEndingWidth = getGap(getPathwayElement().getEndLineType());
 		Point2D adjustedSegmentEnd = segments[segments.length - 1].calculateNewEndPoint(lineEndingWidth);
-		ArrowShape he = getVHead(segments[segments.length - 1].getStartLinePoint(), adjustedSegmentEnd,
+		ArrowShape he = getVHead(segments[segments.length - 1].getMStart(), adjustedSegmentEnd,
 				getPathwayElement().getEndLineType());
 
 		// first segment in the connector shape
 		double lineStartingWidth = getGap(getPathwayElement().getStartLineType());
 		Point2D adjustedSegmentStart = segments[0].calculateNewStartPoint(lineStartingWidth);
-		ArrowShape hs = getVHead(segments[0].getEndLinePoint(), adjustedSegmentStart,
-				getPathwayElement().getStartLineType());
+		ArrowShape hs = getVHead(segments[0].getMEnd(), adjustedSegmentStart, getPathwayElement().getStartLineType());
 		return new ArrowShape[] { hs, he };
 	}
 
@@ -560,8 +559,8 @@ public class VLineElement extends VPathwayElement implements Adjustable {
 	}
 
 	/**
-	 * Returns the height of this object adjusted to the current zoom factor, but not
-	 * taking into account rotation
+	 * Returns the height of this object adjusted to the current zoom factor, but
+	 * not taking into account rotation
 	 * 
 	 * @note if you want the height of the rotated object's boundary, use
 	 *       {@link #getVShape(true)}.getY();
@@ -572,8 +571,8 @@ public class VLineElement extends VPathwayElement implements Adjustable {
 	}
 
 	/**
-	 * Returns the x-coordinate of the left side of this object adjusted to the current
-	 * zoom factor, but not taking into account rotation
+	 * Returns the x-coordinate of the left side of this object adjusted to the
+	 * current zoom factor, but not taking into account rotation
 	 * 
 	 * @note if you want the left side of the rotated object's boundary, use
 	 *       {@link #getVShape(true)}.getX();
@@ -584,8 +583,8 @@ public class VLineElement extends VPathwayElement implements Adjustable {
 	}
 
 	/**
-	 * Returns the y-coordinate of the top side of this object adjusted to the current
-	 * zoom factor, but not taking into account rotation
+	 * Returns the y-coordinate of the top side of this object adjusted to the
+	 * current zoom factor, but not taking into account rotation
 	 * 
 	 * @note if you want the top side of the rotated object's boundary, use
 	 *       {@link #getVShape(true)}.getY();
@@ -614,15 +613,25 @@ public class VLineElement extends VPathwayElement implements Adjustable {
 		for (LinePoint p : getPathwayElement().getLinePoints()) {
 			p.moveBy(canvas.mFromV(vdx), canvas.mFromV(vdy));
 		}
-		// Redraw graphRefs
-		for (GraphRefContainer ref : gdata.getReferences()) {
-			if (ref instanceof LinePoint) {
-				VPoint vp = canvas.getPoint((LinePoint) ref);
-				if (vp != null) {
-					vp.getLine().recalculateConnector();
+		// Redraw graphRefs //TODO
+		for (Anchor anchor : getPathwayElement().getAnchors()) {
+			for (LinkableFrom ref : anchor.getLinkableFroms()) {
+				if (ref instanceof LinePoint) {
+					VPoint vp = canvas.getPoint((LinePoint) ref);
+					if (vp != null) {
+						vp.getLine().recalculateConnector();
+					}
 				}
 			}
 		}
+//		for (GraphRefContainer ref : gdata.getReferences()) {
+//			if (ref instanceof LinePoint) {
+//				VPoint vp = canvas.getPoint((LinePoint) ref);
+//				if (vp != null) {
+//					vp.getLine().recalculateConnector();
+//				}
+//			}
+//		}
 	}
 
 	private void setHandleLocation(VPoint vp) {
@@ -772,7 +781,7 @@ public class VLineElement extends VPathwayElement implements Adjustable {
 	// ================================================================================
 
 	protected Color getLineColor() {
-		Color linecolor = gdata.getColor();
+		Color linecolor = getPathwayElement().getLineColor();
 		/*
 		 * the selection is not colored red when in edit mode it is possible to see a
 		 * color change immediately
@@ -784,8 +793,8 @@ public class VLineElement extends VPathwayElement implements Adjustable {
 	}
 
 	protected void setLineStyle(Graphics2D g) {
-		int ls = gdata.getLineStyle();
-		float lt = (float) vFromM(gdata.getLineThickness());
+		LineStyleType ls = getPathwayElement().getLineStyle();
+		float lt = (float) vFromM(getPathwayElement().getLineWidth());
 		if (ls == LineStyleType.SOLID) {
 			g.setStroke(new BasicStroke(lt));
 		} else if (ls == LineStyleType.DASHED) {

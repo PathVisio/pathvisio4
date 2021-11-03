@@ -196,7 +196,7 @@ public class VGroup extends VShapedElement implements LinkProvider, VElementMous
 			flags += FLAG_ANCHORSVISIBLE;
 
 		// Draw the group style appearance
-		GroupPainter p = GroupPainterRegistry.getPainter(gdata.getGroupStyle().toString());
+		GroupPainter p = GroupPainterRegistry.getPainter(getPathwayElement().getType().toString());
 		p.drawGroup(g2d, this, flags);
 	}
 

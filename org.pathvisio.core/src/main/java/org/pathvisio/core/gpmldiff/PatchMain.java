@@ -19,71 +19,56 @@ package org.pathvisio.core.gpmldiff;
 import java.io.File;
 import java.io.InputStreamReader;
 
-import org.pathvisio.core.debug.Logger;
+import org.pathvisio.debug.Logger;
 
 /**
-   Dgpml patch utility, main function
+ * Dgpml patch utility, main function
  */
-public class PatchMain
-{
-	static void printUsage()
-	{
-		System.out.println (
-			"Patch\n\n" +
-			"Applies a set of differences to a pathway\n\n" +
-			"Usage:\n" +
-			"  Patch old.gpml < patch.dgpml"
-			);
-		System.exit (1);
+public class PatchMain {
+	static void printUsage() {
+		System.out.println("Patch\n\n" + "Applies a set of differences to a pathway\n\n" + "Usage:\n"
+				+ "  Patch old.gpml < patch.dgpml");
+		System.exit(1);
 	}
 
 	static File oldFile;
 	static int fuzz;
 	static boolean reverse;
 
-	static boolean parseCliOptions (String argv[])
-	{
+	static boolean parseCliOptions(String argv[]) {
 		String error = null;
-		if (argv.length != 1) error = "One parameter expected";
-		if (error == null)
-		{
-			oldFile = new File (argv[0]);
-			if (!oldFile.exists())
-			{
+		if (argv.length != 1)
+			error = "One parameter expected";
+		if (error == null) {
+			oldFile = new File(argv[0]);
+			if (!oldFile.exists()) {
 				error = argv[0] + ": File not found";
 			}
 		}
-		if (error != null)
-		{
-			Logger.log.error (error);
-			System.out.println (error);
+		if (error != null) {
+			Logger.log.error(error);
+			System.out.println(error);
 			printUsage();
 		}
 		return error == null;
 	}
 
-	public static void main(String argv[])
-	{
-		Logger.log.setStream (System.err);
-		if (parseCliOptions(argv))
-		{
-			PwyDoc pwy = PwyDoc.read (oldFile);
+	public static void main(String argv[]) {
+		Logger.log.setStream(System.err);
+		if (parseCliOptions(argv)) {
+			PwyDoc pwy = PwyDoc.read(oldFile);
 			assert (pwy != null);
 
 			Patch patch = new Patch();
-			try
-			{
-				patch.readFromReader (new InputStreamReader (System.in)); // read diff from STDIN
-				if (reverse)
-				{
+			try {
+				patch.readFromReader(new InputStreamReader(System.in)); // read diff from STDIN
+				if (reverse) {
 					patch.reverse();
 				}
-				patch.applyTo (pwy, fuzz);
+				patch.applyTo(pwy, fuzz);
 				pwy.write(pwy.getSourceFile());
-			}
-			catch (Exception e)
-			{
-				Logger.log.error ("Exception occured while processing patch", e);
+			} catch (Exception e) {
+				Logger.log.error("Exception occured while processing patch", e);
 			}
 		}
 	}

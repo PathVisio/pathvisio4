@@ -18,7 +18,7 @@ package org.pathvisio.core.view;
 
 import java.net.URL;
 
-import org.pathvisio.core.model.PathwayModel;
+import org.pathvisio.model.PathwayModel;
 import org.pathvisio.core.view.model.VElement;
 import org.pathvisio.core.view.model.VPathwayModel;
 import org.pathvisio.model.PathwayElement;

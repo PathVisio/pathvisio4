@@ -28,21 +28,19 @@ import java.util.Set;
 
 import javax.swing.JOptionPane;
 
-import org.pathvisio.core.debug.Logger;
+import org.pathvisio.debug.Logger;
 import org.pathvisio.core.util.ColorConverter;
 import org.pathvisio.core.util.CommonsFileUtils;
-import org.pathvisio.core.util.Utils;
+import org.pathvisio.util.Utils;
 
 /**
  * Loads & saves application preferences
  */
-public class PreferenceManager
-{
+public class PreferenceManager {
 	private Properties properties;
 	private File propFile = null;
 	private Set<PreferenceListener> listeners = new HashSet<PreferenceListener>();
 	private boolean dirty;
-
 
 	public void addListener(PreferenceListener listener) {
 		listeners.add(listener);
@@ -56,22 +54,17 @@ public class PreferenceManager
 	}
 
 	/**
-	 * Stores preferences back to preference file, if necessary.
-	 * Only writes to disk if the properties have changed.
+	 * Stores preferences back to preference file, if necessary. Only writes to disk
+	 * if the properties have changed.
 	 */
-	public void store()
-	{
-		if (dirty)
-		{
-			Logger.log.info ("Preferences have changed. Writing preferences");
-			try
-			{
+	public void store() {
+		if (dirty) {
+			Logger.log.info("Preferences have changed. Writing preferences");
+			try {
 				properties.store(new FileOutputStream(propFile), "");
 				dirty = false;
-			}
-			catch (IOException e)
-			{
-				Logger.log.error ("Could not write properties");
+			} catch (IOException e) {
+				Logger.log.error("Could not write properties");
 			}
 		}
 	}
@@ -79,69 +72,54 @@ public class PreferenceManager
 	/**
 	 * Load preferences from file
 	 */
-	public void load()
-	{
+	public void load() {
 		properties = new Properties();
 		propFile = new File(GlobalPreference.getApplicationDir(), ".PathVisio");
 
-		try
-		{
-			if(propFile.exists()) {
+		try {
+			if (propFile.exists()) {
 				properties.load(new FileInputStream(propFile));
-				compatUpdate();			
-			} 
-			else 
-			{
+				compatUpdate();
+			} else {
 				Logger.log.info("Preferences file " + propFile + " doesn't exist, using defaults");
 			}
-		}
-		catch (IOException e)
-		{
-			Logger.log.error ("Could not read properties", e);
+		} catch (IOException e) {
+			Logger.log.error("Could not read properties", e);
 		}
 		dirty = false;
 	}
 
 	/**
-	 * Convert old / obsolete properties to new values.
-	 * Old properties are left in place for backwards compatibility.
+	 * Convert old / obsolete properties to new values. Old properties are left in
+	 * place for backwards compatibility.
 	 */
-	private void compatUpdate()
-	{
-		if (properties.containsKey(GlobalPreference.DB_GDB_CURRENT.name()) &&
-			!properties.containsKey(GlobalPreference.DB_CONNECTSTRING_GDB.name()))
+	private void compatUpdate() {
+		if (properties.containsKey(GlobalPreference.DB_GDB_CURRENT.name())
+				&& !properties.containsKey(GlobalPreference.DB_CONNECTSTRING_GDB.name()))
 			set(GlobalPreference.DB_CONNECTSTRING_GDB, "idmapper-pgdb:" + get(GlobalPreference.DB_GDB_CURRENT));
-		if (properties.containsKey(GlobalPreference.DB_METABDB_CURRENT.name()) &&
-			!properties.containsKey(GlobalPreference.DB_CONNECTSTRING_METADB.name()))
+		if (properties.containsKey(GlobalPreference.DB_METABDB_CURRENT.name())
+				&& !properties.containsKey(GlobalPreference.DB_CONNECTSTRING_METADB.name()))
 			set(GlobalPreference.DB_CONNECTSTRING_METADB, "idmapper-pgdb:" + get(GlobalPreference.DB_METABDB_CURRENT));
 	}
 
 	/**
 	 * Get a preference as String
 	 */
-	public String get (Preference p)
-	{
+	public String get(Preference p) {
 		String key = p.name();
-		if (properties.containsKey(key))
-		{
+		if (properties.containsKey(key)) {
 			return properties.getProperty(key);
-		}
-		else
-		{
+		} else {
 			return p.getDefault();
 		}
 	}
 
-	public void set (Preference p, String newVal)
-	{
+	public void set(Preference p, String newVal) {
 		String oldVal = get(p);
 
-		if (oldVal == null ? newVal == null : oldVal.equals (newVal))
-		{
+		if (oldVal == null ? newVal == null : oldVal.equals(newVal)) {
 			// newVal is equal to oldVal, do nothing
-		}
-		else
-		{
+		} else {
 			if (newVal == null)
 				properties.remove(p.name());
 			else
@@ -151,90 +129,70 @@ public class PreferenceManager
 		}
 	}
 
-	public int getInt (Preference p)
-	{
-		return Integer.parseInt (get(p));
+	public int getInt(Preference p) {
+		return Integer.parseInt(get(p));
 	}
 
-	public void setInt (Preference p, int val)
-	{
-		set (p, "" + val);
+	public void setInt(Preference p, int val) {
+		set(p, "" + val);
 	}
 
-	public File getFile (Preference p)
-	{
-		return new File (get (p));
+	public File getFile(Preference p) {
+		return new File(get(p));
 	}
 
-	public void setFile (Preference p, File val)
-	{
-		set (p, "" + val);
+	public void setFile(Preference p, File val) {
+		set(p, "" + val);
 	}
 
-	public Color getColor (Preference p)
-	{
-		return ColorConverter.parseColorString(get (p));
+	public Color getColor(Preference p) {
+		return ColorConverter.parseColorString(get(p));
 	}
 
-	public void setColor (Preference p, Color c)
-	{
-		set (p, ColorConverter.getRgbString(c));
+	public void setColor(Preference p, Color c) {
+		set(p, ColorConverter.getRgbString(c));
 	}
 
-	public void setBoolean (Preference p, Boolean val)
-	{
-		set (p, "" + val);
+	public void setBoolean(Preference p, Boolean val) {
+		set(p, "" + val);
 	}
 
-	public boolean getBoolean (Preference p)
-	{
-		return (get(p).equals (""  + true));
+	public boolean getBoolean(Preference p) {
+		return (get(p).equals("" + true));
 	}
 
 	/**
 	 * Returns true if the current value of Preference p equals the default value.
 	 */
-	public boolean isDefault (Preference p)
-	{
+	public boolean isDefault(Preference p) {
 		return !properties.containsKey(p.name());
 	}
-
 
 	static PreferenceManager preferences = null;
 
 	/**
-	@Deprecated use SwingEngine.getPreferenceManager() instead
-	*/ 
-	public static PreferenceManager getCurrent()
-	{
+	 * @Deprecated use SwingEngine.getPreferenceManager() instead
+	 */
+	public static PreferenceManager getCurrent() {
 		return preferences;
 	}
 
 	/**
-	 * Compatibility fix.
-	 * The configuration directory used to be always on $HOME/.PathVisio.
-	 * For windows, we changed this to %APPDIR%/PathVisio, which makes more sense on that
-	 * system.
-	 * This function checks for the existence of a config directory on the old location, and moves
-	 * if possible.
+	 * Compatibility fix. The configuration directory used to be always on
+	 * $HOME/.PathVisio. For windows, we changed this to %APPDIR%/PathVisio, which
+	 * makes more sense on that system. This function checks for the existence of a
+	 * config directory on the old location, and moves if possible.
 	 */
-	public static void compatMovePvDir()
-	{
+	public static void compatMovePvDir() {
 		File oldConfigDir = new File(System.getProperty("user.home"), ".PathVisio");
-		if (Utils.getOS() == Utils.OS_WINDOWS &&  
-				oldConfigDir.exists())
-		{
+		if (Utils.getOS() == Utils.OS_WINDOWS && oldConfigDir.exists()) {
 			File dest = GlobalPreference.getApplicationDir();
-			JOptionPane.showMessageDialog(null, "Note: Because you updated to a new version of PathVisio, \n" +
-					"the PathVisio configuration directory will be moved to\n" + dest);
-			for (File src : oldConfigDir.listFiles())
-			{
-				try
-				{
+			JOptionPane.showMessageDialog(null, "Note: Because you updated to a new version of PathVisio, \n"
+					+ "the PathVisio configuration directory will be moved to\n" + dest);
+			for (File src : oldConfigDir.listFiles()) {
+				try {
 					CommonsFileUtils.moveToDirectory(src, dest, true);
-				}
-				catch (IOException e)
-				{
+				} catch (IOException e) {
 					Logger.log.error("Could not move PathVisio directory", e);
 				}
 			}
@@ -242,17 +200,13 @@ public class PreferenceManager
 		}
 	}
 
-	public static void init()
-	{
-		if (preferences == null)
-		{
-			preferences = new PreferenceManager();			
+	public static void init() {
+		if (preferences == null) {
+			preferences = new PreferenceManager();
 			compatMovePvDir();
 			preferences.load();
-		}
-		else
-		{
-			Logger.log.warn ("PreferenceManager was initialized twice");
+		} else {
+			Logger.log.warn("PreferenceManager was initialized twice");
 		}
 	}
 }

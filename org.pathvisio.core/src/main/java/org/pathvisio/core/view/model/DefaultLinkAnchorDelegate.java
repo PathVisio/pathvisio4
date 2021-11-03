@@ -16,7 +16,6 @@
  ******************************************************************************/
 package org.pathvisio.core.view.model;
 
-import org.pathvisio.core.view.AbstractLinkAnchorDelegate;
 import org.pathvisio.model.GraphLink.LinkableTo;
 import org.pathvisio.model.ShapedElement;
 

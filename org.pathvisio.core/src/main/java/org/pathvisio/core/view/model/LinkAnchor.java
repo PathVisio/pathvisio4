@@ -137,7 +137,7 @@ public class LinkAnchor extends VElement {
 	}
 
 	@Override
-	protected int getZOrder() {
+	public int getZOrder() {
 		return parent.getZOrder() + 1;
 	}
 

@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.pathvisio.core.debug.Logger;
+import org.pathvisio.debug.Logger;
 
 /**
    Class containing main method

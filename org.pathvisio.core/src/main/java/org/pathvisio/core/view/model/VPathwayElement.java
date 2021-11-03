@@ -19,12 +19,9 @@ package org.pathvisio.core.view.model;
 import java.awt.geom.Point2D;
 import java.util.List;
 
-import org.pathvisio.core.biopax.PublicationXref;
 import org.pathvisio.event.PathwayObjectEvent;
 import org.pathvisio.model.PathwayElement;
 import org.pathvisio.model.PathwayElement.CitationRef;
-
-import com.sun.xml.bind.v2.model.core.ElementInfo;
 
 /**
  * This class is a parent class for all graphics which can have a
@@ -33,10 +30,6 @@ import com.sun.xml.bind.v2.model.core.ElementInfo;
  * 
  * 
  * @author finterly
- */
-/**
- * @author p70073399
- *
  */
 public abstract class VPathwayElement extends VPathwayObject {
 
@@ -75,6 +68,9 @@ public abstract class VPathwayElement extends VPathwayObject {
 		return vCitation;
 	}
 
+	/**
+	 * @param vCitation
+	 */
 	protected void setCitation(VCitation vCitation) {
 		this.vCitation = vCitation;
 	}
