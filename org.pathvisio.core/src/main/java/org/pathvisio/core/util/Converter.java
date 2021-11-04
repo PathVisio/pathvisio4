@@ -28,7 +28,6 @@ import org.pathvisio.core.model.DataNodeListExporter;
 import org.pathvisio.core.model.EUGeneExporter;
 import org.pathvisio.io.GpmlFormat;
 import org.pathvisio.core.model.ImageExporter;
-import org.pathvisio.core.model.MappFormat;
 import org.pathvisio.model.PathwayModel;
 import org.pathvisio.event.PathwayExporter;
 import org.pathvisio.event.PathwayImporter;
@@ -40,7 +39,7 @@ import org.pathvisio.core.view.shape.MIMShapes;
 /**
  * Converter.java
  * 
- * Command Line GenMAPP to GPML Converter
+ * Command Line GenMAPP to GPML Converter. Converts to images. Move to separate Converter Jar File. 
  * 
  * Created on 15 augustus 2005, 20:28
  * 

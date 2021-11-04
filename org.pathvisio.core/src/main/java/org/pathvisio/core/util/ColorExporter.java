@@ -49,7 +49,9 @@ import org.pathvisio.core.view.shape.MIMShapes;
 
 /**
  * Utility that takes a set of graphId/Color pairs and exports a pathway image
- * after coloring the objects with the specified graphIds.
+ * after coloring the objects with the specified graphIds. TODO Move to jar file? 
+ * 
+ * TODO Color ElementIds or Xrefs...Only DataNodes
  * 
  * @author thomas
  */

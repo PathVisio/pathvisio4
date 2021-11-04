@@ -95,20 +95,81 @@ public class Engine {
 	}
 
 	// TODO: No reason to keep this in engine, it doesn't act on active pathway
-//	/**
-//	 * Exports given pathway to file. This function doesn't act on the active
-//	 * pathway.
-//	 * 
-//	 * @param pathway pathway to export
-//	 * @param file    file to write to.
-//	 * @returns a list of warnings that occurred during export, or an empty list if
-//	 *          there were none.
-//	 */
-//	public List<String> exportPathway(File file, PathwayModel pathway) throws ConverterException {
-//		Logger.log.trace("Exporting pathway to " + file);
-//
-//		Set<PathwayExporter> set = getPathwayExporters(file);
-//
+	/**
+	 * Exports given pathway to file. This function doesn't act on the active
+	 * pathway.
+	 * 
+	 * @param pathway pathway to export
+	 * @param file    file to write to.
+	 * @returns a list of warnings that occurred during export, or an empty list if
+	 *          there were none.
+	 */
+	public List<String> exportPathway(File file, PathwayModel pathway) throws ConverterException {
+		Logger.log.trace("Exporting pathway to " + file);
+
+		Set<PathwayExporter> set = getPathwayExporters(file);
+
+		if (set != null && set.size() == 1) {
+			PathwayExporter exporter = Utils.oneOf(set);
+			exporter.doExport(file, pathway);
+			return exporter.getWarnings();
+		} else
+			throw new ConverterException(
+					"Could not determine exporter for '" + FileUtils.getExtension(file.toString()) + "' files");
+	}
+
+	// TODO: No reason to keep this in engine, it doesn't act on active pathway
+	/**
+	 * Exports given pathway to file. This function doesn't act on the active
+	 * pathway.
+	 * 
+	 * @param pathway pathway to export
+	 * @param file    file to write to.
+	 * @returns a list of warnings that occurred during export, or an empty list if
+	 *          there were none.
+	 */
+	public List<String> exportPathway(File file, PathwayModel pathway, int zoom) throws ConverterException {
+		Logger.log.trace("Exporting pathway to " + file);
+
+		Set<PathwayExporter> set = getPathwayExporters(file);
+
+		if (set != null && set.size() == 1) {
+			PathwayExporter exporter = Utils.oneOf(set);
+			exporter.doExport(file, pathway, zoom);
+			return exporter.getWarnings();
+		} else
+			throw new ConverterException(
+					"Could not determine exporter for '" + FileUtils.getExtension(file.toString()) + "' files");
+	}
+
+	// TODO: No reason to keep this in engine, it doesn't act on active pathway
+	/**
+	 * Exports given pathway to file. This function doesn't act on the active
+	 * pathway.
+	 * 
+	 * @param pathway pathway to export
+	 * @param file    file to write to.
+	 * @returns a list of warnings that occurred during export, or an empty list if
+	 *          there were none.
+	 */
+	public List<String> exportPathway(File file, PathwayModel pathway, String exporterName) throws ConverterException {
+		Logger.log.trace("Exporting pathway to " + file);
+
+		Set<PathwayExporter> set = getPathwayExporters(file);
+		try {
+			for (PathwayExporter pExporter : set) {
+
+				if (pExporter.getName().equals(exporterName)) {
+					System.out.println(pExporter.getName());
+					pExporter.doExport(file, pathway);
+					return pExporter.getWarnings();
+				}
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 //		if (set != null && set.size() == 1) {
 //			PathwayExporter exporter = Utils.oneOf(set);
 //			exporter.doExport(file, pathway);
@@ -116,69 +177,7 @@ public class Engine {
 //		} else
 //			throw new ConverterException(
 //					"Could not determine exporter for '" + FileUtils.getExtension(file.toString()) + "' files");
-//	}
-
-	// TODO: No reason to keep this in engine, it doesn't act on active pathway
-//	/**
-//	 * Exports given pathway to file. This function doesn't act on the active
-//	 * pathway.
-//	 * 
-//	 * @param pathway pathway to export
-//	 * @param file    file to write to.
-//	 * @returns a list of warnings that occurred during export, or an empty list if
-//	 *          there were none.
-//	 */
-//	public List<String> exportPathway(File file, PathwayModel pathway, int zoom) throws ConverterException {
-//		Logger.log.trace("Exporting pathway to " + file);
-//
-//		Set<PathwayExporter> set = getPathwayExporters(file);
-//
-//		if (set != null && set.size() == 1) {
-//			PathwayExporter exporter = Utils.oneOf(set);
-//			exporter.doExport(file, pathway, zoom);
-//			return exporter.getWarnings();
-//		} else
-//			throw new ConverterException(
-//					"Could not determine exporter for '" + FileUtils.getExtension(file.toString()) + "' files");
-//	}
-
-	// TODO: No reason to keep this in engine, it doesn't act on active pathway
-//	/**
-//	 * Exports given pathway to file. This function doesn't act on the active
-//	 * pathway.
-//	 * 
-//	 * @param pathway pathway to export
-//	 * @param file    file to write to.
-//	 * @returns a list of warnings that occurred during export, or an empty list if
-//	 *          there were none.
-//	 */
-//	public List<String> exportPathway(File file, PathwayModel pathway, String exporterName) throws ConverterException {
-//		Logger.log.trace("Exporting pathway to " + file);
-//
-//		Set<PathwayExporter> set = getPathwayExporters(file);
-//		try {
-//			for (PathwayExporter pExporter : set) {
-//
-//				if (pExporter.getName().equals(exporterName)) {
-//					System.out.println(pExporter.getName());
-//					pExporter.doExport(file, pathway);
-//					return pExporter.getWarnings();
-//				}
-//			}
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		return null;
-////		if (set != null && set.size() == 1)
-////		{
-////			PathwayExporter exporter = Utils.oneOf(set);
-////			exporter.doExport(file, pathway);
-////			return exporter.getWarnings();
-////		}
-////		else
-////			throw new ConverterException( "Could not determine exporter for '" + FileUtils.getExtension(file.toString()) +  "' files" );
-//	}
+	}
 
 	public void importPathway(File file) throws ConverterException {
 		Logger.log.trace("Importing pathway from " + file);

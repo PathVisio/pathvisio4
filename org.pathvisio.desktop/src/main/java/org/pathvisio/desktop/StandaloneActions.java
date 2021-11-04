@@ -39,8 +39,8 @@ import org.pathvisio.core.ApplicationEvent;
 import org.pathvisio.core.Globals;
 import org.pathvisio.core.Engine.ApplicationEventListener;
 import org.pathvisio.core.util.Resources;
-import org.pathvisio.core.view.ViewActions;
 import org.pathvisio.core.view.model.VPathwayModel;
+import org.pathvisio.core.view.model.ViewActions;
 import org.pathvisio.desktop.dialog.RunLocalPluginDialog;
 import org.pathvisio.gui.SwingEngine;
 

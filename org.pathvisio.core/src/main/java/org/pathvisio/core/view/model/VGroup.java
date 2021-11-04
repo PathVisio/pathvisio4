@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.pathvisio.core.view.GroupPainter;
-import org.pathvisio.core.view.GroupPainterRegistry;
 import org.pathvisio.core.view.VElementMouseEvent;
 import org.pathvisio.core.view.VElementMouseListener;
 import org.pathvisio.model.Group;

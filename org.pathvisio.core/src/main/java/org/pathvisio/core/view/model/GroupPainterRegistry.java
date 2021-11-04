@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
-package org.pathvisio.core.view;
+package org.pathvisio.core.view.model;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -25,8 +25,8 @@ import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.pathvisio.core.view.GroupPainter;
 import org.pathvisio.model.type.GroupType;
-import org.pathvisio.core.view.model.VGroup;
 
 /**
  * Keeps track of all GroupPainters.
@@ -34,6 +34,12 @@ import org.pathvisio.core.view.model.VGroup;
  * @author thomas
  */
 public class GroupPainterRegistry {
+
+	public static final double DEFAULT_M_MARGIN = 8; // Make the bounds slightly
+	// larger than the summed bounds
+	// of the containing elements
+	public static final double COMPLEX_M_MARGIN = 12;
+
 	private static Map<String, GroupPainter> painters = new HashMap<String, GroupPainter>();
 
 	/**
@@ -62,90 +68,13 @@ public class GroupPainterRegistry {
 
 	private static final int TRANSLUCENCY_LEVEL = (int) (255 * .10);
 
-	private static GroupPainter defaultPainter = new GroupPainter() {
-		public void drawGroup(Graphics2D g, VGroup group, int flags) {
-			boolean mouseover = (flags & VGroup.FLAG_MOUSEOVER) != 0;
-			boolean anchors = (flags & VGroup.FLAG_ANCHORSVISIBLE) != 0;
-			boolean selected = (flags & VGroup.FLAG_SELECTED) != 0;
-
-			// Draw group outline
-			int sw = 1;
-			Rectangle2D rect = group.getVBounds();
-			// fill
-			g.setColor(new Color(180, 180, 100, TRANSLUCENCY_LEVEL));
-			g.fillRect((int) rect.getX(), (int) rect.getY(), (int) rect.getWidth(), (int) rect.getHeight());
-			// border
-			g.setColor(Color.GRAY);
-			g.setStroke(
-					new BasicStroke(sw, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 1, new float[] { 4, 2 }, 0));
-			g.drawRect((int) rect.getX(), (int) rect.getY(), (int) rect.getWidth() - sw, (int) rect.getHeight() - sw);
-
-			// Group highlight, on mouseover, linkanchors display and selection
-			if (mouseover || anchors || selected) {
-				// fill
-				g.setColor(new Color(255, 0, 0, (int) (255 * .05)));
-				g.fillRect((int) rect.getX(), (int) rect.getY(), (int) rect.getWidth(), (int) rect.getHeight());
-				// border
-				g.setColor(Color.GRAY);
-				g.setStroke(new BasicStroke(sw, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 1, new float[] { 4, 2 },
-						0));
-				g.drawRect((int) rect.getX(), (int) rect.getY(), (int) rect.getWidth() - sw,
-						(int) rect.getHeight() - sw);
-			}
-		}
-	};
-
-	private static GroupPainter complexPainter = new GroupPainter() {
-		public void drawGroup(Graphics2D g, VGroup group, int flags) {
-			boolean mouseover = (flags & VGroup.FLAG_MOUSEOVER) != 0;
-			boolean anchors = (flags & VGroup.FLAG_ANCHORSVISIBLE) != 0;
-			boolean selected = (flags & VGroup.FLAG_SELECTED) != 0;
-
-			// Draw group outline
-			int sw = 1;
-			Rectangle2D vRect = group.getVBounds();
-			float vTop = (float) vRect.getMinY();
-			float vLeft = (float) vRect.getMinX();
-			float vBottom = (float) vRect.getMaxY() - sw;
-			float vRight = (float) vRect.getMaxX() - sw;
-
-			float vMargin = (float) Math.min(Math.min(vRect.getWidth() / 2.5, vRect.getHeight() / 2.5),
-					group.vFromM(GroupType.COMPLEX_M_MARGIN * 1.5));
-
-			GeneralPath outline = new GeneralPath();
-			outline.moveTo(vLeft + vMargin, vTop);
-			outline.lineTo(vRight - vMargin, vTop);
-			outline.lineTo(vRight, vTop + vMargin);
-			outline.lineTo(vRight, vBottom - vMargin);
-			outline.lineTo(vRight - vMargin, vBottom);
-			outline.lineTo(vLeft + vMargin, vBottom);
-			outline.lineTo(vLeft, vBottom - vMargin);
-			outline.lineTo(vLeft, vTop + vMargin);
-			outline.closePath();
-
-			// fill
-			g.setColor(new Color(180, 180, 100, TRANSLUCENCY_LEVEL));
-			g.fill(outline);
-			// border
-			g.setColor(Color.GRAY);
-			g.setStroke(new BasicStroke());
-			g.draw(outline);
-
-			// Group highlight, on mouseover, linkanchors display and selection
-			if (mouseover || anchors || selected) {
-				// fill
-				g.setColor(new Color(255, 0, 0, (int) (255 * .05)));
-				g.fill(outline);
-
-				// border
-				g.setColor(Color.GRAY);
-				g.setStroke(new BasicStroke());
-				g.draw(outline);
-			}
-		}
-	};
-
-	private static GroupPainter groupPainter = new GroupPainter() {
+	/**
+	 * Painter for {@link GroupType#TRANSPARENT}. Group appears as transparent
+	 * rectangle. When mouse over group, fill color changes to blue #0000ff0c.
+	 * 
+	 * NB: "Transparent" (GPML2021) replaces "Group" (GPML2013a).
+	 */
+	private static GroupPainter transparentPainter = new GroupPainter() {
 		public void drawGroup(Graphics2D g, VGroup group, int flags) {
 			boolean mouseover = (flags & VGroup.FLAG_MOUSEOVER) != 0;
 			boolean anchors = (flags & VGroup.FLAG_ANCHORSVISIBLE) != 0;
@@ -183,6 +112,69 @@ public class GroupPainterRegistry {
 		}
 	};
 
+	/**
+	 * Painter for {@link GroupType#COMPLEX}. Group appears as gray #b4b46419
+	 * octagon with gray #808080 solid border. When mouse over group, fill color
+	 * changes to red #ff00000c.
+	 * 
+	 * NB: the octagon shape is specially implemented.
+	 */
+	private static GroupPainter complexPainter = new GroupPainter() {
+		public void drawGroup(Graphics2D g, VGroup group, int flags) {
+			boolean mouseover = (flags & VGroup.FLAG_MOUSEOVER) != 0;
+			boolean anchors = (flags & VGroup.FLAG_ANCHORSVISIBLE) != 0;
+			boolean selected = (flags & VGroup.FLAG_SELECTED) != 0;
+
+			// Draw group outline
+			int sw = 1;
+			Rectangle2D vRect = group.getVBounds();
+			float vTop = (float) vRect.getMinY();
+			float vLeft = (float) vRect.getMinX();
+			float vBottom = (float) vRect.getMaxY() - sw;
+			float vRight = (float) vRect.getMaxX() - sw;
+
+			float vMargin = (float) Math.min(Math.min(vRect.getWidth() / 2.5, vRect.getHeight() / 2.5),
+					group.vFromM(COMPLEX_M_MARGIN * 1.5));
+
+			GeneralPath outline = new GeneralPath();
+			outline.moveTo(vLeft + vMargin, vTop);
+			outline.lineTo(vRight - vMargin, vTop);
+			outline.lineTo(vRight, vTop + vMargin);
+			outline.lineTo(vRight, vBottom - vMargin);
+			outline.lineTo(vRight - vMargin, vBottom);
+			outline.lineTo(vLeft + vMargin, vBottom);
+			outline.lineTo(vLeft, vBottom - vMargin);
+			outline.lineTo(vLeft, vTop + vMargin);
+			outline.closePath();
+
+			// fill
+			g.setColor(new Color(180, 180, 100, TRANSLUCENCY_LEVEL));
+			g.fill(outline);
+			// border
+			g.setColor(Color.GRAY);
+			g.setStroke(new BasicStroke());
+			g.draw(outline);
+
+			// Group highlight, on mouseover, linkanchors display and selection
+			if (mouseover || anchors || selected) {
+				// fill
+				g.setColor(new Color(255, 0, 0, (int) (255 * .05)));
+				g.fill(outline);
+
+				// border
+				g.setColor(Color.GRAY);
+				g.setStroke(new BasicStroke());
+				g.draw(outline);
+			}
+		}
+	};
+
+	/**
+	 * Painter for {@link GroupType#PATHWAY}. Group appears as green #00ff000c
+	 * rectangle with gray #808080 dashed border. When mouse over group, fill color
+	 * changes to green #00ff0019.
+	 * 
+	 */
 	private static GroupPainter pathwayPainter = new GroupPainter() {
 		public void drawGroup(Graphics2D g, VGroup group, int flags) {
 			boolean mouseover = (flags & VGroup.FLAG_MOUSEOVER) != 0;
@@ -222,11 +214,51 @@ public class GroupPainterRegistry {
 		}
 	};
 
+	/**
+	 * Painter for {@link GroupType#GROUP}. Group appears as gray #b4b46419
+	 * rectangle with gray #808080 dashed border. When mouse over group, fill color
+	 * changes to red #ff00000c.
+	 * 
+	 * NB: "Group" (GPML2021) replaces "None" (GPML2013a).
+	 */
+	private static GroupPainter defaultPainter = new GroupPainter() {
+		public void drawGroup(Graphics2D g, VGroup group, int flags) {
+			boolean mouseover = (flags & VGroup.FLAG_MOUSEOVER) != 0;
+			boolean anchors = (flags & VGroup.FLAG_ANCHORSVISIBLE) != 0;
+			boolean selected = (flags & VGroup.FLAG_SELECTED) != 0;
+
+			// Draw group outline
+			int sw = 1;
+			Rectangle2D rect = group.getVBounds();
+			// fill
+			g.setColor(new Color(180, 180, 100, TRANSLUCENCY_LEVEL));
+			g.fillRect((int) rect.getX(), (int) rect.getY(), (int) rect.getWidth(), (int) rect.getHeight());
+			// border
+			g.setColor(Color.GRAY);
+			g.setStroke(
+					new BasicStroke(sw, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 1, new float[] { 4, 2 }, 0));
+			g.drawRect((int) rect.getX(), (int) rect.getY(), (int) rect.getWidth() - sw, (int) rect.getHeight() - sw);
+
+			// Group highlight, on mouseover, linkanchors display and selection
+			if (mouseover || anchors || selected) {
+				// fill
+				g.setColor(new Color(255, 0, 0, (int) (255 * .05)));
+				g.fillRect((int) rect.getX(), (int) rect.getY(), (int) rect.getWidth(), (int) rect.getHeight());
+				// border
+				g.setColor(Color.GRAY);
+				g.setStroke(new BasicStroke(sw, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 1, new float[] { 4, 2 },
+						0));
+				g.drawRect((int) rect.getX(), (int) rect.getY(), (int) rect.getWidth() - sw,
+						(int) rect.getHeight() - sw);
+			}
+		}
+	};
+
 	// Register default painters
 	static {
+		registerPainter(GroupType.GROUP.toString(), defaultPainter);
 		registerPainter(GroupType.COMPLEX.toString(), complexPainter);
-		registerPainter(GroupType.NONE.toString(), defaultPainter);
-		registerPainter(GroupType.GROUP.toString(), groupPainter);
 		registerPainter(GroupType.PATHWAY.toString(), pathwayPainter);
+		registerPainter(GroupType.TRANSPARENT.toString(), transparentPainter);
 	}
 }

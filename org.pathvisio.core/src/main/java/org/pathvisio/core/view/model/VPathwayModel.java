@@ -43,13 +43,17 @@ import javax.swing.KeyStroke;
 import javax.swing.Timer;
 
 import org.pathvisio.core.Engine;
-import org.pathvisio.core.biopax.BiopaxElement;
-import org.pathvisio.core.debug.Logger;
+import org.pathvisio.debug.Logger;
 import org.pathvisio.model.type.GroupType;
+import org.pathvisio.model.DataNode;
+import org.pathvisio.model.GraphicalLine;
+import org.pathvisio.model.Group;
+import org.pathvisio.model.Interaction;
+import org.pathvisio.model.Label;
 import org.pathvisio.model.LineElement;
-import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.model.PathwayModel;
 import org.pathvisio.model.PathwayModel.StatusFlagEvent;
+import org.pathvisio.model.Shape;
 import org.pathvisio.model.PathwayElement;
 import org.pathvisio.model.LineElement.Anchor;
 import org.pathvisio.model.LineElement.LinePoint;
@@ -57,19 +61,18 @@ import org.pathvisio.event.PathwayEvent;
 import org.pathvisio.event.PathwayListener;
 import org.pathvisio.core.preferences.GlobalPreference;
 import org.pathvisio.core.preferences.PreferenceManager;
-import org.pathvisio.core.util.Utils;
+import org.pathvisio.util.Utils;
 import org.pathvisio.core.view.KeyEvent;
 import org.pathvisio.core.view.LayoutType;
 import org.pathvisio.core.view.MouseEvent;
 import org.pathvisio.core.view.Template;
 import org.pathvisio.core.view.VElementMouseEvent;
 import org.pathvisio.core.view.VElementMouseListener;
-import org.pathvisio.core.view.ViewActions;
-import org.pathvisio.core.view.ViewActions.KeyMoveAction;
-import org.pathvisio.core.view.ViewActions.TextFormattingAction;
 import org.pathvisio.core.view.model.Handle.Freedom;
 import org.pathvisio.core.view.model.SelectionBox.SelectionListener;
 import org.pathvisio.core.view.model.VPathwayEvent.VPathwayEventType;
+import org.pathvisio.core.view.model.ViewActions.KeyMoveAction;
+import org.pathvisio.core.view.model.ViewActions.TextFormattingAction;
 
 /**
  * This class implements and handles a drawing. Graphics objects are stored in
@@ -374,13 +377,13 @@ public class VPathwayModel implements PathwayListener {
 		return null;
 	}
 
-	Map<MPoint, VPoint> pointsMtoV = new HashMap<MPoint, VPoint>();
+	Map<LinePoint, VPoint> pointsMtoV = new HashMap<LinePoint, VPoint>();
 
-	protected VPoint getPoint(MPoint mPoint) {
+	protected VPoint getPoint(LinePoint mPoint) {
 		return pointsMtoV.get(mPoint);
 	}
 
-	public VPoint newPoint(MPoint mPoint, VLineElement line) {
+	public VPoint newPoint(LinePoint mPoint, VLineElement line) {
 		VPoint p = pointsMtoV.get(mPoint);
 		if (p == null) {
 			p = new VPoint(this, mPoint, line);
@@ -1219,17 +1222,38 @@ public class VPathwayModel implements PathwayListener {
 		selection.stopSelecting();
 	}
 
-	public void selectObjectsByObjectType(ObjectType ot) {
+	public void selectObjectsByObjectType(Class c) {
 		clearSelection();
 		selection.startSelecting();
-		for (PathwayElement pe : getPathwayModel().getDataObjects()) {
-			if (pe.getObjectType() == ot) {
+		if (c == DataNode.class) {
+			for (DataNode pe : getPathwayModel().getDataNodes()) {
 				selection.addToSelection(getPathwayElementView(pe));
 			}
+		} else if (c == Interaction.class) {
+			for (Interaction pe : getPathwayModel().getInteractions()) {
+				selection.addToSelection(getPathwayElementView(pe));
+			}
+		} else if (c == GraphicalLine.class) {
+			for (GraphicalLine pe : getPathwayModel().getGraphicalLines()) {
+				selection.addToSelection(getPathwayElementView(pe));
+			}
+		} else if (c == Label.class) {
+			for (Label pe : getPathwayModel().getLabels()) {
+				selection.addToSelection(getPathwayElementView(pe));
+			}
+		} else if (c == Shape.class) {
+			for (Shape pe : getPathwayModel().getShapes()) {
+				selection.addToSelection(getPathwayElementView(pe));
+			}
+		} else if (c == Group.class) {
+			for (Group pe : getPathwayModel().getGroups()) {
+				selection.addToSelection(getPathwayElementView(pe));
+			}
+		} else {
+			// TODO???? Citations, Annotations... other???
 		}
 		selection.stopSelecting();
 	}
-
 	/**
 	 * select all objects of the pathway.
 	 */

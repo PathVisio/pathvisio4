@@ -46,16 +46,16 @@ import org.pathvisio.core.model.PathwayModel.StatusFlagListener;
 import org.pathvisio.model.PathwayElement;
 import org.pathvisio.core.model.ShapeType;
 import org.pathvisio.core.util.Resources;
-import org.pathvisio.core.view.DefaultTemplates;
 import org.pathvisio.core.view.LayoutType;
 import org.pathvisio.core.view.Template;
-import org.pathvisio.core.view.ViewActions;
+import org.pathvisio.core.view.model.DefaultTemplates;
 import org.pathvisio.core.view.model.Handle;
 import org.pathvisio.core.view.model.SelectionBox;
 import org.pathvisio.core.view.model.VElement;
 import org.pathvisio.core.view.model.VLabel;
 import org.pathvisio.core.view.model.VPathwayModel;
 import org.pathvisio.core.view.model.VPathwayObject;
+import org.pathvisio.core.view.model.ViewActions;
 import org.pathvisio.core.view.shape.MIMShapes;
 import org.pathvisio.gui.dialogs.AboutDlg;
 import org.pathvisio.gui.dialogs.PathwayElementDialog;
@@ -178,22 +178,22 @@ public class CommonActions implements ApplicationEventListener {
 							new NewElementAction(e, new DefaultTemplates.LabelTemplate())
 					},
 					new Action[] {
-							new NewElementAction(e, new DefaultTemplates.LineTemplate(
+							new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 									"line", LineStyleType.SOLID, ArrowHeadType.LINE, ArrowHeadType.LINE, ConnectorType.STRAIGHT)
 							),
-							new NewElementAction(e, new DefaultTemplates.LineTemplate(
+							new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 									"arrow", LineStyleType.SOLID, ArrowHeadType.LINE, ArrowHeadType.ARROW, ConnectorType.STRAIGHT)
 							),
-							new NewElementAction(e, new DefaultTemplates.LineTemplate(
+							new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 									"dashedline", LineStyleType.DASHED, ArrowHeadType.LINE, ArrowHeadType.LINE, ConnectorType.STRAIGHT)
 							),
-							new NewElementAction(e, new DefaultTemplates.LineTemplate(
+							new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 									"dashedarrow", LineStyleType.DASHED, ArrowHeadType.LINE, ArrowHeadType.ARROW, ConnectorType.STRAIGHT)
 							),
-							new NewElementAction(e, new DefaultTemplates.LineTemplate(
+							new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 									"elbow", LineStyleType.SOLID, ArrowHeadType.LINE, ArrowHeadType.LINE, ConnectorType.ELBOW)
 							),
-							new NewElementAction(e, new DefaultTemplates.LineTemplate(
+							new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 									"curve", LineStyleType.SOLID, ArrowHeadType.LINE, ArrowHeadType.LINE, ConnectorType.CURVED)
 							),
 					},
@@ -204,7 +204,7 @@ public class CommonActions implements ApplicationEventListener {
 							new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.OVAL))
 					},
 					new Action[] {
-							new NewElementAction(e, new DefaultTemplates.LineTemplate(
+							new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 									"arrow", LineStyleType.SOLID, ArrowHeadType.LINE, ArrowHeadType.ARROW, ConnectorType.STRAIGHT)
 							),
 					},
@@ -215,7 +215,7 @@ public class CommonActions implements ApplicationEventListener {
 						//	new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.BRACE))
 					//},
 					new Action[] {
-							new NewElementAction(e, new DefaultTemplates.LineTemplate(
+							new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 									"tbar", LineStyleType.SOLID, ArrowHeadType.LINE, ArrowHeadType.TBAR, ConnectorType.STRAIGHT
 							))
 					},
@@ -234,7 +234,7 @@ public class CommonActions implements ApplicationEventListener {
 //							),
 //					},
 					new Action[] {
-							new NewElementAction(e, new DefaultTemplates.InteractionTemplate()) },
+							new NewElementAction(e, new DefaultTemplates.DataNodeInteractionTemplate()) },
 					new Action[] {
 							new NewElementAction(e, new DefaultTemplates.ReactionTemplate()) },
 					new Action[] {
@@ -288,41 +288,41 @@ public class CommonActions implements ApplicationEventListener {
 		
 		// actions for "Basic interactions" section
 		 newInteractionActions = new Action[] {
-				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "line", LineStyleType.SOLID, ArrowHeadType.LINE, ArrowHeadType.LINE, ConnectorType.STRAIGHT)
 				 ),
-				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "arrow", LineStyleType.SOLID, ArrowHeadType.LINE, ArrowHeadType.ARROW, ConnectorType.STRAIGHT)
 				 ),
-				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "dashedline", LineStyleType.DASHED, ArrowHeadType.LINE, ArrowHeadType.LINE, ConnectorType.STRAIGHT)
 				 ),
-				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "dashedarrow", LineStyleType.DASHED, ArrowHeadType.LINE, ArrowHeadType.ARROW, ConnectorType.STRAIGHT)
 				 ),
-				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "elbow", LineStyleType.SOLID, ArrowHeadType.LINE, ArrowHeadType.LINE, ConnectorType.ELBOW)
 				 ),
-				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "curve", LineStyleType.SOLID, ArrowHeadType.LINE, ArrowHeadType.LINE, ConnectorType.CURVED)
 				 ),
-				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "tbar", LineStyleType.SOLID, ArrowHeadType.LINE, ArrowHeadType.TBAR, ConnectorType.STRAIGHT
 				 )),
 		 };
 		
 		 // actions for "Receptor/ligand interactions" section
 		 newRLInteractionActions = new Action[] {
-				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "ligandround", LineStyleType.SOLID, ArrowHeadType.LINE, ArrowHeadType.LIGAND_ROUND, ConnectorType.STRAIGHT)
 				 ),
-				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "ligandsquare", LineStyleType.SOLID, ArrowHeadType.LINE, ArrowHeadType.LIGAND_SQUARE, ConnectorType.STRAIGHT)
 				 ),
-				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "receptorround", LineStyleType.SOLID, ArrowHeadType.LINE, ArrowHeadType.RECEPTOR_ROUND, ConnectorType.STRAIGHT)
 				 ),
-				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "receptorsquare", LineStyleType.SOLID, ArrowHeadType.LINE, ArrowHeadType.RECEPTOR_SQUARE, ConnectorType.STRAIGHT)
 				 ),
 		 };
@@ -347,28 +347,28 @@ public class CommonActions implements ApplicationEventListener {
 		 
 		 // actions for "Molecular Interaction Map Interactions" section
 		 newMIMInteractionActions = new Action[] {
-				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "Necessary stimulation", LineStyleType.SOLID, ArrowHeadType.LINE, MIMShapes.MIM_NECESSARY_STIMULATION, ConnectorType.STRAIGHT)
 				 ),
-				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "Binding", LineStyleType.SOLID, ArrowHeadType.LINE, MIMShapes.MIM_BINDING, ConnectorType.STRAIGHT)
 				 ),
-				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "Conversion", LineStyleType.SOLID, ArrowHeadType.LINE, MIMShapes.MIM_CONVERSION, ConnectorType.STRAIGHT)
 				 ),
-				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "Stimulation", LineStyleType.SOLID, ArrowHeadType.LINE, MIMShapes.MIM_STIMULATION, ConnectorType.STRAIGHT)
 				 ),
-				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "Modification", LineStyleType.SOLID, ArrowHeadType.LINE, MIMShapes.MIM_MODIFICATION, ConnectorType.STRAIGHT)
 				 ),
-				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "Catalysis", LineStyleType.SOLID, ArrowHeadType.LINE, MIMShapes.MIM_CATALYSIS, ConnectorType.STRAIGHT)
 				 ),
-				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "Inhibition", LineStyleType.SOLID, ArrowHeadType.LINE, MIMShapes.MIM_INHIBITION, ConnectorType.STRAIGHT)
 				 ),
-				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "Cleavage", LineStyleType.SOLID, ArrowHeadType.LINE, MIMShapes.MIM_CLEAVAGE, ConnectorType.STRAIGHT)
 				 ),
 /*				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
@@ -380,13 +380,13 @@ public class CommonActions implements ApplicationEventListener {
 				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
 						 "Branching right", LineStyle.SOLID, LineType.LINE, MIMShapes.MIM_BRANCHING_RIGHT, ConnectorType.STRAIGHT)
 				 ),
-*/				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+*/				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "Transcription-translation", LineStyleType.SOLID, ArrowHeadType.LINE, MIMShapes.MIM_TRANSLATION, ConnectorType.STRAIGHT)
 				 ),
 /*				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
 						 "Gap", LineStyle.SOLID, LineType.LINE, MIMShapes.MIM_GAP, ConnectorType.STRAIGHT)
 				 ),
-*/				 new NewElementAction(e, new DefaultTemplates.LineTemplate(
+*/				 new NewElementAction(e, new DefaultTemplates.InteractionTemplate(
 						 "Translocation", LineStyleType.SOLID, ArrowHeadType.LINE, MIMShapes.MIM_TRANSLOCATION, ConnectorType.STRAIGHT)
 				 ),
 		 };

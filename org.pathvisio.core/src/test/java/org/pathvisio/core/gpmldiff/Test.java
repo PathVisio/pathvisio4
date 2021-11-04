@@ -23,9 +23,9 @@ import java.io.StringReader;
 import junit.framework.TestCase;
 
 import org.pathvisio.io.ConverterException;
-import org.pathvisio.core.model.PathwayModel;
+import org.pathvisio.model.PathwayModel;
 import org.pathvisio.model.PathwayElement;
-import org.pathvisio.core.model.ShapeType;
+import org.pathvisio.model.type.ShapeType;
 /**
    Unit tests for package GpmlDiff
 */

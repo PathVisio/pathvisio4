@@ -28,8 +28,19 @@ import org.bridgedb.DataSource;
 import org.bridgedb.Xref;
 import org.pathvisio.core.data.XrefWithSymbol;
 import org.pathvisio.core.preferences.PreferenceManager;
-import org.pathvisio.core.util.Utils;
+import org.pathvisio.event.PathwayEvent;
+import org.pathvisio.event.PathwayListener;
+import org.pathvisio.event.PathwayObjectEvent;
+import org.pathvisio.event.PathwayObjectListener;
+import org.pathvisio.io.ConverterException;
+import org.pathvisio.model.PathwayElement;
+import org.pathvisio.model.PathwayModel;
+import org.pathvisio.util.Utils;
 
+/**
+ * @author unknown
+ *
+ */
 public class Test extends TestCase implements PathwayListener, PathwayObjectListener {
 
 	PathwayModel data;
