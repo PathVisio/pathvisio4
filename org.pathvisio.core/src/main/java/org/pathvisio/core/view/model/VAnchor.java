@@ -43,7 +43,8 @@ import org.pathvisio.core.view.shape.ShapeRegistry;
  * 
  * @author unknown, finterly
  */
-public class VAnchor extends VElement implements VLinkableTo, LinkProvider, Adjustable {
+public class VAnchor extends VElement implements VLinkableTo, Adjustable {
+	
 	private Anchor mAnchor;
 	private VLineElement line;
 	private Handle handle;
@@ -210,7 +211,7 @@ public class VAnchor extends VElement implements VLinkableTo, LinkProvider, Adju
 	}
 
 	/**
-	 * Returns the z-order from the model //TODO public? 
+	 * Returns the z-order from the model //TODO public?
 	 */
 	@Override
 	public int getZOrder() {

@@ -193,7 +193,7 @@ public class PathwayTableModel extends AbstractTableModel implements SelectionLi
 			PropertyView p = getPropertyAt(rowIndex);
 			p.setValue(aValue);
 		}
-		swingEngine.getEngine().getActiveVPathway().redrawDirtyRect();
+		swingEngine.getEngine().getActiveVPathway().redraw();
 	}
 
 	public String getColumnName(int column) {

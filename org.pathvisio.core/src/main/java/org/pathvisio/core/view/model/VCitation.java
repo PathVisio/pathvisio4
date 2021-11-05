@@ -43,16 +43,17 @@ public class VCitation extends VElement implements VElementMouseListener {
 	static final String FONT_NAME = "Arial";
 	static final Color FONT_COLOR = new Color(0, 0, 128);
 	static final int M_PADDING = 3;
-	private VPathwayObject parent;
+	private VPathwayElement parent;
 	private Point2D rPosition;
 
 	/**
-	 * @param canvas    The parent VPathway
-	 * @param parent    The Graphics for which the references need to be displayed
-	 * @param rPosition The position to place the references, relative to the parent
+	 * @param canvas    the parent VPathwayModel
+	 * @param parent    the VPathwayElement for which the references need to be
+	 *                  displayed
+	 * @param rPosition the position to place the references, relative to the parent
 	 *                  Graphics
 	 */
-	public VCitation(VPathwayModel canvas, VPathwayObject parent, Point2D rPosition) {
+	public VCitation(VPathwayModel canvas, VPathwayElement parent, Point2D rPosition) {
 		super(canvas);
 		this.parent = parent;
 		this.rPosition = rPosition;

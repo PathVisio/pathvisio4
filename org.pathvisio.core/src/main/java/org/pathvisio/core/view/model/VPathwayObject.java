@@ -23,7 +23,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.List;
 
 import org.pathvisio.debug.DebugList;
-import org.pathvisio.model.PathwayElement;
+import org.pathvisio.model.PathwayObject;
 import org.pathvisio.event.PathwayObjectEvent;
 import org.pathvisio.event.PathwayObjectListener;
 
@@ -33,7 +33,7 @@ import org.pathvisio.event.PathwayObjectListener;
  */
 public abstract class VPathwayObject extends VElement implements PathwayObjectListener {
 
-	protected PathwayElement gdata = null;
+	protected PathwayObject gdata = null;
 
 	/**
 	 * Children is everything that moves when this element is dragged, including
@@ -41,7 +41,7 @@ public abstract class VPathwayObject extends VElement implements PathwayObjectLi
 	 */
 	private List<VElement> children = new DebugList<VElement>();
 
-	public VPathwayObject(VPathwayModel canvas, PathwayElement o) {
+	public VPathwayObject(VPathwayModel canvas, PathwayObject o) {
 		super(canvas);
 		o.addListener(this);
 		gdata = o;
@@ -52,7 +52,7 @@ public abstract class VPathwayObject extends VElement implements PathwayObjectLi
 	 * 
 	 * @return
 	 */
-	public PathwayElement getPathwayElement() {
+	public PathwayObject getPathwayElement() {
 		return gdata;
 	}
 

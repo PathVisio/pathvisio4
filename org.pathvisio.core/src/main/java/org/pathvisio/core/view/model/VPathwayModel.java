@@ -46,17 +46,22 @@ import org.pathvisio.core.Engine;
 import org.pathvisio.debug.Logger;
 import org.pathvisio.model.type.GroupType;
 import org.pathvisio.model.DataNode;
+import org.pathvisio.model.DataNode.State;
+import org.pathvisio.model.GraphLink.LinkableTo;
 import org.pathvisio.model.GraphicalLine;
 import org.pathvisio.model.Group;
+import org.pathvisio.model.Groupable;
 import org.pathvisio.model.Interaction;
 import org.pathvisio.model.Label;
 import org.pathvisio.model.LineElement;
 import org.pathvisio.model.PathwayModel;
 import org.pathvisio.model.PathwayModel.StatusFlagEvent;
+import org.pathvisio.model.PathwayObject;
 import org.pathvisio.model.Shape;
 import org.pathvisio.model.PathwayElement;
 import org.pathvisio.model.LineElement.Anchor;
 import org.pathvisio.model.LineElement.LinePoint;
+import org.pathvisio.model.Pathway;
 import org.pathvisio.event.PathwayEvent;
 import org.pathvisio.event.PathwayListener;
 import org.pathvisio.core.preferences.GlobalPreference;
@@ -215,47 +220,105 @@ public class VPathwayModel implements PathwayListener {
 
 	/**
 	 * Map the contents of a single data object to this VPathway.
+	 * 
+	 * @param o the model pathway element.
 	 */
 	private VPathwayObject fromModelElement(PathwayElement o) {
 		VPathwayObject result = null;
-		switch (o.getObjectType()) {
-		case DATANODE:
-			result = new VDataNode(this, o);
-			break;
-		case SHAPE:
-			result = new VShape(this, o);
-			break;
-		case LINE:
-			result = new VLineElement(this, o);
-			break;
-		case GRAPHLINE:
-			result = new VLineElement(this, o);
-			break;
-		case MAPPINFO:
-			VInfoBox mi = new VInfoBox(this, o);
-			result = mi;
-			mi.markDirty();
-			break;
-		case LABEL:
-			result = new VLabel(this, o);
-			break;
-		case GROUP:
-			result = new VGroup(this, o);
-			break;
-		case STATE:
-			result = new VState(this, o);
-			break;
-		case LEGEND:
-			result = new Legend(this, o);
-			break;
-		default:
-			break;
+
+		if (o.getClass() == DataNode.class) {
+			return fromModelDataNode((DataNode) o);
+		} else if (o.getClass() == State.class) {
+			return fromModelState((State) o);
+		} else if (o.getClass() == Interaction.class) {
+			return fromModelLineElement((Interaction) o);
+		} else if (o.getClass() == GraphicalLine.class) {
+			return fromModelLineElement((GraphicalLine) o);
+		} else if (o.getClass() == Label.class) {
+			return fromModelLabel((Label) o);
+		} else if (o.getClass() == Shape.class) {
+			return fromModelShape((Shape) o);
+		} else if (o.getClass() == Group.class) {
+			return fromModelGroup((Group) o);
+		} else if (o.getClass() == Pathway.class) {
+			return fromModelPathway((Pathway) o);
+		} else {
+			return null;
 		}
-		return result;
 	}
 
 	/**
-	 * used by undo manager.
+	 * Map the contents of a single {@link DataNode} to this VPathwayModel.
+	 * 
+	 * @param o the model pathway element.
+	 * @return
+	 */
+	private VPathwayObject fromModelDataNode(DataNode o) {
+		return new VDataNode(this, o);
+	}
+
+	/**
+	 * Map the contents of a single {@link State} to this VPathwayModel.
+	 * 
+	 * @param o the model pathway element.
+	 * @return
+	 */
+	private VPathwayObject fromModelState(State o) {
+		return new VState(this, o);
+	}
+
+	/**
+	 * Map the contents of a single {@link LineElement} to this VPathwayModel.
+	 * 
+	 * @param o the model pathway element.
+	 * @return
+	 */
+	private VPathwayObject fromModelLineElement(LineElement o) {
+		return new VLineElement(this, o);
+	}
+
+	/**
+	 * Map the contents of a single {@link Label} to this VPathwayModel.
+	 * 
+	 * @param o the model pathway element.
+	 * @return
+	 */
+	private VPathwayObject fromModelLabel(Label o) {
+		return new VLabel(this, o);
+	}
+
+	/**
+	 * Map the contents of a single {@link Shape} to this VPathwayModel.
+	 * 
+	 * @param o the model pathway element.
+	 * @return
+	 */
+	private VPathwayObject fromModelShape(Shape o) {
+		return new VShape(this, o);
+	}
+
+	/**
+	 * Map the contents of a single {@link Group} to this VPathwayModel.
+	 * 
+	 * @param o the model pathway element.
+	 * @return
+	 */
+	private VPathwayObject fromModelGroup(Group o) {
+		return new VGroup(this, o);
+	}
+
+	/**
+	 * Map the contents of a single {@link Pathway} to this VPathwayModel.
+	 * 
+	 * @param o the model pathway element.
+	 * @return
+	 */
+	private VPathwayObject fromModelPathway(Pathway o) {
+		return new VInfoBox(this, o);
+	}
+
+	/**
+	 * Used by undo manager.
 	 */
 	public void replacePathway(PathwayModel originalState) {
 		boolean changed = data.hasChanged();
@@ -274,7 +337,7 @@ public class VPathwayModel implements PathwayListener {
 		pressedObject = null;
 		data.transferStatusFlagListeners(originalState);
 		data = null;
-		pointsMtoV = new HashMap<MPoint, VPoint>();
+		pointsMtoV = new HashMap<LinePoint, VPoint>();
 		fromModel(originalState);
 
 		if (changed != originalState.hasChanged()) {
@@ -289,7 +352,7 @@ public class VPathwayModel implements PathwayListener {
 		Logger.log.trace("Create view structure");
 
 		data = aData;
-		for (PathwayElement o : data.getDataObjects()) {
+		for (PathwayElement o : data.getPathwayElements()) {
 			fromModelElement(o);
 		}
 
@@ -325,14 +388,6 @@ public class VPathwayModel implements PathwayListener {
 	}
 
 	/**
-	 * Deprecated: Does nothing, redraws are now scheduled by Swing. call
-	 * addDirtyRect() or redraw() instead, or remove calls to this altogether
-	 */
-	@Deprecated
-	public void redrawDirtyRect() {
-	}
-
-	/**
 	 * Sets the MappInfo containing information on the pathway
 	 *
 	 * @param mappInfo
@@ -358,12 +413,12 @@ public class VPathwayModel implements PathwayListener {
 	}
 
 	/**
-	 * Gets the view representation {@link VPathwayObject} of the given model element
-	 * {@link PathwayElement}
+	 * Gets the view representation {@link VPathwayObject} of the given model
+	 * element {@link PathwayElement}
 	 *
 	 * @param e
-	 * @return the {@link VPathwayObject} representing the given {@link PathwayElement} or
-	 *         <code>null</code> if no view is available
+	 * @return the {@link VPathwayObject} representing the given
+	 *         {@link PathwayElement} or <code>null</code> if no view is available
 	 */
 	public VPathwayObject getPathwayElementView(PathwayElement e) {
 		// TODO: store Graphics in a hashmap to improve speed
@@ -508,76 +563,89 @@ public class VPathwayModel implements PathwayListener {
 	private LinkAnchor currentLinkAnchor;
 
 	/**
-	 * @arg p2d point where mouse is at
+	 * Links a given point to an {@link VLinkableTo} object.
+	 * 
+	 * @param p2d the point where mouse is at
+	 * @param g   the handle
 	 */
 	private void linkPointToObject(Point2D p2d, Handle g) {
 		if (dragUndoState == DRAG_UNDO_CHANGE_START) {
 			dragUndoState = DRAG_UNDO_CHANGED;
 		}
 		hideLinkAnchors();
-		VPoint p = (VPoint) g.getAdjustable();
-		VLineElement l = p.getLine();
-		PathwayElement pe = l.getPathwayElement();
-		List<LinkProvider> objects = getLinkProvidersAt(p2d);
-		// Fix for preventing grouped line to link to its own group
-		// Remove the group from the list of linkproviders
-		// Also remove the line anchors to prevent linking a line
-		// to it's own anchors
+		VPoint vPoint = (VPoint) g.getAdjustable();
+		VLineElement vLine = vPoint.getLine();
+		LineElement line = vLine.getPathwayElement();
+		// get linkproviders for given location
+		List<LinkProvider> linkProviders = getLinkProvidersAt(p2d);
+		/*
+		 * Fix for preventing grouped line to link to its own group: Remove the group
+		 * from the list of linkproviders. Also remove the line anchors to prevent
+		 * linking a line to it's own anchors.
+		 */
 		if (g.getAdjustable() instanceof VPoint) {
-			if (pe.getGroupRef() != null) {
-				PathwayElement group = getPathwayModel().getGroupById(pe.getGroupRef());
-				objects.remove(getPathwayElementView(group));
+			Group group = line.getGroupRef();
+			if (group != null) {
+				linkProviders.remove(getPathwayElementView(group));
 			}
-			for (VAnchor va : l.getVAnchors()) {
-				objects.remove(va);
+			for (VAnchor va : vLine.getVAnchors()) {
+				linkProviders.remove(va);
 			}
 		}
-
-		GraphIdContainer idc = null;
-		for (LinkProvider lp : objects) {
-			if (lp instanceof VAnchor && ((VAnchor) lp).getMAnchor().getShape().isDisallowLinks()) {
+		LinkableTo linkableTo = null;
+		for (LinkProvider linkProvider : linkProviders) {
+			// do nothing if linkprovider is an anchor with disallowlinks true
+			if (linkProvider instanceof VAnchor
+					&& ((VAnchor) linkProvider).getAnchor().getShapeType().isDisallowLinks()) {
 				break;
 			}
-			lp.showLinkAnchors();
-			LinkAnchor la = lp.getLinkAnchorAt(p2d);
-			if (la != null) {
-				// Set graphRef
-				la.link(p.getMPoint());
-				idc = la.getGraphIdContainer();
+			linkProvider.showLinkAnchors();
+			LinkAnchor linkAnchor = linkProvider.getLinkAnchorAt(p2d);
+			if (linkAnchor != null) {
+				// set elementRef to link
+				linkAnchor.link(vPoint.getLinePoint());
+				linkableTo = linkAnchor.getLinkableTo();
 				if (currentLinkAnchor != null) {
 					currentLinkAnchor.unhighlight();
 				}
-				la.highlight();
-				currentLinkAnchor = la;
+				linkAnchor.highlight();
+				currentLinkAnchor = linkAnchor;
 				break;
 			}
 		}
-
-		if (idc == null && p.getMPoint().isLinked()) {
-			String graphRef = p.getMPoint().getGraphRef();
-			p.getMPoint().unlink();
+		// TODO make sure links update from model to view to model...?
+		if (linkableTo == null && vPoint.getLinePoint().getElementRef() != null) {
+			LinkableTo elementRef = vPoint.getLinePoint().getElementRef();
+			vPoint.getLinePoint().unlink();
 			if (currentLinkAnchor != null) {
-				if (pe instanceof LineElement && isAnotherLineLinked(graphRef, (LineElement) pe)) {
-
-				} else if (currentLinkAnchor.getGraphIdContainer() instanceof MAnchor
-						&& currentLinkAnchor.getGraphIdContainer().getGraphId().equals(graphRef)) {
-					currentLinkAnchor.getGraphIdContainer().setGraphId(null);
+				if (isAnotherLineLinked(elementRef, (LineElement) line)) {
+					// do nothing if another line linked to object
+				} else if (currentLinkAnchor.getLinkableTo() instanceof Anchor
+						&& currentLinkAnchor.getLinkableTo() == elementRef) {
+					currentLinkAnchor.getLinkableTo().setElementId(null); // TODO what is this for?
 				}
 				currentLinkAnchor.unhighlight();
 			}
 		}
 	}
 
-	private boolean isAnotherLineLinked(String graphRef, LineElement currLine) {
-		for (PathwayElement element : getPathwayModel().getDataObjects()) {
+	/**
+	 * Checks if another line is linked? TODO
+	 * 
+	 * @param elementRef
+	 * @param currLine
+	 * @return
+	 */
+	private boolean isAnotherLineLinked(LinkableTo elementRef, LineElement currLine) {
+		for (PathwayElement element : getPathwayModel().getPathwayElements()) {
 			if (element instanceof LineElement) {
 				if (element.equals(currLine)) {
 					continue;
 				}
-				for (MPoint point : element.getMPoints()) {
-					if (point.getGraphRef() == null) {
+				for (LinePoint point : ((LineElement) element).getLinePoints()) {
+					if (point.getElementRef() == null) {
 						// skip point
-					} else if (graphRef != null && point.getGraphRef().equals(graphRef)) {
+					} else if (elementRef != null && point.getElementRef() == elementRef) {
 						return true;
 					}
 				}
@@ -660,8 +728,10 @@ public class VPathwayModel implements PathwayListener {
 			if (!lastMouseOver.contains(vpe)) {
 				lastMouseOver.add(vpe);
 				stateEntered = true;
-				if (vpe instanceof VLabel && !((VLabel) vpe).gdata.getHref().equals("")) {
-					lastEnteredElement = vpe;
+				if (vpe instanceof VLabel) {
+					if (!((VLabel) vpe).getPathwayElement().getHref().equals("")) {
+						lastEnteredElement = vpe;
+					}
 				} else {
 					fireVElementMouseEvent(new VElementMouseEvent(this, VElementMouseEvent.TYPE_MOUSEENTER, vpe, ve));
 				}
@@ -709,8 +779,8 @@ public class VPathwayModel implements PathwayListener {
 
 		public void actionPerformed(ActionEvent e) {
 			if (!tooltipDisplayed) {
-				fireVPathwayEvent(new VPathwayEvent(VPathwayModel.this, getObjectsAt(lastEvent.getLocation()), lastEvent,
-						VPathwayEventType.ELEMENT_HOVER));
+				fireVPathwayEvent(new VPathwayEvent(VPathwayModel.this, getObjectsAt(lastEvent.getLocation()),
+						lastEvent, VPathwayEventType.ELEMENT_HOVER));
 				tooltipDisplayed = true;
 			}
 		}
@@ -761,10 +831,16 @@ public class VPathwayModel implements PathwayListener {
 		selection.addToSelection(o);
 	}
 
-	// opens href of a Label with ctrl + click
+	/**
+	 * Opens href of a Label with ctrl + click.
+	 * 
+	 * @param e
+	 * @param o
+	 * @return
+	 */
 	private boolean openHref(MouseEvent e, VElement o) {
 		if (e.isKeyDown(128) && o != null && o instanceof VLabel) {
-			String href = ((VLabel) o).gdata.getHref();
+			String href = ((VLabel) o).getPathwayElement().getHref();
 			if (selection.getSelection().size() < 1 && !href.equals("")) {
 				fireVPathwayEvent(new VPathwayEvent(this, o, VPathwayEventType.HREF_ACTIVATED));
 				return true;
@@ -829,7 +905,7 @@ public class VPathwayModel implements PathwayListener {
 			// if it was a click, give object the initial size.
 			else if (newObject != null && Math.abs(vDragStart.x - e.getX()) <= MIN_DRAG_LENGTH
 					&& Math.abs(vDragStart.y - e.getY()) <= MIN_DRAG_LENGTH) {
-				newObject.setInitialSize();
+				DefaultTemplates.setInitialSize(newObject);
 			}
 			newObject = null;
 			setNewTemplate(null);
@@ -978,7 +1054,7 @@ public class VPathwayModel implements PathwayListener {
 	public void resetHighlight() {
 		for (VElement o : drawingObjects)
 			o.unhighlight();
-		redrawDirtyRect();
+		redraw();
 	}
 
 	/**
@@ -1102,7 +1178,7 @@ public class VPathwayModel implements PathwayListener {
 		} else
 		// Shift or Ctrl not pressed
 		{
-			// If pressedobject is not selectionbox:
+			// If pressed object is not selectionbox:
 			// Clear current selection and select pressed object
 			if (!(pressedObject instanceof SelectionBox)) {
 				clearSelection();
@@ -1118,7 +1194,7 @@ public class VPathwayModel implements PathwayListener {
 					clearSelection();
 			}
 		}
-		redrawDirtyRect();
+		redraw();
 	}
 
 	/**
@@ -1254,6 +1330,7 @@ public class VPathwayModel implements PathwayListener {
 		}
 		selection.stopSelecting();
 	}
+
 	/**
 	 * select all objects of the pathway.
 	 */
@@ -1284,22 +1361,23 @@ public class VPathwayModel implements PathwayListener {
 		 * Check group status of current selection
 		 */
 		for (VPathwayObject g : selection) {
-			PathwayElement pe = g.getPathwayElement();
-			String ref = pe.getGroupRef();
+			PathwayObject pe = g.getPathwayElement();
+			String ref = null;
+			if (pe instanceof Groupable) {
+				ref = ((Groupable) pe).getGroupRef().getElementId();
+			}
 			// If not a group
-			if (pe.getObjectType() != ObjectType.GROUP) {
-				// and not a member of a group
+			if (pe.getClass() != Group.class) {
+				// and not a member of a group, then selection needs to be grouped
 				if (ref == null) {
-					// then selection needs to be grouped
 					groupSelection = true;
 				}
-				// and is a member of a group
+				// and is a member of a group, recursively get all parent group references.
 				else {
-					// recursively get all parent group references.
 					while (ref != null) {
 						groupRefList.add(ref);
-						PathwayElement refGroup = data.getGroupById(ref);
-						ref = refGroup.getGroupRef();
+						Group refGroup = (Group) data.getPathwayObject(ref);
+						ref = refGroup.getGroupRef().getElementId();
 					}
 				}
 			}
@@ -1310,9 +1388,9 @@ public class VPathwayModel implements PathwayListener {
 			groupSelection = true;
 		}
 
-		// In all cases, any old groups in selection should be disolved.
+		// In all cases, any old groups in selection should be dissolved.
 		for (String id : groupRefList) {
-			PathwayElement e = data.getGroupById(id);
+			Group e = (Group) data.getPathwayObject(id);
 			if (e != null)
 				data.remove(e);
 		}
@@ -1326,16 +1404,14 @@ public class VPathwayModel implements PathwayListener {
 		// No more nested or overlapping groups!
 		else {
 			// Form new group with all selected elementsselectPathwayObjects
-			PathwayElement group = PathwayElement.createPathwayElement(ObjectType.GROUP);
+			Group group = new Group(GroupType.GROUP); // TODO default?
 			data.add(group);
-			group.setGroupStyle(GroupType.NONE);
-			String id = group.createGroupId();
-
 			for (VPathwayObject g : selection) {
-				PathwayElement pe = g.getPathwayElement();
-				pe.setGroupRef(id);
+				PathwayElement pe = (PathwayElement) g.getPathwayElement();
+				if (pe instanceof Groupable) {
+					((Groupable) pe).setGroupRefTo(group);
+				}
 			}
-
 			// Select new group in view
 			VPathwayObject vg = getPathwayElementView(group);
 			if (vg != null) {
@@ -1347,6 +1423,9 @@ public class VPathwayModel implements PathwayListener {
 		return null;
 	}
 
+	/**
+	 * @param vpe
+	 */
 	private void fireHyperlinkUpdate(VElement vpe) {
 		int type;
 		if (stateEntered && stateCtrl) {
@@ -1541,36 +1620,34 @@ public class VPathwayModel implements PathwayListener {
 	}
 
 	/*
-	 * when line deleted need to: see if other lines contain same graphIds (this
-	 * means that 2 different lines are attached to the same anchor) if so - ignore
-	 * graphId otherwise - loop through pathway and find any lines with anchors that
-	 * contain GraphIds for the deleted line and remove.
+	 * When line deleted need to: see if other lines connected to the same {@link
+	 * LinkableTo}. (this means that 2 different lines are attached to the same
+	 * anchor) if so - ignore graphId otherwise - loop through pathway and find any
+	 * lines with anchors that contain GraphIds for the deleted line and remove.
 	 */
-	private void removeRefFromConnectingAnchors(String graphId1, String graphId2) {
-		if (graphId1 == null && (graphId2 == null)) {
+	private void removeRefFromConnectingAnchors(LinkableTo linkableTo1, LinkableTo linkableTo2) {
+		if (linkableTo1 == null && (linkableTo2 == null)) {
 			return;
 		}
-		for (PathwayElement element : getPathwayModel().getDataObjects()) {
-			if (element instanceof LineElement) {
-				for (MPoint point : element.getMPoints()) {
-					if (point.getGraphRef() == null) {
-						// skip point
-					} else if (graphId1 != null && point.getGraphRef().equals(graphId1)) {
-						graphId1 = null;
-					} else if (graphId2 != null && point.getGraphRef().equals(graphId2)) {
-						graphId2 = null;
-					}
+		for (LineElement element : getPathwayModel().getLineElements()) {
+			for (LinePoint point : ((LineElement) element).getLinePoints()) {
+				if (point.getElementRef() == null) {
+					// skip point
+				} else if (linkableTo1 != null && point.getElementRef() == linkableTo1) {
+					linkableTo1 = null;
+				} else if (linkableTo2 != null && point.getElementRef() == linkableTo2) {
+					linkableTo2 = null;
 				}
 			}
 		}
-		if (graphId1 == null && (graphId2 == null)) {
+		if (linkableTo1 == null && (linkableTo2 == null)) {
 			return;
 		}
-		for (PathwayElement element : getPathwayModel().getDataObjects()) {
+		for (PathwayElement element : getPathwayModel().getPathwayElements()) {
 			if (element instanceof LineElement) {
-				for (MAnchor anchor : element.getMAnchors()) {
+				for (Anchor anchor : ((LineElement) element).getAnchors()) {
 					if (anchor.getGraphId() != null
-							&& (anchor.getGraphId().equals(graphId1) || anchor.getGraphId().equals(graphId2))) {
+							&& (anchor.getGraphId().equals(linkableTo1) || anchor.getGraphId().equals(linkableTo2))) {
 						anchor.setGraphId(null);
 					}
 				}
@@ -1579,8 +1656,8 @@ public class VPathwayModel implements PathwayListener {
 	}
 
 	/**
-	 * Calculate the board size. Calls {@link VElement#getVBounds()} for
-	 * every element and adds all results together to obtain the board size
+	 * Calculate the board size. Calls {@link VElement#getVBounds()} for every
+	 * element and adds all results together to obtain the board size
 	 */
 	public Dimension calculateVSize() {
 		Rectangle2D bounds = new Rectangle2D.Double();
@@ -1700,7 +1777,7 @@ public class VPathwayModel implements PathwayListener {
 			}
 
 			selection.fitToSelection();
-			redrawDirtyRect();
+			redraw();
 		}
 	}
 
@@ -1972,7 +2049,8 @@ public class VPathwayModel implements PathwayListener {
 	public List<VPathwayObject> getSelectedNonGroupGraphics() {
 		List<VPathwayObject> result = new ArrayList<VPathwayObject>();
 		for (VElement g : drawingObjects) {
-			if (g.isSelected() && g instanceof VPathwayObject && !(g instanceof SelectionBox) && !((g instanceof VGroup))) {
+			if (g.isSelected() && g instanceof VPathwayObject && !(g instanceof SelectionBox)
+					&& !((g instanceof VGroup))) {
 				result.add((VPathwayObject) g);
 			}
 		}
@@ -2149,7 +2227,7 @@ public class VPathwayModel implements PathwayListener {
 			}
 		}
 		moveGraphicsTop(getSelectedGraphics());
-		redrawDirtyRect();
+		redraw();
 	}
 
 	public void pasteFromClipboard() {

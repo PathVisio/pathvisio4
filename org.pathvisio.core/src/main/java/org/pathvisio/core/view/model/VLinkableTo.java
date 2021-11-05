@@ -34,7 +34,7 @@ import org.pathvisio.model.GraphLink.LinkableTo;
  * 
  * @author finterly
  */
-public interface VLinkableTo {
+public interface VLinkableTo extends LinkProvider {
 
 	public int getZOrder(); //TODO has to be public 
 

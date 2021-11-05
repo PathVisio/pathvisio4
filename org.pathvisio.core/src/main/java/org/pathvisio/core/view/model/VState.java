@@ -20,7 +20,6 @@ import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 
 import org.pathvisio.model.DataNode.State;
-import org.pathvisio.model.PathwayElement;
 
 /**
  * This class represents the view of a {@link State} PathwayElement.
@@ -29,7 +28,7 @@ import org.pathvisio.model.PathwayElement;
  */
 public class VState extends VShapedElement {
 
-	public VState(VPathwayModel canvas, PathwayElement o) {
+	public VState(VPathwayModel canvas, State o) {
 		super(canvas, o);
 	}
 

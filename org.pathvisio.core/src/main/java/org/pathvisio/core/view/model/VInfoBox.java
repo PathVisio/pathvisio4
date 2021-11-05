@@ -24,52 +24,69 @@ import java.awt.font.TextLayout;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
-import org.pathvisio.model.PathwayElement;
+import org.pathvisio.model.Pathway;
 
 /**
- * //TODO: view.InfoBox corresponds in some ways to
+ * Infobox contains the meta-information (e.g. title, organism) for a pathway
+ * model. The infobox is always displayed in the top left corner at coordinate
+ * (0,0).
+ * 
+ * view.InfoBox corresponds in some ways to
  * model.PathwayElement(ObjectType.MAPPINFO) and in some ways to
  * model.PathwayElement(ObjectType.INFOBOX). This confusion is rooted in
  * inconsistencies in GPML. This should be cleaned up one day.
  * 
  * @author unknown, finterly
  */
-public class VInfoBox extends VPathwayObject {
+public class VInfoBox extends VPathwayElement {
+
+	/**
+	 * The infobox is always displayed in the top left corner at coordinate (0,0).
+	 */
+	static final double LEFT = 0;
+	static final double TOP = 0;
+
 	static final int V_SPACING = 5;
 	static final int H_SPACING = 10;
 	static final int INITIAL_SIZE = 200;
 
-	// Elements not stored in gpml
+	// graphics for info box not stored in gpml
 	String fontName = "Times New Roman";
 	String fontWeight = "regular";
 	static final double M_INITIAL_FONTSIZE = 12.0;
 
+	// initialize, real size is calculated on first call to draw()
 	int sizeX = 1;
-	int sizeY = 1; // Real size is calculated on first call to draw()
+	int sizeY = 1;
 
-	public VInfoBox(VPathwayModel canvas, PathwayElement o) {
+	public VInfoBox(VPathwayModel canvas, Pathway o) {
 		super(canvas, o);
 		canvas.setMappInfo(this);
+	}
+
+	/**
+	 * Gets the model representation (PathwayElement) of this class
+	 * 
+	 * @return
+	 */
+	@Override
+	public Pathway getPathwayElement() {
+		return (Pathway) super.getPathwayElement();
 	}
 
 	protected VCitation createCitation() {
 		return new VCitation(canvas, this, new Point2D.Double(1, 0));
 	}
 
-	// public Point getBoardSize() { return new Point((int)gdata.getMBoardWidth(),
-	// (int)gdata.getMBoardHeight()); }
-
 	int getVFontSize() {
 		return (int) (vFromM(M_INITIAL_FONTSIZE));
 	}
 
-	protected void vMoveBy(double vdx, double vdy) {
-//		markDirty();
-		gdata.setMTop(gdata.getMTop() + mFromV(vdy));
-		gdata.setMLeft(gdata.getMLeft() + mFromV(vdx));
-//		markDirty();
-	}
-
+	/**
+	 * Calculates size of infobox based on text length, and draws infobox.
+	 * 
+	 * @param g the {@link Graphics2D}
+	 */
 	public void doDraw(Graphics2D g) {
 		Font f = new Font(fontName, Font.PLAIN, getVFontSize());
 		Font fb = new Font(f.getFontName(), Font.BOLD, f.getSize());
@@ -80,22 +97,26 @@ public class VInfoBox extends VPathwayObject {
 
 		// Draw Name, Organism, Data-Source, Version, Author, Maintained-by, Email,
 		// Availability and last modified
-		String[][] text = new String[][] { { "Title: ", gdata.getMapInfoName() },
-				{ "Maintained by: ", gdata.getMaintainer() }, { "Email: ", gdata.getEmail() },
-				{ "Availability: ", gdata.getCopyright() }, { "Last modified: ", gdata.getLastModified() },
-				{ "Organism: ", gdata.getOrganism() }, { "Data Source: ", gdata.getMapInfoDataSource() } };
-
+		String[][] text = new String[][] { { "Title: ", getPathwayElement().getTitle() },
+				{ "Organism: ", getPathwayElement().getOrganism() },
+//				{"Source: ", gdata.getSource()}, //TODO 
+//				{"Version: ", gdata.getVersion()},
+//				{"License: ", gdata.getLicense()},
+//				{"Last modified: ", gdata.getLastModified()},
+//				{"Data Source: ", gdata.getMapInfoDataSource()}
+		};
 		int shift = 0;
-		int vLeft = (int) vFromM(gdata.getMLeft());
-		int vTop = (int) vFromM(gdata.getMTop());
+		int vLeft = (int) vFromM(LEFT);
+		int vTop = (int) vFromM(TOP);
 
 		int newSizeX = sizeX;
 		int newSizeY = sizeY;
 
 		FontRenderContext frc = g.getFontRenderContext();
 		for (String[] s : text) {
-			if (s[1] == null || s[1].equals(""))
+			if (s[1] == null || s[1].equals("")) {
 				continue; // Skip empty labels
+			}
 			TextLayout tl0 = new TextLayout(s[0], fb, frc);
 			TextLayout tl1 = new TextLayout(s[1], f, frc);
 			Rectangle2D b0 = tl0.getBounds();
@@ -112,9 +133,12 @@ public class VInfoBox extends VPathwayObject {
 		}
 		newSizeY = shift + 10; // add 10 for safety
 
-		// if the size was incorrect, mark dirty and draw again.
-		// note: we can't draw again right away because the clip rect
-		// is set to a too small region.
+		/*
+		 * If the size was incorrect, mark dirty and draw again.
+		 * 
+		 * Note: we can't draw again right away because the clip rect is set to a too
+		 * small region.
+		 */
 		if (newSizeX != sizeX || newSizeY != sizeY) {
 			sizeX = newSizeX;
 			sizeY = newSizeY;
@@ -122,9 +146,12 @@ public class VInfoBox extends VPathwayObject {
 		}
 	}
 
+	/**
+	 * TODO is this used?
+	 */
 	protected Shape getVShape(boolean rotate) {
-		double vLeft = vFromM(gdata.getMLeft());
-		double vTop = vFromM(gdata.getMTop());
+		double vLeft = vFromM(LEFT);
+		double vTop = vFromM(TOP);
 		double vW = sizeX;
 		double vH = sizeY;
 		if (vW == 1 && vH == 1) {
@@ -134,7 +161,18 @@ public class VInfoBox extends VPathwayObject {
 		return new Rectangle2D.Double(vLeft, vTop, vW, vH);
 	}
 
+	/**
+	 * Do nothing. Infobox is always displayed in the top left corner at coordinate
+	 * (0,0) and cannot be moved.
+	 */
+	protected void vMoveBy(double vdx, double vdy) {
+		// do nothing, can't move infobox
+	}
+
+	/**
+	 * Do nothing. Infobox cannot be resized.
+	 */
 	protected void setVScaleRectangle(Rectangle2D r) {
-		// Do nothing, can't resize infobox
+		// do nothing, can't resize infobox
 	}
 }

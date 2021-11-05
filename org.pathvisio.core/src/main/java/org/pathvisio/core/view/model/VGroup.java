@@ -31,6 +31,7 @@ import org.pathvisio.core.view.GroupPainter;
 import org.pathvisio.core.view.VElementMouseEvent;
 import org.pathvisio.core.view.VElementMouseListener;
 import org.pathvisio.model.Group;
+import org.pathvisio.model.Groupable;
 import org.pathvisio.model.PathwayElement;
 
 /**
@@ -42,7 +43,7 @@ import org.pathvisio.model.PathwayElement;
  * 
  * @author unknown, finterly
  */
-public class VGroup extends VShapedElement implements LinkProvider, VElementMouseListener {
+public class VGroup extends VShapedElement implements VElementMouseListener {
 
 	public static final int FLAG_SELECTED = 1 << 0;
 	public static final int FLAG_MOUSEOVER = 1 << 1;
@@ -63,56 +64,60 @@ public class VGroup extends VShapedElement implements LinkProvider, VElementMous
 		return (Group) super.getPathwayElement();
 	}
 
-	/**
-	 * Generates current id-ref pairs from all current groups
-	 *
-	 * @return HashMap<String, String>
-	 */
-	protected Map<String, String> getIdRefPairs() {
-		// idRefPairs<id, ref>
-		Map<String, String> idRefPairs = new HashMap<String, String>();
+//	/**
+//	 * TODO doesn't seem to be used anywhere
+//	 * 
+//	 * Generates current id-ref pairs from all current groups
+//	 *
+//	 * @return HashMap<String, String>
+//	 */
+//	protected Map<String, String> getIdRefPairs() {
+//		// idRefPairs<id, ref>
+//		Map<String, String> idRefPairs = new HashMap<String, String>();
+//
+//		// Populate hash map of id-ref pairs for all groups
+//		for (VElement vpe : canvas.getDrawingObjects()) {
+//			if (vpe instanceof VPathwayObject && vpe instanceof VGroup) {
+//				PathwayElement pe = ((VPathwayObject) vpe).getPathwayElement();
+//				if (pe.getGroupRef() != null) {
+//					idRefPairs.put(pe.getGroupId(), pe.getGroupRef());
+//				}
+//			}
+//		}
+//
+//		return idRefPairs;
+//	}
 
-		// Populate hash map of id-ref pairs for all groups
-		for (VElement vpe : canvas.getDrawingObjects()) {
-			if (vpe instanceof VPathwayObject && vpe instanceof VGroup) {
-				PathwayElement pe = ((VPathwayObject) vpe).getPathwayElement();
-				if (pe.getGroupRef() != null) {
-					idRefPairs.put(pe.getGroupId(), pe.getGroupRef());
-				}
-			}
-		}
-
-		return idRefPairs;
-	}
-
-	/**
-	 * Generates list of group references nested under this group
-	 *
-	 * @return ArrayList<String>
-	 */
-	protected List<String> getRefList() {
-		Map<String, String> idRefPairs = this.getIdRefPairs();
-		List<String> refList = new ArrayList<String>();
-		String thisId = this.getPathwayElement().getGroupId();
-		refList.add(thisId);
-		boolean hit = true;
-
-		while (hit) {
-			hit = false;
-			// search for hits in hash map; add to refList
-			for (String id : idRefPairs.keySet()) {
-				if (refList.contains(idRefPairs.get(id))) {
-					refList.add(id);
-					hit = true;
-				}
-			}
-			// remove hits from hash map
-			for (int i = 0; i < refList.size(); i++) {
-				idRefPairs.remove(refList.get(i));
-			}
-		}
-		return refList;
-	}
+//	/**
+//	 * TODO doesn't seem to be used anywhere
+//	 * 
+//	 * Generates list of group references nested under this group
+//	 *
+//	 * @return ArrayList<String>
+//	 */
+//	protected List<String> getRefList() {
+//		Map<String, String> idRefPairs = this.getIdRefPairs();
+//		List<String> refList = new ArrayList<String>();
+//		String thisId = this.getPathwayElement().getGroupId();
+//		refList.add(thisId);
+//		boolean hit = true;
+//
+//		while (hit) {
+//			hit = false;
+//			// search for hits in hash map; add to refList
+//			for (String id : idRefPairs.keySet()) {
+//				if (refList.contains(idRefPairs.get(id))) {
+//					refList.add(id);
+//					hit = true;
+//				}
+//			}
+//			// remove hits from hash map
+//			for (int i = 0; i < refList.size(); i++) {
+//				idRefPairs.remove(refList.get(i));
+//			}
+//		}
+//		return refList;
+//	}
 
 	/**
 	 * Determines whether the area defined by the grouped elements contains the
@@ -123,6 +128,7 @@ public class VGroup extends VShapedElement implements LinkProvider, VElementMous
 	 * @param point - the point to check
 	 * @return True if the object contains the point, false otherwise
 	 */
+	@Override
 	protected boolean vContains(Point2D point) {
 		// return false if point falls on any individual element
 		for (VElement vpe : canvas.getDrawingObjects()) {
@@ -148,18 +154,21 @@ public class VGroup extends VShapedElement implements LinkProvider, VElementMous
 		List<VPathwayObject> gg = new ArrayList<VPathwayObject>();
 		// return true if group object is referenced by selection
 		for (VElement vpe : canvas.getDrawingObjects()) {
-			if (vpe instanceof VPathwayObject && vpe != this) {
-				VPathwayObject vpeg = (VPathwayObject) vpe;
-				PathwayElement pe = vpeg.getPathwayElement();
-				String ref = pe.getGroupRef();
-				if (ref != null && ref.equals(getPathwayElement().getGroupId())) {
-					gg.add(vpeg);
+			if (vpe instanceof VGroupable && vpe != this) {
+				VGroupable vpeg = (VGroupable) vpe;
+				Groupable pe = vpeg.getPathwayElement();
+				Group ref = pe.getGroupRef();
+				if (ref != null && ref.equals(getPathwayElement())) {
+					gg.add((VPathwayObject) vpeg);
 				}
 			}
 		}
 		return gg;
 	}
 
+	/**
+	 *
+	 */
 	@Override
 	public void select() {
 		for (VPathwayObject g : getGroupGraphics()) {
@@ -168,6 +177,9 @@ public class VGroup extends VShapedElement implements LinkProvider, VElementMous
 		super.select();
 	}
 
+	/**
+	 *
+	 */
 	@Override
 	public void deselect() {
 		for (VPathwayObject g : getGroupGraphics()) {
@@ -176,6 +188,9 @@ public class VGroup extends VShapedElement implements LinkProvider, VElementMous
 		super.deselect();
 	}
 
+	/**
+	 *
+	 */
 	@Override
 	protected void vMoveBy(double dx, double dy) {
 		canvas.moveMultipleElements(getGroupGraphics(), dx, dy);
@@ -184,6 +199,10 @@ public class VGroup extends VShapedElement implements LinkProvider, VElementMous
 		markDirty();
 	}
 
+	/**
+	 *
+	 */
+	@Override
 	protected void doDraw(Graphics2D g2d) {
 		// Build the flags
 		int flags = 0;
@@ -201,6 +220,10 @@ public class VGroup extends VShapedElement implements LinkProvider, VElementMous
 
 	boolean mouseover = false;
 
+	/**
+	 *
+	 */
+	@Override
 	public void vElementMouseEvent(VElementMouseEvent e) {
 		if (e.getElement() == this) {
 			boolean old = mouseover;
@@ -215,6 +238,10 @@ public class VGroup extends VShapedElement implements LinkProvider, VElementMous
 		}
 	}
 
+	/**
+	 *
+	 */
+	@Override
 	public void highlight(Color c) {
 		super.highlight(c);
 		// Highlight the children
@@ -223,12 +250,20 @@ public class VGroup extends VShapedElement implements LinkProvider, VElementMous
 		}
 	}
 
+	/**
+	 *
+	 */
+	@Override
 	protected Shape calculateVOutline() {
 		// Include rotation and stroke
 		Area a = new Area(getVShape(true));
 		return a;
 	}
 
+	/**
+	 *
+	 */
+	@Override
 	protected Shape getVShape(boolean rotate) {
 		Rectangle2D mb = null;
 		if (rotate) {
@@ -239,6 +274,10 @@ public class VGroup extends VShapedElement implements LinkProvider, VElementMous
 		return canvas.vFromM(mb);
 	}
 
+	/**
+	 *
+	 */
+	@Override
 	protected void setVScaleRectangle(Rectangle2D r) {
 		// TODO Auto-generated method stub
 
@@ -247,20 +286,35 @@ public class VGroup extends VShapedElement implements LinkProvider, VElementMous
 	private LinkProvider linkAnchorDelegate = new DefaultLinkAnchorDelegate(this);
 	private boolean anchorsShowing = false;
 
+	/**
+	 *
+	 */
+	@Override
 	public void showLinkAnchors() {
 		anchorsShowing = true;
 		linkAnchorDelegate.showLinkAnchors();
 	}
 
+	/**
+	 *
+	 */
+	@Override
 	public void hideLinkAnchors() {
 		anchorsShowing = false;
 		linkAnchorDelegate.hideLinkAnchors();
 	}
 
+	/**
+	 *
+	 */
+	@Override
 	public LinkAnchor getLinkAnchorAt(Point2D p) {
 		return linkAnchorDelegate.getLinkAnchorAt(p);
 	}
 
+	/**
+	 *
+	 */
 	@Override
 	protected void destroy() {
 		super.destroy();
@@ -270,6 +324,7 @@ public class VGroup extends VShapedElement implements LinkProvider, VElementMous
 	/**
 	 * Use this to override default linkAnchorDelegate
 	 */
+	@Override
 	public void setLinkAnchorDelegate(LinkProvider delegate) {
 		if (delegate == null)
 			throw new NullPointerException("passed illegal null value for delegate");

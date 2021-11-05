@@ -16,7 +16,7 @@
  ******************************************************************************/
 package org.pathvisio.core.view.model;
 
-import org.pathvisio.model.PathwayElement;
+import org.pathvisio.model.Label;
 
 /**
  * Represents the view of a PathwayElement with ObjectType.LABEL.
@@ -29,8 +29,17 @@ public class VLabel extends VShapedElement {
 	 * 
 	 * @param canvas - the VPathway this label will be part of
 	 */
-	public VLabel(VPathwayModel canvas, PathwayElement o) {
+	public VLabel(VPathwayModel canvas, Label o) {
 		super(canvas, o);
 	}
 
+	/**
+	 * Gets the model representation (PathwayElement) of this class
+	 * 
+	 * @return
+	 */
+	@Override
+	public Label getPathwayElement() {
+		return (Label) super.getPathwayElement();
+	}
 }

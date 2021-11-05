@@ -16,7 +16,6 @@
  ******************************************************************************/
 package org.pathvisio.core.view.model;
 
-import org.pathvisio.model.PathwayElement;
 import org.pathvisio.model.Shape;
 
 /**
@@ -30,7 +29,7 @@ public class VShape extends VShapedElement {
 	 * 
 	 * @param canvas - the VPathway this Shape will be part of
 	 */
-	public VShape(VPathwayModel canvas, PathwayElement o) {
+	public VShape(VPathwayModel canvas, Shape o) {
 		super(canvas, o);
 	}
 

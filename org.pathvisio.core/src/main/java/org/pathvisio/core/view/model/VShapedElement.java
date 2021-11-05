@@ -46,14 +46,14 @@ import org.pathvisio.core.view.model.LinAlg.Point;
 import org.pathvisio.core.view.shape.ShapeRegistry;
 
 /**
- * This is an {@link VPathwayObject} class representing shapelike forms, and
- * provides implementation for containing 8 handles placed in a (rotated)
- * rectangle around the shape and a rotation handle
+ * This class represents the view of {@link ShapedElement} pathway elements:
+ * {@link DataNode}, {@link State}, {@link Label}, {@link Shape}, and
+ * {@link Group}. Rotation is implemented with 8 handles placed in a (rotated)
+ * rectangle around the shape and a rotation handle.
  * 
  * @author unknown, finterly
  */
-public abstract class VShapedElement extends VPathwayElement
-		implements VLinkableTo, VGroupable, LinkProvider, Adjustable {
+public abstract class VShapedElement extends VPathwayElement implements VLinkableTo, VGroupable, Adjustable {
 
 	private static final double M_ROTATION_HANDLE_POSITION = 20.0;
 
@@ -76,7 +76,7 @@ public abstract class VShapedElement extends VPathwayElement
 	 * @param canvas
 	 * @param o
 	 */
-	public VShapedElement(VPathwayModel canvas, PathwayElement o) {
+	public VShapedElement(VPathwayModel canvas, ShapedElement o) {
 		super(canvas, o);
 	}
 

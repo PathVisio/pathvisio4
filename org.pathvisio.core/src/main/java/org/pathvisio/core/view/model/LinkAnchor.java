@@ -40,19 +40,19 @@ public class LinkAnchor extends VElement {
 	static final int HINT_STROKE_SIZE = 10;
 
 	double relX, relY;
-	LinkableTo idContainer;
-	VLinkableTo parent;
+	LinkableTo linkableTo;
+	VLinkableTo vLinkableTo;
 
 	public LinkAnchor(VPathwayModel canvas, VLinkableTo parent, LinkableTo idContainer, double relX, double relY) {
 		super(canvas);
 		this.relX = relX;
 		this.relY = relY;
-		this.idContainer = idContainer;
-		this.parent = parent;
+		this.linkableTo = idContainer;
+		this.vLinkableTo = parent;
 	}
 
 	public Shape getMatchArea() {
-		Point2D abs = idContainer.toAbsoluteCoordinate(new Point2D.Double(relX, relY));
+		Point2D abs = linkableTo.toAbsoluteCoordinate(new Point2D.Double(relX, relY));
 		return canvas.vFromM(new Ellipse2D.Double(abs.getX() - MATCH_RADIUS, abs.getY() - MATCH_RADIUS,
 				MATCH_RADIUS * 2, MATCH_RADIUS * 2));
 	}
@@ -62,7 +62,7 @@ public class LinkAnchor extends VElement {
 	}
 
 	private Shape getShape(boolean includeHighlight) {
-		Point2D abs = idContainer.toAbsoluteCoordinate(getPosition());
+		Point2D abs = linkableTo.toAbsoluteCoordinate(getPosition());
 		Shape s = canvas.vFromM(new Ellipse2D.Double(abs.getX() - DRAW_RADIUS, abs.getY() - DRAW_RADIUS,
 				DRAW_RADIUS * 2, DRAW_RADIUS * 2));
 		if (drawHighlight && includeHighlight) {
@@ -108,11 +108,11 @@ public class LinkAnchor extends VElement {
 	}
 
 	public LinkableTo getLinkableTo() {
-		return idContainer;
+		return linkableTo;
 	}
 
 	public void link(LinkableFrom ref) {
-		ref.linkTo(idContainer, relX, relY);
+		ref.linkTo(linkableTo, relX, relY);
 	}
 
 	private boolean drawHighlight;
@@ -138,7 +138,7 @@ public class LinkAnchor extends VElement {
 
 	@Override
 	public int getZOrder() {
-		return parent.getZOrder() + 1;
+		return vLinkableTo.getZOrder() + 1;
 	}
 
 }

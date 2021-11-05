@@ -20,7 +20,12 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author unknown
+ *
+ */
 public abstract class AbstractLinkAnchorDelegate implements LinkProvider {
+	
 	protected List<LinkAnchor> linkAnchors = new ArrayList<LinkAnchor>();
 
 	public void createLinkAnchors() {

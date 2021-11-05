@@ -37,15 +37,12 @@ import org.pathvisio.model.GraphLink.LinkableFrom;
 import org.pathvisio.model.type.LineStyleType;
 import org.pathvisio.model.type.ArrowHeadType;
 import org.pathvisio.model.LineElement;
-import org.pathvisio.model.PathwayElement;
 import org.pathvisio.model.LineElement.Anchor;
 import org.pathvisio.model.LineElement.LinePoint;
 import org.pathvisio.event.PathwayObjectEvent;
 import org.pathvisio.core.preferences.GlobalPreference;
 import org.pathvisio.core.preferences.PreferenceManager;
 import org.pathvisio.core.view.Adjustable;
-import org.pathvisio.core.view.model.Handle.Freedom;
-import org.pathvisio.core.view.model.Handle.Style;
 import org.pathvisio.core.view.shape.ArrowShape;
 import org.pathvisio.core.view.shape.ShapeRegistry;
 
@@ -762,7 +759,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	 */
 	public Segment getSegment(double lc) {
 		Segment[] segments = getConnectorShape().getSegments();
-		double length = 0;
+		double length = 0; //TODO 
 		for (Segment s : segments) {
 			length += s.getMLength();
 		}
