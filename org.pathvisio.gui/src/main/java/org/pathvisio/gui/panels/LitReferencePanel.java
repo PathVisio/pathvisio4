@@ -40,9 +40,9 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
 import org.pathvisio.core.biopax.BiopaxElement;
-import org.pathvisio.core.biopax.BiopaxReferenceManager;
+import org.pathvisio.core.biopax.BiopaxReferenFceManager;
 import org.pathvisio.core.biopax.PublicationXref;
-import org.pathvisio.core.debug.Logger;
+import org.pathvisio.debug.Logger;
 import org.pathvisio.model.PathwayElement;
 import org.pathvisio.core.util.Resources;
 import org.pathvisio.gui.SwingEngine;

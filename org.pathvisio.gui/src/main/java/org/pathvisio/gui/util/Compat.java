@@ -22,11 +22,14 @@ import java.util.Map;
 import javax.swing.JOptionPane;
 
 import org.bridgedb.DataSource;
+import org.bridgedb.Xref;
 import org.bridgedb.bio.Organism;
 import org.pathvisio.core.ApplicationEvent;
 import org.pathvisio.core.Engine;
-import org.pathvisio.core.model.ObjectType;
-import org.pathvisio.core.model.PathwayModel;
+import org.pathvisio.model.PathwayModel;
+import org.pathvisio.model.PathwayObject;
+import org.pathvisio.util.XrefUtils;
+import org.pathvisio.model.DataNode;
 import org.pathvisio.model.PathwayElement;
 import org.pathvisio.gui.SwingEngine;
 
@@ -52,14 +55,15 @@ public class Compat implements Engine.ApplicationEventListener {
 	}
 
 	private boolean usesOldEnsembl(PathwayModel pwy) {
-		Organism org = Organism.fromLatinName(pwy.getMappInfo().getOrganism());
+		Organism org = Organism.fromLatinName(pwy.getPathway().getOrganism());
 		if (!ensSpecies.containsKey(org))
 			return false; // this pwy is not one of the species to be converted
 
-		for (PathwayElement elt : pwy.getDataObjects()) {
-			if (elt.getObjectType() == ObjectType.DATANODE
-					&& elt.getDataSource() == DataSource.getByCompactIdentifierPrefix("ensembl")) {
-				return true;
+		for (PathwayObject elt : pwy.getPathwayObjects()) {
+			if (elt.getClass() == DataNode.class) {
+				if (((DataNode) elt).getXref().getDataSource() == DataSource.getByCompactIdentifierPrefix("ensembl")) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -71,14 +75,15 @@ public class Compat implements Engine.ApplicationEventListener {
 	 * datanodes to species specific datanodes if possible.
 	 */
 	private void convertEnsembl(PathwayModel pwy) {
-		Organism org = Organism.fromLatinName(pwy.getMappInfo().getOrganism());
+		Organism org = Organism.fromLatinName(pwy.getPathway().getOrganism());
 		if (!ensSpecies.containsKey(org))
 			return; // this pwy is not one of the species to be converted
 
-		for (PathwayElement elt : pwy.getDataObjects()) {
-			if (elt.getObjectType() == ObjectType.DATANODE
-					&& elt.getDataSource() == DataSource.getByCompactIdentifierPrefix("ensembl")) {
-				elt.setDataSource(ensSpecies.get(org));
+		for (PathwayObject elt : pwy.getPathwayObjects()) {
+			if (elt.getClass() == DataNode.class) {
+				if (((DataNode) elt).getXref().getDataSource() == DataSource.getByCompactIdentifierPrefix("ensembl")) {
+					((DataNode) elt).setXref(new Xref(((DataNode) elt).getXref().getId(), ensSpecies.get(org)));
+				}
 			}
 		}
 

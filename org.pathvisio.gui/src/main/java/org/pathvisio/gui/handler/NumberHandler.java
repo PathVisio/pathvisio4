@@ -31,8 +31,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
-import org.pathvisio.core.debug.Logger;
-import org.pathvisio.core.model.PropertyType;
+import org.pathvisio.debug.Logger;
+import org.pathvisio.prop.PropertyType;
 
 
 /**

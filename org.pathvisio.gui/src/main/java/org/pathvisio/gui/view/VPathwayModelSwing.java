@@ -72,7 +72,7 @@ import org.pathvisio.core.view.model.VPathwayModel;
 import org.pathvisio.core.view.model.VPathwayWrapper;
 import org.pathvisio.core.view.model.VShapedElement;
 import org.pathvisio.gui.MainPanel;
-import org.pathvisio.gui.dnd.PathwayImportHandler;
+import org.pathvisio.gui.dnd.PathwayModelImportHandler;
 
 /**
  * swing-dependent implementation of VPathway.
@@ -96,7 +96,7 @@ public class VPathwayModelSwing extends JPanel implements VPathwayWrapper, Mouse
 
 		setFocusable(true);
 		setRequestFocusEnabled(true);
-		setTransferHandler(new PathwayImportHandler());
+		setTransferHandler(new PathwayModelImportHandler());
 
 		setDoubleBuffered(PreferenceManager.getCurrent().getBoolean(GlobalPreference.ENABLE_DOUBLE_BUFFERING));
 	}
@@ -259,7 +259,7 @@ public class VPathwayModelSwing extends JPanel implements VPathwayWrapper, Mouse
 	 */
 	public void positionPasteFromClipboard(Point cursorPosition) {
 		Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
-		PathwayImportHandler handler = (PathwayImportHandler) getTransferHandler();
+		PathwayModelImportHandler handler = (PathwayModelImportHandler) getTransferHandler();
 		handler.importDataAtCursorPosition(this, clip.getContents(this), cursorPosition);
 	}
 
@@ -267,8 +267,8 @@ public class VPathwayModelSwing extends JPanel implements VPathwayWrapper, Mouse
 
 	public void copyToClipboard(PathwayModel source, List<PathwayElement> copyElements) {
 		Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
-		clip.setContents(new PathwayTransferable(source, copyElements), (PathwayImportHandler) getTransferHandler());
-		((PathwayImportHandler) getTransferHandler()).obtainedOwnership();
+		clip.setContents(new PathwayTransferable(source, copyElements), (PathwayModelImportHandler) getTransferHandler());
+		((PathwayModelImportHandler) getTransferHandler()).obtainedOwnership();
 	}
 
 	Set<ToolTipProvider> toolTipProviders = new HashSet<ToolTipProvider>();

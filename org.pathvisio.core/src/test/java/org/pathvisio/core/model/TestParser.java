@@ -26,15 +26,27 @@ import java.io.IOException;
 import junit.framework.TestCase;
 
 import org.bridgedb.DataSource;
-import org.pathvisio.core.biopax.BiopaxNode;
 import org.pathvisio.debug.StopWatch;
 import org.pathvisio.io.ConverterException;
+import org.pathvisio.model.DataNode;
+import org.pathvisio.model.Label;
+import org.pathvisio.model.Pathway;
 import org.pathvisio.model.PathwayElement;
 import org.pathvisio.model.PathwayModel;
+import org.pathvisio.model.PathwayObject;
+import org.pathvisio.model.Shape;
 import org.pathvisio.model.type.ArrowHeadType;
+import org.pathvisio.model.type.ShapeType;
 import org.pathvisio.core.preferences.PreferenceManager;
 import org.pathvisio.core.view.shape.MIMShapes;
 
+/**
+ * 
+ * Some old tests 
+ * 
+ * @author p70073399
+ *
+ */
 public class TestParser extends TestCase {
 	private static final File PATHVISIO_BASEDIR = new File("../..");
 
@@ -63,9 +75,8 @@ public class TestParser extends TestCase {
 		long result = sw.stop();
 		System.out.println("Timing: " + result + " msec");
 
-		PathwayElement mi = data.getMappInfo();
-		assertEquals("Apoptosis Mechanisms", mi.getMapInfoName());
-		assertEquals("Alexander C. Zambon", mi.getMaintainer());
+		Pathway mi = data.getPathway();
+		assertEquals("Apoptosis Mechanisms", mi.getTitle());
 
 //		System.out.println (data.getDataObjects().size());
 //		for (PathwayElement elt : data.getDataObjects())
@@ -78,32 +89,31 @@ public class TestParser extends TestCase {
 //			}
 //		}
 
-		assertEquals(206, data.getDataObjects().size());
-		PathwayElement elt = data.getElementById("c3d");
-		assertEquals(elt.getObjectType(), ObjectType.DATANODE);
-		assertEquals(Color.BLACK, elt.getColor());
-		assertEquals(9230.0, elt.getMCenterX(), 0.1);
-		assertEquals(5010.0, elt.getMCenterY(), 0.1);
-		assertEquals(900.0, elt.getMWidth(), 0.1);
-		assertEquals(300.0, elt.getMHeight(), 0.1);
-		assertEquals("8739", elt.getElementID());
-		assertEquals(DataSource.getExistingByFullName("Entrez Gene"), elt.getDataSource());
+		assertEquals(206, data.getPathwayObjects().size());
+		DataNode elt = (DataNode) data.getPathwayObject("c3d");
+		assertEquals(Color.BLACK, elt.getTextColor());
+		assertEquals(Color.BLACK, elt.getBorderColor());
+
+		assertEquals(9230.0, elt.getCenterX(), 0.1);
+		assertEquals(5010.0, elt.getCenterY(), 0.1);
+		assertEquals(900.0, elt.getWidth(), 0.1);
+		assertEquals(300.0, elt.getHeight(), 0.1);
+		assertEquals("8739", elt.getXref().getId());
+		assertEquals(DataSource.getExistingByFullName("Entrez Gene"), elt.getXref().getDataSource());
 
 		// TODO: Line doesn't have fixed graphId, can't test
 		// TODO: generate line graphId based on hash of coordinates if not available
-		elt = data.getElementById("d49");
-		assertEquals(ObjectType.LABEL, elt.getObjectType());
-		assertEquals("Interferon regulatory factors", elt.getTextLabel());
-		assertEquals(28672, elt.getZOrder());
+		Label elt2 = (Label) data.getPathwayObject("d49");
+		assertEquals("Interferon regulatory factors", elt2.getTextLabel());
+		assertEquals(28672, elt2.getZOrder());
 
-		elt = data.getElementById("c45");
-		assertEquals(ObjectType.SHAPE, elt.getObjectType());
-		assertEquals(ShapeType.BRACE, elt.getShapeType());
-		assertEquals(2890.0, elt.getMCenterX(), 0.1);
-		assertEquals(2430.0, elt.getMCenterY(), 0.1);
-		assertEquals(4253.1, elt.getMWidth(), 0.1);
-		assertEquals(130.0, elt.getMHeight(), 0.1);
-		assertEquals(0.0, elt.getRotation(), 0.1);
+		Shape elt3 = (Shape) data.getPathwayObject("c45");
+		assertEquals(ShapeType.BRACE, elt3.getShapeType());
+		assertEquals(2890.0, elt3.getCenterX(), 0.1);
+		assertEquals(2430.0, elt3.getCenterY(), 0.1);
+		assertEquals(4253.1, elt3.getWidth(), 0.1);
+		assertEquals(130.0, elt3.getHeight(), 0.1);
+		assertEquals(0.0, elt3.getRotation(), 0.1);
 
 	}
 
@@ -160,7 +170,7 @@ public class TestParser extends TestCase {
 		assertEquals("Type your comment here", elt.getComments().get(1).getComment());
 		assertNull(elt.getComments().get(1).getSource());
 
-		elt = data.getElementById("a8a81");
+		elt = data.getPathwayObject("a8a81");
 		assertEquals(3, elt.getComments().size());
 		assertEquals("c", elt.getComments().get(0).getComment());
 		assertNull(elt.getComments().get(0).getSource());
@@ -169,7 +179,7 @@ public class TestParser extends TestCase {
 		assertEquals("Type your comment here", elt.getComments().get(2).getComment());
 		assertEquals("unknown", elt.getComments().get(2).getSource());
 
-		elt = data.getElementById("b7b72");
+		elt = data.getPathwayObject("b7b72");
 		assertEquals(1, elt.getComments().size());
 		assertEquals("This is a line", elt.getComments().get(0).getComment());
 		assertEquals("manual", elt.getComments().get(0).getSource());
@@ -181,7 +191,7 @@ public class TestParser extends TestCase {
 		PathwayModel data = readHelper(test);
 
 		PathwayElement elt;
-		elt = data.getElementById("id37eeec26");
+		elt = data.getPathwayObject("id37eeec26");
 		assertEquals(ObjectType.LINE, elt.getObjectType());
 		assertEquals(12288, elt.getZOrder());
 		assertEquals(LineStyleType.DASHED, elt.getLineStyle());
@@ -195,7 +205,7 @@ public class TestParser extends TestCase {
 		assertEquals(ArrowHeadType.LINE, elt.getEndLineType());
 		assertEquals(0, elt.getMAnchors().size());
 
-		elt = data.getElementById("ida7a6255a");
+		elt = data.getPathwayObject("ida7a6255a");
 		assertEquals(ArrowHeadType.LINE, elt.getStartLineType());
 		assertEquals(ArrowHeadType.ARROW, elt.getEndLineType());
 		assertEquals(2, elt.getMAnchors().size());
@@ -204,57 +214,57 @@ public class TestParser extends TestCase {
 		assertEquals(0.6, elt.getMAnchors().get(1).getPosition(), 0.01);
 		assertEquals(AnchorShapeType.CIRCLE, elt.getMAnchors().get(1).getShape());
 
-		elt = data.getElementById("idb5761669");
+		elt = data.getPathwayObject("idb5761669");
 		assertEquals(ConnectorType.ELBOW, elt.getConnectorType());
 
-		elt = data.getElementById("a3686");
+		elt = data.getPathwayObject("a3686");
 		assertEquals(ArrowHeadType.TBAR, elt.getStartLineType());
 		assertEquals(ArrowHeadType.RECEPTOR, elt.getEndLineType());
 
-		elt = data.getElementById("d6034");
+		elt = data.getPathwayObject("d6034");
 		assertEquals(ArrowHeadType.LIGAND_SQUARE, elt.getStartLineType());
 		assertEquals(ArrowHeadType.RECEPTOR_SQUARE, elt.getEndLineType());
 
-		elt = data.getElementById("c4eb9");
+		elt = data.getPathwayObject("c4eb9");
 		assertEquals(ArrowHeadType.LIGAND_ROUND, elt.getStartLineType());
 		assertEquals(ArrowHeadType.RECEPTOR_ROUND, elt.getEndLineType());
 
-		elt = data.getElementById("a6d48");
+		elt = data.getPathwayObject("a6d48");
 		assertEquals(MIMShapes.MIM_NECESSARY_STIMULATION, elt.getStartLineType());
 		assertEquals(MIMShapes.MIM_BINDING, elt.getEndLineType());
 
-		elt = data.getElementById("ec31c");
+		elt = data.getPathwayObject("ec31c");
 		assertEquals(MIMShapes.MIM_CONVERSION, elt.getStartLineType());
 		assertEquals(MIMShapes.MIM_STIMULATION, elt.getEndLineType());
 
-		elt = data.getElementById("dfcd3");
+		elt = data.getPathwayObject("dfcd3");
 		assertEquals(MIMShapes.MIM_MODIFICATION, elt.getStartLineType());
 		assertEquals(MIMShapes.MIM_CATALYSIS, elt.getEndLineType());
 
-		elt = data.getElementById("c89d2");
+		elt = data.getPathwayObject("c89d2");
 		assertEquals(MIMShapes.MIM_CLEAVAGE, elt.getStartLineType());
 		assertEquals(MIMShapes.MIM_INHIBITION, elt.getEndLineType());
 
-		elt = data.getElementById("b3573");
+		elt = data.getPathwayObject("b3573");
 		assertEquals(0.5, elt.getLineThickness(), 0.01);
 
-		elt = data.getElementById("afd19");
+		elt = data.getPathwayObject("afd19");
 		assertEquals(1.5, elt.getLineThickness(), 0.01);
 
-		elt = data.getElementById("ef9d5");
+		elt = data.getPathwayObject("ef9d5");
 		assertEquals(Color.RED, elt.getColor());
 
-		elt = data.getElementById("d3f58");
+		elt = data.getPathwayObject("d3f58");
 		assertEquals(1, elt.getMAnchors().size());
 		assertEquals("f68db", elt.getMAnchors().get(0).getGraphId());
 
-		elt = data.getElementById("id123456789");
+		elt = data.getPathwayObject("id123456789");
 		assertEquals("f68db", elt.getEndGraphRef());
 		// TODO: Why are both 0.0? that doesn't make much sense.
 		assertEquals(0.0, elt.getMPoints().get(0).getRelX(), 0.01);
 		assertEquals(0.0, elt.getMPoints().get(0).getRelY(), 0.01);
 
-		elt = data.getElementById("e8ff5");
+		elt = data.getPathwayObject("e8ff5");
 		assertEquals(5, elt.getMPoints().size());
 		assertEquals("b6665", elt.getMPoints().get(0).getGraphRef());
 		assertEquals(0.0, elt.getMPoints().get(0).getRelX(), 0.01);
@@ -263,7 +273,7 @@ public class TestParser extends TestCase {
 		assertEquals(0.0, elt.getMPoints().get(4).getRelX(), 0.01);
 		assertEquals(-1.0, elt.getMPoints().get(4).getRelY(), 0.01);
 
-		elt = data.getElementById("c42c6");
+		elt = data.getPathwayObject("c42c6");
 		assertEquals(ConnectorType.CURVED, elt.getConnectorType());
 	}
 
@@ -272,7 +282,7 @@ public class TestParser extends TestCase {
 		PathwayModel data = readHelper(test);
 
 		PathwayElement elt;
-		elt = data.getElementById("a8a81");
+		elt = data.getPathwayObject("a8a81");
 		assertEquals(ObjectType.DATANODE, elt.getObjectType());
 		assertEquals(32768, elt.getZOrder());
 		assertEquals("Metabolite", elt.getDataNodeType());
@@ -295,7 +305,7 @@ public class TestParser extends TestCase {
 		assertEquals(LineStyleType.SOLID, elt.getLineStyle());
 		assertEquals(DataSource.getExistingByFullName("EC Number"), elt.getDataSource());
 
-		elt = data.getElementById("ec886");
+		elt = data.getPathwayObject("ec886");
 		assertEquals(32767, elt.getZOrder());
 		assertEquals("GeneProduct", elt.getDataNodeType());
 		assertEquals("", elt.getTextLabel());
@@ -304,7 +314,7 @@ public class TestParser extends TestCase {
 		assertEquals("", elt.getElementID());
 		assertNull(elt.getDataSource());
 
-		elt = data.getElementById("f7f5c");
+		elt = data.getPathwayObject("f7f5c");
 		assertEquals(32768, elt.getZOrder());
 		assertEquals("Unknown", elt.getDataNodeType());
 		assertEquals("Fructose", elt.getTextLabel());
@@ -321,7 +331,7 @@ public class TestParser extends TestCase {
 		assertEquals("id", elt.getElementID());
 		assertNull(elt.getDataSource());
 
-		elt = data.getElementById("fbbac");
+		elt = data.getPathwayObject("fbbac");
 		assertEquals("multi-\nline", elt.getTextLabel());
 		assertEquals(Color.BLUE, elt.getFillColor());
 		assertEquals(ShapeType.ROUNDED_RECTANGLE, elt.getShapeType());
@@ -329,7 +339,7 @@ public class TestParser extends TestCase {
 		assertEquals(DataSource.getExistingByFullName("Entrez Gene"), elt.getDataSource());
 		assertEquals("3643", elt.getElementID());
 
-		elt = data.getElementById("be269");
+		elt = data.getPathwayObject("be269");
 		assertEquals(ObjectType.STATE, elt.getObjectType());
 		assertEquals("f7f5c", elt.getGraphRef());
 		assertEquals(15.0, elt.getMWidth(), 0.01);
@@ -340,7 +350,7 @@ public class TestParser extends TestCase {
 		assertEquals("1234", elt.getElementID());
 		assertEquals(DataSource.getExistingByFullName("Entrez Gene"), elt.getDataSource());
 
-		elt = data.getElementById("ca5fa");
+		elt = data.getPathwayObject("ca5fa");
 		assertEquals(ShapeType.RECTANGLE, elt.getShapeType());
 	}
 
@@ -357,12 +367,12 @@ public class TestParser extends TestCase {
 		assertEquals(1, elt.getBiopaxRefs().size());
 		assertEquals("c73", elt.getBiopaxRefs().get(0));
 
-		elt = data.getElementById("fdba5");
+		elt = data.getPathwayObject("fdba5");
 		assertEquals(2, elt.getBiopaxRefs().size());
 		assertEquals("c73", elt.getBiopaxRefs().get(0));
 		assertEquals("b29", elt.getBiopaxRefs().get(1));
 
-		elt = data.getElementById("ab123");
+		elt = data.getPathwayObject("ab123");
 		assertEquals(1, elt.getBiopaxRefs().size());
 		assertEquals("f7c", elt.getBiopaxRefs().get(0));
 
@@ -380,13 +390,13 @@ public class TestParser extends TestCase {
 		PathwayModel data = readHelper(new File(PATHVISIO_BASEDIR, "testData/2010a/parsetest8.gpml"));
 
 		PathwayElement elt;
-		elt = data.getElementById("a8d1a");
+		elt = data.getPathwayObject("a8d1a");
 		assertEquals("e79b2", elt.getGroupRef());
 
-		elt = data.getElementById("af2ec");
+		elt = data.getPathwayObject("af2ec");
 		assertEquals("fb6cc", elt.getGroupRef());
 
-		elt = data.getElementById("d8370");
+		elt = data.getPathwayObject("d8370");
 		assertEquals(ObjectType.GROUP, elt.getObjectType());
 		assertEquals("fb6cc", elt.getGroupId());
 		assertEquals("", elt.getTextLabel());
@@ -395,7 +405,7 @@ public class TestParser extends TestCase {
 		assertEquals(GroupType.GROUP, elt.getGroupStyle());
 		assertNull(elt.getGroupRef());
 
-		elt = data.getElementById("d8371");
+		elt = data.getPathwayObject("d8371");
 		assertEquals(ObjectType.GROUP, elt.getObjectType());
 		assertEquals("e79b2", elt.getGroupId());
 		assertEquals("Blah", elt.getTextLabel());

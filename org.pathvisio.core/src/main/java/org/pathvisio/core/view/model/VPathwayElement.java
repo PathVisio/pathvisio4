@@ -51,7 +51,7 @@ public abstract class VPathwayElement extends VPathwayObject {
 	 */
 	@Override
 	public PathwayElement getPathwayObject() {
-		return getPathwayObject();
+		return (PathwayElement) super.getPathwayObject();
 	}
 
 	/**

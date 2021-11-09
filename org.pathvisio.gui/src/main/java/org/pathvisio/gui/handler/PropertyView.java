@@ -26,7 +26,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import org.pathvisio.model.PathwayElement;
-import org.pathvisio.core.model.Property;
+import org.pathvisio.prop.Property;
 import org.pathvisio.core.view.model.VPathwayModel;
 import org.pathvisio.gui.SwingEngine;
 

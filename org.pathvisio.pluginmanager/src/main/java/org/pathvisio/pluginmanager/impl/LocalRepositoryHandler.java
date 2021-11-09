@@ -25,7 +25,7 @@ import java.util.Map;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.pathvisio.core.debug.Logger;
+import org.pathvisio.debug.Logger;
 import org.pathvisio.pluginmanager.impl.data.BundleVersion;
 import org.pathvisio.pluginmanager.impl.data.PVRepository;
 import org.pathvisio.pluginmanager.impl.io.RepoXmlFactory;

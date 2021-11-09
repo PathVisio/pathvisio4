@@ -39,7 +39,9 @@ import javax.swing.JTextPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.pathvisio.core.model.PathwayElement.Comment;
+import org.pathvisio.model.PathwayObject;
+import org.pathvisio.model.PathwayElement;
+import org.pathvisio.model.PathwayElement.Comment;
 import org.pathvisio.core.util.Resources;
 
 public class CommentPanel extends PathwayElementPanel implements ActionListener {
@@ -66,42 +68,47 @@ public class CommentPanel extends PathwayElementPanel implements ActionListener 
 		add(buttonPanel, BorderLayout.PAGE_END);
 	}
 
+	@Override
+	protected PathwayElement getInput() {
+		return (PathwayElement) super.getInput();
+	}
+
+	@Override
 	public void setReadOnly(boolean readonly) {
 		super.setReadOnly(readonly);
 		setChildrenEnabled(buttonPanel, !readonly);
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e) {
-		if(e.getActionCommand().equals(ADD)) {
+		if (e.getActionCommand().equals(ADD)) {
 			getInput().addComment("Type your comment here", "");
 		}
 		refresh();
 	}
 
+	@Override
 	public void refresh() {
-		if(cmtPanel != null) remove(cmtPanel);
+		if (cmtPanel != null)
+			remove(cmtPanel);
 
-		DefaultFormBuilder b = new DefaultFormBuilder(
-				new FormLayout("fill:pref:grow")
-		);
+		DefaultFormBuilder b = new DefaultFormBuilder(new FormLayout("fill:pref:grow"));
 		CommentEditor firstEditor = null;
-		for(Comment c : getInput().getComments()) {
+		for (Comment c : getInput().getComments()) {
 			CommentEditor ce = new CommentEditor(c);
-			if(firstEditor == null) firstEditor = ce;
+			if (firstEditor == null)
+				firstEditor = ce;
 			b.append(ce);
 			b.nextLine();
 		}
-		if(getInput().getComments().size() == 0) {
+		if (getInput().getComments().size() == 0) {
 			CommentEditor ce = new CommentEditor(null);
 			firstEditor = ce;
 			b.append(ce);
 			b.nextLine();
 		}
 		JPanel p = b.getPanel();
-		cmtPanel = new JScrollPane(p,
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
-		);
+		cmtPanel = new JScrollPane(p, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		add(cmtPanel, BorderLayout.CENTER);
 		validate();
 	}
@@ -114,34 +121,35 @@ public class CommentPanel extends PathwayElementPanel implements ActionListener 
 		public CommentEditor(Comment c) {
 			comment = c;
 			setBackground(Color.WHITE);
-			setLayout(new FormLayout(
-					"2dlu, fill:[100dlu,min]:grow, 1dlu, pref, 2dlu", "2dlu, pref, 2dlu"
-			));
+			setLayout(new FormLayout("2dlu, fill:[100dlu,min]:grow, 1dlu, pref, 2dlu", "2dlu, pref, 2dlu"));
 			txt = new JTextPane();
-			txt.setText(comment == null ? "Type your comment here" : comment.getComment());
+			txt.setText(comment == null ? "Type your comment here" : comment.getCommentText());
 			txt.setBorder(BorderFactory.createEtchedBorder());
 			txt.getDocument().addDocumentListener(new DocumentListener() {
 				public void changedUpdate(DocumentEvent e) {
 					update();
 				}
+
 				public void insertUpdate(DocumentEvent e) {
 					update();
 				}
+
 				public void removeUpdate(DocumentEvent e) {
 					update();
 				}
+
 				void update() {
-					if(comment == null) {
+					if (comment == null) {
 						comment = getInput().new Comment(txt.getText(), "");
 						getInput().addComment(comment);
 					} else {
-						comment.setComment(txt.getText());
+						comment.setCommentText(txt.getText());
 					}
 				}
 			});
 			txt.addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
-					if(comment == null) {
+					if (comment == null) {
 						txt.selectAll();
 					}
 				}
@@ -162,6 +170,7 @@ public class CommentPanel extends PathwayElementPanel implements ActionListener 
 				public void mouseEntered(MouseEvent e) {
 					e.getComponent().setBackground(new Color(200, 200, 255));
 				}
+
 				public void mouseExited(MouseEvent e) {
 					e.getComponent().setBackground(Color.WHITE);
 				}
@@ -175,10 +184,12 @@ public class CommentPanel extends PathwayElementPanel implements ActionListener 
 
 			MouseAdapter maHide = new MouseAdapter() {
 				public void mouseEntered(MouseEvent e) {
-					if(!readonly) btnPanel.setVisible(true);
+					if (!readonly)
+						btnPanel.setVisible(true);
 				}
+
 				public void mouseExited(MouseEvent e) {
-					if(!contains(e.getPoint())) {
+					if (!contains(e.getPoint())) {
 						btnPanel.setVisible(false);
 					}
 				}
@@ -189,7 +200,7 @@ public class CommentPanel extends PathwayElementPanel implements ActionListener 
 
 		public void actionPerformed(ActionEvent e) {
 			String action = e.getActionCommand();
-			if(REMOVE.equals(action)) {
+			if (REMOVE.equals(action)) {
 				getInput().removeComment(comment);
 				refresh();
 			}

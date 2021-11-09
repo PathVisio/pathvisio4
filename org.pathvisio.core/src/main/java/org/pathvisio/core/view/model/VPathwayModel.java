@@ -88,6 +88,8 @@ import org.pathvisio.core.view.model.ViewActions.TextFormattingAction;
  *
  * It's necessary to call PreferenceManager.init() before you can instantiate
  * this class.
+ * 
+ * @author unknown, finterly
  */
 public class VPathwayModel implements PathwayModelListener {
 	private static final double FUZZY_SIZE = 8; // fuzz-factor around mouse cursor
@@ -2153,8 +2155,8 @@ public class VPathwayModel implements PathwayModelListener {
 	 * idMap and newIds should be an empty map / set. It will be filled by this
 	 * method.
 	 */
-	private void generateNewIds(List<PathwayElement> elements, Map<String, String> idmap, Set<String> newids) {
-		for (PathwayElement o : elements) {
+	private void generateNewIds(List<PathwayObject> elements, Map<String, String> idmap, Set<String> newids) {
+		for (PathwayObject o : elements) {
 			String id = o.getElementId();
 //			String groupId = o.getGroupId(); TODO not needed?
 			generatePasteId(id, data.getElementIds(), idmap, newids);
@@ -2169,7 +2171,7 @@ public class VPathwayModel implements PathwayModelListener {
 		}
 	}
 
-	public void paste(List<PathwayElement> elements) {
+	public void paste(List<PathwayObject> elements) {
 		paste(elements, 0, 0);
 	}
 
@@ -2235,7 +2237,7 @@ public class VPathwayModel implements PathwayModelListener {
 		}
 	}
 
-	public void paste(List<PathwayElement> elements, double xShift, double yShift) {
+	public void paste(List<PathwayObject> elements, double xShift, double yShift) {
 		undoManager.newAction("Paste");
 		clearSelection();
 
@@ -2246,7 +2248,7 @@ public class VPathwayModel implements PathwayModelListener {
 		generateNewIds(elements, idmap, newids);
 
 		// Step 2: do the actual copying
-		for (PathwayElement o : elements) {
+		for (PathwayObject o : elements) {
 			// if pathway, skip because it should be unique
 			if (o.getClass() == Pathway.class) {
 				continue;
@@ -2286,7 +2288,7 @@ public class VPathwayModel implements PathwayModelListener {
 		}
 
 		// Step 3: refresh connector shapes
-		for (PathwayElement o : elements) {
+		for (PathwayObject o : elements) {
 			if (o instanceof LineElement) {
 				((LineElement) o).getConnectorShape().recalculateShape(((LineElement) o));
 			}

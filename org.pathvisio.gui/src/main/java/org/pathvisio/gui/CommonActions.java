@@ -194,8 +194,9 @@ public class CommonActions implements ApplicationEventListener {
 				// new Action[] {
 				// new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.BRACE))
 				// },
-				new Action[] { new NewElementAction(e, new DefaultTemplates.InteractionTemplate("tbar",
-						LineStyleType.SOLID, ArrowHeadType.UNDIRECTED, ArrowHeadType.INHIBITION, ConnectorType.STRAIGHT)) },
+				new Action[] {
+						new NewElementAction(e, new DefaultTemplates.InteractionTemplate("tbar", LineStyleType.SOLID,
+								ArrowHeadType.UNDIRECTED, ArrowHeadType.INHIBITION, ConnectorType.STRAIGHT)) },
 //					new Action[] {
 //							new NewElementAction(e, new DefaultTemplates.LineTemplate(
 //									"ligandround", LineStyle.SOLID, LineType.LINE, LineType.LIGAND_ROUND, ConnectorType.STRAIGHT)
@@ -240,8 +241,8 @@ public class CommonActions implements ApplicationEventListener {
 		// actions for "Basic shapes" section
 		newShapeActions = new Action[] { new NewElementAction(e, new DefaultTemplates.LabelTemplate()),
 				new NewElementAction(e,
-						new DefaultTemplates.GraphicalLineTemplate("line", LineStyleType.SOLID, ArrowHeadType.UNDIRECTED,
-								ArrowHeadType.UNDIRECTED, ConnectorType.STRAIGHT)),
+						new DefaultTemplates.GraphicalLineTemplate("line", LineStyleType.SOLID,
+								ArrowHeadType.UNDIRECTED, ArrowHeadType.UNDIRECTED, ConnectorType.STRAIGHT)),
 				new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.ARC)),
 				new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.RECTANGLE)),
 				new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.OVAL)),
@@ -262,8 +263,8 @@ public class CommonActions implements ApplicationEventListener {
 						new DefaultTemplates.InteractionTemplate("arrow", LineStyleType.SOLID, ArrowHeadType.UNDIRECTED,
 								ArrowHeadType.DIRECTED, ConnectorType.STRAIGHT)),
 				new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("dashedline", LineStyleType.DASHED, ArrowHeadType.UNDIRECTED,
-								ArrowHeadType.UNDIRECTED, ConnectorType.STRAIGHT)),
+						new DefaultTemplates.InteractionTemplate("dashedline", LineStyleType.DASHED,
+								ArrowHeadType.UNDIRECTED, ArrowHeadType.UNDIRECTED, ConnectorType.STRAIGHT)),
 				new NewElementAction(e,
 						new DefaultTemplates.InteractionTemplate("dashedarrow", LineStyleType.DASHED,
 								ArrowHeadType.UNDIRECTED, ArrowHeadType.DIRECTED, ConnectorType.STRAIGHT)),
@@ -279,8 +280,8 @@ public class CommonActions implements ApplicationEventListener {
 		// actions for "Receptor/ligand interactions" section
 		newRLInteractionActions = new Action[] {
 				new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("ligandround", LineStyleType.SOLID, ArrowHeadType.UNDIRECTED,
-								ArrowHeadType.LIGAND_ROUND, ConnectorType.STRAIGHT)),
+						new DefaultTemplates.InteractionTemplate("ligandround", LineStyleType.SOLID,
+								ArrowHeadType.UNDIRECTED, ArrowHeadType.LIGAND_ROUND, ConnectorType.STRAIGHT)),
 				new NewElementAction(e,
 						new DefaultTemplates.InteractionTemplate("ligandsquare", LineStyleType.SOLID,
 								ArrowHeadType.UNDIRECTED, ArrowHeadType.LIGAND_SQUARE, ConnectorType.STRAIGHT)),
@@ -339,26 +340,26 @@ public class CommonActions implements ApplicationEventListener {
 						new DefaultTemplates.InteractionTemplate("Necessary stimulation", LineStyleType.SOLID,
 								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_NECESSARY_STIMULATION, ConnectorType.STRAIGHT)),
 				new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("Binding", LineStyleType.SOLID, ArrowHeadType.UNDIRECTED,
-								MIMShapes.MIM_BINDING, ConnectorType.STRAIGHT)),
+						new DefaultTemplates.InteractionTemplate("Binding", LineStyleType.SOLID,
+								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_BINDING, ConnectorType.STRAIGHT)),
 				new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("Conversion", LineStyleType.SOLID, ArrowHeadType.UNDIRECTED,
-								MIMShapes.MIM_CONVERSION, ConnectorType.STRAIGHT)),
+						new DefaultTemplates.InteractionTemplate("Conversion", LineStyleType.SOLID,
+								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_CONVERSION, ConnectorType.STRAIGHT)),
 				new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("Stimulation", LineStyleType.SOLID, ArrowHeadType.UNDIRECTED,
-								MIMShapes.MIM_STIMULATION, ConnectorType.STRAIGHT)),
+						new DefaultTemplates.InteractionTemplate("Stimulation", LineStyleType.SOLID,
+								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_STIMULATION, ConnectorType.STRAIGHT)),
 				new NewElementAction(e,
 						new DefaultTemplates.InteractionTemplate("Modification", LineStyleType.SOLID,
 								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_MODIFICATION, ConnectorType.STRAIGHT)),
 				new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("Catalysis", LineStyleType.SOLID, ArrowHeadType.UNDIRECTED,
-								MIMShapes.MIM_CATALYSIS, ConnectorType.STRAIGHT)),
+						new DefaultTemplates.InteractionTemplate("Catalysis", LineStyleType.SOLID,
+								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_CATALYSIS, ConnectorType.STRAIGHT)),
 				new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("Inhibition", LineStyleType.SOLID, ArrowHeadType.UNDIRECTED,
-								MIMShapes.MIM_INHIBITION, ConnectorType.STRAIGHT)),
+						new DefaultTemplates.InteractionTemplate("Inhibition", LineStyleType.SOLID,
+								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_INHIBITION, ConnectorType.STRAIGHT)),
 				new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("Cleavage", LineStyleType.SOLID, ArrowHeadType.UNDIRECTED,
-								MIMShapes.MIM_CLEAVAGE, ConnectorType.STRAIGHT)),
+						new DefaultTemplates.InteractionTemplate("Cleavage", LineStyleType.SOLID,
+								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_CLEAVAGE, ConnectorType.STRAIGHT)),
 				/*
 				 * new NewElementAction(e, new DefaultTemplates.LineTemplate( "Covalent bond",
 				 * LineStyle.SOLID, LineType.LINE, MIMShapes.MIM_COVALENT_BOND,
@@ -709,6 +710,7 @@ public class CommonActions implements ApplicationEventListener {
 
 		public void actionPerformed(ActionEvent e) {
 			if (element instanceof VPathwayObject) {
+				
 				PathwayElement pwElm = ((VPathwayObject) element).getPathwayObject();
 				BiopaxReferenceManager m = pwElm.getBiopaxReferenceManager();
 				PublicationXref xref = new PublicationXref();

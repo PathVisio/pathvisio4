@@ -26,12 +26,12 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
-import org.pathvisio.core.model.PropertyType;
-import org.pathvisio.core.model.StaticPropertyType;
+import org.pathvisio.prop.PropertyType;
+import org.pathvisio.prop.StaticPropertyType;
 import org.pathvisio.gui.util.FontNameRenderer;
 
 /**
- * This class knows how to handle fonts.  It renders and edits fonts.
+ * This class knows how to handle fonts. It renders and edits fonts.
  *
  * @author Mark Woon
  */
@@ -39,16 +39,14 @@ public class FontHandler extends DefaultCellEditor implements TableCellRenderer,
 	JLabel renderer;
 	JComboBox editor;
 
-
 	public FontHandler() {
 		super(new JComboBox(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()));
-		editor = (JComboBox)getComponent();
+		editor = (JComboBox) getComponent();
 		editor.setRenderer(new FontNameRenderer());
 		renderer = new JLabel();
 	}
 
-
-	//-- TypeHandler methods --//
+	// -- TypeHandler methods --//
 
 	public PropertyType getType() {
 		return StaticPropertyType.FONT;
@@ -66,19 +64,17 @@ public class FontHandler extends DefaultCellEditor implements TableCellRenderer,
 		return this;
 	}
 
-
-	//-- TableCellRenderer methods --//
+	// -- TableCellRenderer methods --//
 
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
 
-		renderer.setText((String)value);
-		renderer.setFont(FontNameRenderer.buildFont((String)value));
+		renderer.setText((String) value);
+		renderer.setFont(FontNameRenderer.buildFont((String) value));
 		return renderer;
 	}
 
-
-	//-- TableCellEditor methods --//
+	// -- TableCellEditor methods --//
 
 	public Object getCellEditorValue() {
 		return editor.getSelectedItem();

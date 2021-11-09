@@ -40,11 +40,11 @@ import org.pathvisio.io.ConverterException;
 import org.pathvisio.io.GpmlFormat;
 import org.pathvisio.model.PathwayModel;
 import org.pathvisio.model.PathwayObject;
+import org.pathvisio.model.Groupable;
 import org.pathvisio.model.Pathway;
-import org.pathvisio.model.PathwayElement;
 import org.pathvisio.gui.view.VPathwayModelSwing;
 
-public class PathwayImportHandler extends TransferHandler implements ClipboardOwner {
+public class PathwayModelImportHandler extends TransferHandler implements ClipboardOwner {
 
 	static final int NOT_OWNER = -1;
 	int timesPasted; // Keeps track of how many times the same data is pasted
@@ -52,7 +52,7 @@ public class PathwayImportHandler extends TransferHandler implements ClipboardOw
 
 	Set<DataFlavor> supportedFlavors;
 
-	public PathwayImportHandler() {
+	public PathwayModelImportHandler() {
 		supportedFlavors = new HashSet<DataFlavor>();
 		supportedFlavors.add(PathwayTransferable.GPML_DATA_FLAVOR);
 		supportedFlavors.add(DataFlavor.stringFlavor);
@@ -135,7 +135,7 @@ public class PathwayImportHandler extends TransferHandler implements ClipboardOw
 		timesPasted = 0;
 	}
 
-	private Point2D.Double calculateShift(List<PathwayElement> elements, Point cursorPosition) {
+	private Point2D.Double calculateShift(List<PathwayObject> elements, Point cursorPosition) {
 		Point2D.Double topLeftCorner = getTopLeftCorner(elements);
 		double xShift = cursorPosition.x - topLeftCorner.x;
 		double yShift = cursorPosition.y - topLeftCorner.y;
@@ -148,19 +148,20 @@ public class PathwayImportHandler extends TransferHandler implements ClipboardOw
 	 * @param elements = list of PathwayElement objects
 	 * @return
 	 */
-	private Point2D.Double getTopLeftCorner(List<PathwayElement> elements) {
+	private Point2D.Double getTopLeftCorner(List<PathwayObject> elements) {
 
 		Rectangle2D vr = null;
-		for (PathwayElement o : elements) {
-			if (o.getObjectType() == ObjectType.INFOBOX)
+		for (PathwayObject o : elements) {
+			if (o.getClass() == Pathway.class)
 				continue;
-			if (o.getObjectType() == ObjectType.BIOPAX)
-				continue;
-			else {
-				if (vr == null)
-					vr = o.getMBounds();
-				else
-					vr.add(o.getMBounds());
+//			if (o.getObjectType() == ObjectType.BIOPAX)
+//				continue;
+			if (o instanceof Groupable) {
+				if (vr == null) {
+					vr = ((Groupable) o).getBounds();
+				} else {
+					vr.add(((Groupable) o).getBounds());
+				}
 			}
 		}
 

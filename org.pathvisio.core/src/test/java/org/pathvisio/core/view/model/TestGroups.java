@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
-package org.pathvisio.core.view;
+package org.pathvisio.core.view.model;
 
 import java.awt.geom.Point2D;
 
@@ -26,6 +26,7 @@ import org.pathvisio.model.PathwayModel;
 import org.pathvisio.model.DataNode;
 import org.pathvisio.model.PathwayElement;
 import org.pathvisio.core.preferences.PreferenceManager;
+import org.pathvisio.core.view.LayoutType;
 import org.pathvisio.core.view.model.VDataNode;
 import org.pathvisio.core.view.model.VElement;
 import org.pathvisio.core.view.model.VGroup;

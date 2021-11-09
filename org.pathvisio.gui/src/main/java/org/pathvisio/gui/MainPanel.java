@@ -67,7 +67,7 @@ import org.pathvisio.core.view.model.VPathwayObject;
 import org.pathvisio.gui.BackpageTextProvider.BackpageAttributes;
 import org.pathvisio.gui.BackpageTextProvider.BackpageXrefs;
 import org.pathvisio.gui.CommonActions.ZoomAction;
-import org.pathvisio.gui.dnd.PathwayImportHandler;
+import org.pathvisio.gui.dnd.PathwayModelImportHandler;
 import org.pathvisio.gui.handler.PathwayTableModel;
 
 import com.mammothsoftware.frwk.ddb.DropDownButton;
@@ -180,7 +180,7 @@ public class MainPanel extends JPanel implements VPathwayModelListener, Applicat
 
 	public void createAndShowGUI() {
 		setLayout(new BorderLayout());
-		setTransferHandler(new PathwayImportHandler());
+		setTransferHandler(new PathwayModelImportHandler());
 		swingEngine.getEngine().addApplicationEventListener(this);
 
 		actions = swingEngine.getActions();

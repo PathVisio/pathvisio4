@@ -28,26 +28,34 @@ import org.bridgedb.DataSource;
 import org.bridgedb.Xref;
 import org.pathvisio.core.data.XrefWithSymbol;
 import org.pathvisio.core.preferences.PreferenceManager;
-import org.pathvisio.event.PathwayEvent;
-import org.pathvisio.event.PathwayListener;
+import org.pathvisio.core.view.model.DefaultTemplates;
+import org.pathvisio.event.PathwayModelEvent;
+import org.pathvisio.event.PathwayModelListener;
 import org.pathvisio.event.PathwayObjectEvent;
 import org.pathvisio.event.PathwayObjectListener;
 import org.pathvisio.io.ConverterException;
+import org.pathvisio.model.DataNode;
+import org.pathvisio.model.Interaction;
+import org.pathvisio.model.Label;
+import org.pathvisio.model.Pathway;
 import org.pathvisio.model.PathwayElement;
 import org.pathvisio.model.PathwayModel;
+import org.pathvisio.model.PathwayObject;
+import org.pathvisio.model.type.DataNodeType;
+import org.pathvisio.prop.StaticProperty;
 import org.pathvisio.util.Utils;
 
 /**
+ * 
  * @author unknown
- *
  */
-public class Test extends TestCase implements PathwayListener, PathwayObjectListener {
+public class Test extends TestCase implements PathwayModelListener, PathwayObjectListener {
 
 	PathwayModel data;
-	PathwayElement o;
-	List<PathwayEvent> received;
+	DataNode o;
+	List<PathwayModelEvent> received;
 	List<PathwayObjectEvent> receivedElementEvents;
-	PathwayElement l;
+	Interaction l;
 
 	private static final File PATHVISIO_BASEDIR = new File("../..");
 
@@ -55,21 +63,21 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 		PreferenceManager.init();
 		data = new PathwayModel();
 		data.addListener(this);
-		o = PathwayElement.createPathwayElement(ObjectType.DATANODE);
-		received = new ArrayList<PathwayEvent>();
+		o = new DataNode("", null);
+		received = new ArrayList<PathwayModelEvent>();
 		receivedElementEvents = new ArrayList<PathwayObjectEvent>();
 		o.addListener(this);
 		data.add(o);
-		l = PathwayElement.createPathwayElement(ObjectType.LINE);
+		l = new Interaction();
 		data.add(l);
 		received.clear();
 		receivedElementEvents.clear();
 	}
 
 	public void testFields() {
-		o.setMCenterX(1.0);
+		o.setCenterX(1.0);
 
-		assertEquals("test set/get CenterX", 1.0, o.getMCenterX(), 0.0001);
+		assertEquals("test set/get CenterX", 1.0, o.getCenterX(), 0.0001);
 
 		assertEquals("Setting CenterX should generate single event", receivedElementEvents.size(), 1);
 		assertEquals("test getProperty()", 1.0, (Double) o.getStaticProperty(StaticProperty.CENTERX), 0.0001);
@@ -82,9 +90,9 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 
 		// however, you should be able to set graphRef to null
 
-		assertNull("graphref null by default", l.getStartGraphRef());
-		l.setStartGraphRef(null);
-		assertNull("can set graphRef to null", l.getStartGraphRef());
+		assertNull("graphref null by default", l.getStartElementRef());
+		l.setStartElementRef(null);
+		assertNull("can set graphRef to null", l.getStartElementRef());
 	}
 
 	public void testProperties() throws IOException, ConverterException {
@@ -135,7 +143,7 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 		temp.deleteOnExit();
 
 		// set an id on this element so we can find it back easily
-		String id = o.setGeneratedGraphId();
+		String id = o.setGeneratedElementId();
 
 		// store
 		data.writeToXml(temp, false);
@@ -145,7 +153,7 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 		p2.readFromXml(temp, true);
 
 		// get same datanode back
-		PathwayElement o2 = p2.getElementById(id);
+		DataNode o2 = (DataNode) p2.getPathwayObject(id);
 		// check that it still has the dynamic properties after storing / reading
 		assertEquals("World5", o2.getDynamicProperty("Hello5"));
 		assertEquals("World3", o2.getPropertyEx("Hello3"));
@@ -165,37 +173,25 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 
 	public void testColor() {
 		try {
-			o.setColor(null);
+			o.setTextColor(null);
+			o.setBorderColor(null);
 			fail("Shouldn't be able to set color null");
 		} catch (Exception e) {
-		}
-	}
-
-	public void testObjectType() {
-		assertEquals("getObjectType() test", o.getObjectType(), ObjectType.DATANODE);
-
-		assertEquals(ObjectType.SHAPE, ObjectType.getTagMapping("Shape"));
-		assertNull(ObjectType.getTagMapping("Non-existing tag"));
-
-		try {
-			PathwayElement.createPathwayElement(null);
-			fail("Shouldn't be able to create invalid object type");
-		} catch (NullPointerException e) {
 		}
 	}
 
 	public void testParent() {
 		// remove
 		data.remove(o);
-		assertNull("removing object set parents null", o.getParent());
+		assertNull("removing object set parents null", o.getPathwayModel());
 		assertEquals(received.size(), 1);
-		assertEquals("Event type should be DELETED", received.get(0).getType(), PathwayEvent.DELETED);
+		assertEquals("Event type should be DELETED", received.get(0).getType(), PathwayModelEvent.DELETED);
 
 		// re-add
 		data.add(o);
-		assertEquals("adding sets parent", o.getParent(), data);
+		assertEquals("adding sets parent", o.getPathwayModel(), data);
 		assertEquals(received.size(), 2);
-		assertEquals("Event type should be ADDED", received.get(1).getType(), PathwayEvent.ADDED);
+		assertEquals("Event type should be ADDED", received.get(1).getType(), PathwayModelEvent.ADDED);
 	}
 
 	/**
@@ -206,20 +202,20 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 		assertTrue("query non-existing list of ref", data.getReferringObjects("abcde").size() == 0);
 
 		// create link
-		o.setGraphId("1");
-		l.setStartGraphRef("1");
-		assertTrue("reference created", data.getReferringObjects("1").contains(l.getMStart()));
+		o.setElementId("1");
+		l.setStartElementRef("1");
+		assertTrue("reference created", data.getReferringObjects("1").contains(l.getStartLinePoint()));
 
-		l.setStartGraphRef("2");
+		l.setStartElementRef("2");
 		assertTrue("reference removed", data.getReferringObjects("1").size() == 0);
 
-		PathwayElement o2 = PathwayElement.createPathwayElement(ObjectType.DATANODE);
+		DataNode o2 = new DataNode("", DataNodeType.UNDEFINED);
 		data.add(o2);
 
 		// create link in opposite order
-		o.setGraphId("2");
+		o.setElementId("2");
 		l.setEndGraphRef("2");
-		assertTrue("reference created (2)", data.getReferringObjects("2").contains(l.getMEnd()));
+		assertTrue("reference created (2)", data.getReferringObjects("2").contains(l.getEndLinePoint()));
 	}
 
 	/**
@@ -284,47 +280,47 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 		assertTrue("s1 should be equal to s2", s1.equals(s2));
 
 		// test for uniqueness
-		o.setGraphId(s1);
+		o.setElementId(s1);
 
-		PathwayElement o2 = PathwayElement.createPathwayElement(ObjectType.DATANODE);
+		PathwayElement o2 = new DataNode("", DataNodeType.UNDEFINED);
 		data.add(o2);
-		assertSame(o.getParent(), o2.getParent());
-		assertEquals("Setting graphId on first element", o.getGraphId(), "123");
+		assertSame(o.getPathwayModel(), o2.getPathwayModel());
+		assertEquals("Setting graphId on first element", o.getElementId(), "123");
 		try {
-			o2.setGraphId(s2);
+			o2.setElementId(s2);
 			// try setting the same id again
 			fail("shouldn't be able to set the same id twice");
 		} catch (IllegalArgumentException e) {
 		}
 
 		// test random id
-		String x = data.getUniqueGraphId();
+		String x = data.getUniqueElementId();
 		try {
 			// test that we can use it as unique id
-			o.setGraphId(x);
-			assertEquals(x, o.getGraphId());
+			o.setElementId(x);
+			assertEquals(x, o.getElementId());
 			// test that we can't use the same id twice
-			o2.setGraphId(x);
+			o2.setElementId(x);
 			fail("shouldn't be able to set the same id twice");
 		} catch (IllegalArgumentException e) {
 		}
 
 		// test that a second random id is unique again
-		x = data.getUniqueGraphId();
-		o2.setGraphId(x);
-		assertEquals(x, o2.getGraphId());
+		x = data.getUniqueElementId();
+		o2.setElementId(x);
+		assertEquals(x, o2.getElementId());
 
 		// test setting id first, then parent
-		PathwayElement o3 = PathwayElement.createPathwayElement(ObjectType.DATANODE);
-		x = data.getUniqueGraphId();
-		o3.setGraphId(x);
+		PathwayElement o3 = new DataNode("", DataNodeType.UNDEFINED);
+		x = data.getUniqueElementId();
+		o3.setElementId(x);
 		data.add(o3);
-		assertEquals(o3.getGraphId(), x);
+		assertEquals(o3.getElementId(), x);
 
 		try {
-			PathwayElement o4 = PathwayElement.createPathwayElement(ObjectType.DATANODE);
+			PathwayElement o4 = new DataNode("", DataNodeType.UNDEFINED);
 			// try setting the same id again
-			o4.setGraphId(x);
+			o4.setElementId(x);
 			data.add(o4);
 			fail("shouldn't be able to set the same id twice");
 		} catch (IllegalArgumentException e) {
@@ -332,25 +328,25 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 	}
 
 	public void testRef2() {
-		o.setGraphId("1");
+		o.setElementId("1");
 
-		PathwayElement o2 = PathwayElement.createPathwayElement(ObjectType.DATANODE);
+		PathwayElement o2 = new DataNode("", DataNodeType.UNDEFINED);
 		// note: parent not set yet!
-		o2.setGraphId("3");
+		o2.setElementId("3");
 		data.add(o2); // reference should now be created
 
 		assertNull("default endGraphRef is null", l.getEndGraphRef());
 
 		l.setEndGraphRef("3");
 
-		assertTrue("reference created through adding", data.getReferringObjects("3").contains(l.getMEnd()));
+		assertTrue("reference created through adding", data.getReferringObjects("3").contains(l.getEndLinePoint()));
 	}
 
 	public void testXml2007() throws IOException, ConverterException {
 		File testFile = new File(PATHVISIO_BASEDIR, "testData/test.gpml");
 		assertTrue(testFile.exists());
 		data.readFromXml(testFile, false);
-		assertTrue("Loaded a bunch of objects from xml", data.getDataObjects().size() > 20);
+		assertTrue("Loaded a bunch of objects from xml", data.getPathwayObjects().size() > 20);
 
 		File temp = File.createTempFile("data.test", ".gpml");
 		temp.deleteOnExit();
@@ -369,7 +365,7 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 		File testFile = new File(PATHVISIO_BASEDIR, "testData/test2.gpml");
 		assertTrue(testFile.exists());
 		data.readFromXml(testFile, false);
-		assertTrue("Loaded a bunch of objects from xml", data.getDataObjects().size() > 20);
+		assertTrue("Loaded a bunch of objects from xml", data.getPathwayObjects().size() > 20);
 		File temp = File.createTempFile("data.test", ".gpml");
 		temp.deleteOnExit();
 		data.writeToXml(temp, false);
@@ -386,31 +382,11 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 	}
 
 	/**
-	 * test exporting of .mapp (genmapp format) Note: this test is only run whenever
-	 * os.name starts with Windows
-	 */
-	public void testMapp() throws IOException, ConverterException {
-		if (Utils.getOS() == Utils.OS_WINDOWS) {
-			data = new MappFormat().doImport(new File(PATHVISIO_BASEDIR, "testData/test.mapp"));
-			assertTrue("Loaded a bunch of objects from mapp", data.getDataObjects().size() > 20);
-			File temp = File.createTempFile("data.test", ".mapp");
-			temp.deleteOnExit();
-			data.writeToMapp(temp);
-
-			try {
-				data = new MappFormat().doImport(new File(PATHVISIO_BASEDIR, "testData/test.gpml"));
-				fail("Loading wrong format, Exception expected");
-			} catch (Exception e) {
-			}
-		}
-	}
-
-	/**
 	 * test exporting of .svg
 	 */
 	public void testSvg() throws IOException, ConverterException {
 		data.readFromXml(new File(PATHVISIO_BASEDIR, "testData/test.gpml"), false);
-		assertTrue("Loaded a bunch of objects from xml", data.getDataObjects().size() > 20);
+		assertTrue("Loaded a bunch of objects from xml", data.getPathwayObjects().size() > 20);
 		File temp = File.createTempFile("data.test", ".svg");
 		temp.deleteOnExit();
 
@@ -422,7 +398,7 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 	 */
 	public void testPng() throws IOException, ConverterException {
 		data.readFromXml(new File(PATHVISIO_BASEDIR, "testData/test.gpml"), false);
-		assertTrue("Loaded a bunch of objects from xml", data.getDataObjects().size() > 20);
+		assertTrue("Loaded a bunch of objects from xml", data.getPathwayObjects().size() > 20);
 		File temp = File.createTempFile("data.test", ".png");
 		temp.deleteOnExit();
 
@@ -435,7 +411,7 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 	 */
 	public void testPng2() throws IOException, ConverterException {
 		data.readFromXml(new File(PATHVISIO_BASEDIR, "testData/test.gpml"), false);
-		assertTrue("Loaded a bunch of objects from xml", data.getDataObjects().size() > 20);
+		assertTrue("Loaded a bunch of objects from xml", data.getPathwayObjects().size() > 20);
 		File temp = File.createTempFile("data.test", ".png");
 		temp.deleteOnExit();
 
@@ -448,7 +424,7 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 	 */
 	public void testPdf() throws IOException, ConverterException {
 		data.readFromXml(new File(PATHVISIO_BASEDIR, "testData/test.gpml"), false);
-		assertTrue("Loaded a bunch of objects from xml", data.getDataObjects().size() > 20);
+		assertTrue("Loaded a bunch of objects from xml", data.getPathwayObjects().size() > 20);
 		File temp = File.createTempFile("data.test", ".pdf");
 		temp.deleteOnExit();
 
@@ -461,7 +437,7 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 	 */
 	public void testTxt() throws IOException, ConverterException {
 		data.readFromXml(new File(PATHVISIO_BASEDIR, "testData/test.gpml"), false);
-		assertTrue("Loaded a bunch of objects from xml", data.getDataObjects().size() > 20);
+		assertTrue("Loaded a bunch of objects from xml", data.getPathwayObjects().size() > 20);
 		File temp = File.createTempFile("data.test", ".txt");
 		temp.deleteOnExit();
 
@@ -474,7 +450,7 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 	 */
 	public void testPwf() throws IOException, ConverterException {
 		data.readFromXml(new File(PATHVISIO_BASEDIR, "testData/test.gpml"), false);
-		assertTrue("Loaded a bunch of objects from xml", data.getDataObjects().size() > 20);
+		assertTrue("Loaded a bunch of objects from xml", data.getPathwayObjects().size() > 20);
 		File temp = File.createTempFile("data.test", ".pwf");
 		temp.deleteOnExit();
 
@@ -483,26 +459,25 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 	}
 
 	/**
-	 * Test that there is one and only one MAPPINFO object
+	 * Test that there is one and only one Pathway object
 	 *
 	 */
 	public void testMappInfo() {
-		PathwayElement mi;
+		Pathway mi;
 
-		mi = data.getMappInfo();
-		assertEquals(mi.getObjectType(), ObjectType.MAPPINFO);
-		assertTrue(data.getDataObjects().contains(mi));
+		mi = data.getPathway();
+		assertTrue(data.getPathwayObjects().contains(mi));
 		assertNotNull(mi);
 
 		// test that adding a new mappinfo object replaces the old one.
-		PathwayElement mi2 = PathwayElement.createPathwayElement(ObjectType.MAPPINFO);
+		Pathway mi2 = new Pathway();
 		data.add(mi2);
-		assertSame("MappInfo should be replaced", data.getMappInfo(), mi2);
-		assertNotSame("Old MappInfo should be gone", data.getMappInfo(), mi);
-		assertNull("Old MappInfo should not have a parent anymore", mi.getParent());
-		assertSame("New MappInfo should now have a parent", mi2.getParent(), data);
+		assertSame("MappInfo should be replaced", data.getPathway(), mi2);
+		assertNotSame("Old MappInfo should be gone", data.getPathway(), mi);
+		assertNull("Old MappInfo should not have a parent anymore", mi.getPathwayModel());
+		assertSame("New MappInfo should now have a parent", mi2.getPathwayModel(), data);
 
-		mi = data.getMappInfo();
+		mi = data.getPathway();
 		try {
 			data.remove(mi);
 			fail("Shouldn't be able to remove mappinfo object!");
@@ -510,52 +485,25 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 		}
 	}
 
-	/**
-	 * Test that there is one and only one MAPPINFO object
-	 *
-	 */
-	public void testInfoBox() {
-		PathwayElement ib;
-
-		ib = data.getInfoBox();
-		assertTrue(data.getDataObjects().contains(ib));
-		assertNotNull(ib);
-		assertEquals(ib.getObjectType(), ObjectType.INFOBOX);
-
-		PathwayElement ib2 = PathwayElement.createPathwayElement(ObjectType.INFOBOX);
-		data.add(ib2);
-		assertSame("Infobox should be replaced", data.getInfoBox(), ib2);
-		assertNotSame("Old Infobox should be gone", data.getInfoBox(), ib);
-		assertNull("Old Infobox should not have a parent anymore", ib.getParent());
-		assertSame("New Infobox should now have a parent", ib2.getParent(), data);
-
-		ib = data.getMappInfo();
-		try {
-			data.remove(ib);
-			fail("Shouldn't be able to remove mappinfo object!");
-		} catch (IllegalArgumentException e) {
-		}
-	}
-
 	public void testValidator() throws IOException {
 		File tmp = File.createTempFile("test", ".gpml");
-		o.setMCenterX(50.0);
-		o.setMCenterY(50.0);
-		o.setInitialSize();
-		o.setGraphId(data.getUniqueGraphId());
-		PathwayElement o2 = PathwayElement.createPathwayElement(ObjectType.LINE);
-		o2.setMStartX(10.0);
-		o2.setMStartY(10.0);
-		o2.setInitialSize();
+		o.setCenterX(50.0);
+		o.setCenterY(50.0);
+		DefaultTemplates.setInitialSize(o);
+		o.setElementId(data.getUniqueElementId());
+		Interaction o2 = new Interaction();
+		o2.setStartLinePointX(10.0);
+		o2.setStartLinePointY(10.0);
+		DefaultTemplates.setInitialSize(o2);
 		data.add(o2);
-		PathwayElement o3 = PathwayElement.createPathwayElement(ObjectType.LABEL);
-		o3.setMCenterX(100.0);
-		o3.setMCenterY(50);
-		o3.setGraphId(data.getUniqueGraphId());
+		Label o3 = new Label("");
+		o3.setCenterX(100.0);
+		o3.setCenterY(50);
+		o3.setElementId(data.getUniqueElementId());
 		data.add(o3);
 		PathwayElement mi;
 
-		mi = data.getMappInfo();
+		mi = data.getPathway();
 		assertTrue("Mi shouldn't be null", mi != null);
 		try {
 			data.writeToXml(tmp, false);
@@ -567,7 +515,7 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 
 	// event listener
 	// receives events generated on objects o and data
-	public void gmmlObjectModified(PathwayEvent e) {
+	public void gmmlObjectModified(PathwayModelEvent e) {
 		// store all received events
 		received.add(e);
 	}
@@ -576,7 +524,7 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 		receivedElementEvents.add(e);
 	}
 
-	public void pathwayModified(PathwayEvent e) {
+	public void pathwayModified(PathwayModelEvent e) {
 		gmmlObjectModified(e);
 	}
 
@@ -588,7 +536,7 @@ public class Test extends TestCase implements PathwayListener, PathwayObjectList
 		// create a dangling ref
 		assertEquals(data.fixReferences(), 0);
 
-		l.setStartGraphRef("dangle");
+		l.setStartElementRef("dangle");
 
 		File temp = File.createTempFile("data.test", ".gpml");
 		temp.deleteOnExit();

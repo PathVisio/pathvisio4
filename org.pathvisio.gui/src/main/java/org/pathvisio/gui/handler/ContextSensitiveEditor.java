@@ -18,7 +18,7 @@ package org.pathvisio.gui.handler;
 
 import java.util.Collection;
 
-import org.pathvisio.core.model.PathwayModel;
+import org.pathvisio.model.PathwayModel;
 import org.pathvisio.model.PathwayElement;
 import org.pathvisio.gui.SwingEngine;
 
