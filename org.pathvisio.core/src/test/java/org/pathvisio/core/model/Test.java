@@ -214,7 +214,7 @@ public class Test extends TestCase implements PathwayModelListener, PathwayObjec
 
 		// create link in opposite order
 		o.setElementId("2");
-		l.setEndGraphRef("2");
+		l.setEndElementRef("2");
 		assertTrue("reference created (2)", data.getReferringObjects("2").contains(l.getEndLinePoint()));
 	}
 

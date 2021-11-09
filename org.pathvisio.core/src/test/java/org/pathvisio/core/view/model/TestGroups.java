@@ -23,16 +23,13 @@ import junit.framework.TestCase;
 import org.pathvisio.model.type.ConnectorType;
 import org.pathvisio.model.type.DataNodeType;
 import org.pathvisio.model.PathwayModel;
+import org.pathvisio.model.ShapedElement;
 import org.pathvisio.model.DataNode;
+import org.pathvisio.model.Group;
+import org.pathvisio.model.Interaction;
 import org.pathvisio.model.PathwayElement;
 import org.pathvisio.core.preferences.PreferenceManager;
 import org.pathvisio.core.view.LayoutType;
-import org.pathvisio.core.view.model.VDataNode;
-import org.pathvisio.core.view.model.VElement;
-import org.pathvisio.core.view.model.VGroup;
-import org.pathvisio.core.view.model.VLineElement;
-import org.pathvisio.core.view.model.VPathwayModel;
-import org.pathvisio.core.view.model.VPathwayObject;
 
 /**
  * Test various operations related to groups, such as adding to / removing from
@@ -54,7 +51,7 @@ public class TestGroups extends TestCase {
 			dn[i].setWidth(500);
 			dn[i].setHeight(500);
 			vDn[i] = (VDataNode) addElement(vpwy, dn[i]);
-			dn[i].setGeneratedElementId(); //TODO 
+//			dn[i].setGeneratedElementId(); // TODO
 		}
 		vLn[0] = (VLineElement) addConnector(vpwy, dn[0], dn[1]);
 		vLn[1] = (VLineElement) addConnector(vpwy, dn[0], dn[2]);
@@ -67,12 +64,11 @@ public class TestGroups extends TestCase {
 		vLn[0].select();
 		// create a group
 		vpwy.toggleGroup(vpwy.getSelectedGraphics());
-		String ref1 = dn[0].getGroupRef();
-		assertNotNull(ref1);
-		assertEquals(ref1, dn[1].getGroupRef());
-		grp1 = vpwy.getPathwayModel().getGroupById(ref1);
+		Group grp1 = dn[0].getGroupRef();
+		assertNotNull(grp1);
+		assertEquals(grp1, dn[1].getGroupRef());
 		vGrp1 = (VGroup) vpwy.getPathwayElementView(grp1);
-		grp1.setGeneratedElementId();
+//		grp1.setGeneratedElementId(); TODO 
 	}
 
 	private VPathwayModel vpwy;
@@ -81,7 +77,7 @@ public class TestGroups extends TestCase {
 	private VDataNode[] vDn = new VDataNode[DATANODE_COUNT];
 	private VLineElement[] vLn = new VLineElement[2];
 	private DataNode[] dn = new DataNode[DATANODE_COUNT];
-	private PathwayElement grp1 = null;
+	private Group grp1 = null;
 	private VGroup vGrp1 = null;
 
 	/** helper for adding elements to a vpathway */
@@ -94,15 +90,15 @@ public class TestGroups extends TestCase {
 	}
 
 	/** helper for adding connectors to a vpathway */
-	private VElement addConnector(VPathwayModel vpwy, PathwayElement l1, PathwayElement l2) {
-		PathwayElement elt = PathwayElement.createPathwayElement(ObjectType.LINE);
+	private VElement addConnector(VPathwayModel vpwy, ShapedElement l1, ShapedElement l2) {
+		Interaction elt = new Interaction();
 		elt.setConnectorType(ConnectorType.ELBOW);
-		elt.setStartGraphRef(l1.getGraphId());
-		elt.setEndGraphRef(l2.getGraphId());
-		elt.setMStartX(l1.getMCenterX());
-		elt.setMStartY(l1.getMCenterY());
-		elt.setMEndX(l2.getMCenterX());
-		elt.setMEndY(l2.getMCenterY());
+		elt.setStartElementRef(l1);
+		elt.setEndElementRef(l2);
+		elt.setStartLinePointX(l1.getCenterX());
+		elt.setStartLinePointY(l1.getCenterY());
+		elt.setEndLinePointX(l2.getCenterX());
+		elt.setEndLinePointY(l2.getCenterY());
 
 		return addElement(vpwy, elt);
 	}
@@ -114,10 +110,9 @@ public class TestGroups extends TestCase {
 		// create a 2nd, nested group
 		vpwy.toggleGroup(vpwy.getSelectedGraphics());
 
-		String ref2 = dn[2].getGroupRef();
-		assertNotNull(ref2);
-		assertEquals(ref2, grp1.getGroupRef());
-		PathwayElement grp2 = vpwy.getPathwayModel().getGroupById(ref2);
+		Group grp2 = dn[2].getGroupRef();
+		assertNotNull(grp2);
+		assertEquals(grp2, ((ShapedElement) grp1).getGroupRef());
 		VGroup vGrp2 = (VGroup) vpwy.getPathwayElementView(grp2);
 	}
 
@@ -167,8 +162,8 @@ public class TestGroups extends TestCase {
 		double oldEy = vLn3.getVEndY();
 		assertEquals(vGrp1.getVCenterX(), oldEx, 0.01);
 		assertEquals(vGrp1.getVCenterY(), oldEy, 0.01);
-		assertEquals(grp1.getGraphId(), vLn3.getPathwayObject().getEndGraphRef());
-		assertNotNull(vLn3.getPathwayObject().getEndGraphRef());
+		assertEquals(grp1.getElementId(), vLn3.getPathwayObject().getEndElementRef());
+		assertNotNull(vLn3.getPathwayObject().getEndElementRef());
 
 		vpwy.clearSelection();
 		vGrp1.select();
@@ -178,7 +173,7 @@ public class TestGroups extends TestCase {
 		// assure that line hasn't moved by deletion of group (bug #1058)
 		assertEquals(oldEx, vLn3.getVEndX(), 0.01);
 		assertEquals(oldEy, vLn3.getVEndY(), 0.01);
-		assertNull(vLn3.getPathwayObject().getEndGraphRef());
+		assertNull(vLn3.getPathwayObject().getEndElementRef());
 
 	}
 

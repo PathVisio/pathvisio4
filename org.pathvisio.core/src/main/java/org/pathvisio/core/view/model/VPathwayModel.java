@@ -2275,7 +2275,7 @@ public class VPathwayModel implements PathwayModelListener {
 			} // else
 
 			// make another copy to preserve clipboard contents for next paste
-			PathwayElement p = o.copy();
+			PathwayElement p = ((PathwayElement) o).copy();
 
 			// use the idMap to set consistent new id's
 			replaceIdsAndRefs(p, idmap);
