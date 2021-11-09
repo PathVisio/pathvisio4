@@ -86,8 +86,8 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 * @return
 	 */
 	@Override
-	public ShapedElement getPathwayElement() {
-		return (ShapedElement) super.getPathwayElement();
+	public ShapedElement getPathwayObject() {
+		return (ShapedElement) super.getPathwayObject();
 	}
 
 	/**
@@ -95,11 +95,11 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 */
 	@Override
 	public int getZOrder() {
-		return getPathwayElement().getZOrder();
+		return getPathwayObject().getZOrder();
 	}
 
 	protected void createHandles() {
-		ShapeType shapeType = getPathwayElement().getShapeType();
+		ShapeType shapeType = getPathwayObject().getShapeType();
 		boolean isResizeable = shapeType.isResizeable();
 		boolean isRotatable = shapeType.isRotatable();
 		if (shapeType != null && !isResizeable && !isRotatable) {
@@ -155,7 +155,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	}
 
 	protected void setVScaleRectangle(Rectangle2D r) {
-		ShapedElement gdata = getPathwayElement();
+		ShapedElement gdata = getPathwayObject();
 		gdata.setWidth(mFromV(r.getWidth()));
 		gdata.setHeight(mFromV(r.getHeight()));
 		gdata.setLeft(mFromV(r.getX()));
@@ -165,7 +165,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	protected void vMoveBy(double vdx, double vdy) {
 		// both setM operations fire the exact same objectModifiedEvent, one should be
 		// enough
-		ShapedElement gdata = getPathwayElement();
+		ShapedElement gdata = getPathwayObject();
 		gdata.dontFireEvents(1);
 		gdata.setLeft(gdata.getLeft() + mFromV(vdx));
 		gdata.setTop(gdata.getTop() + mFromV(vdy));
@@ -183,7 +183,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 */
 	private Point mToInternal(Point p) {
 		Point pt = mRelativeToCenter(p);
-		Point pr = LinAlg.rotate(pt, getPathwayElement().getRotation());
+		Point pr = LinAlg.rotate(pt, getPathwayObject().getRotation());
 		return pr;
 	}
 
@@ -196,9 +196,9 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 */
 	private Point mToExternal(double x, double y) {
 		Point p = new Point(x, y);
-		Point pr = LinAlg.rotate(p, -getPathwayElement().getRotation());
-		pr.x += getPathwayElement().getCenterX();
-		pr.y += getPathwayElement().getCenterY();
+		Point pr = LinAlg.rotate(p, -getPathwayObject().getRotation());
+		pr.x += getPathwayObject().getCenterX();
+		pr.y += getPathwayObject().getCenterY();
 		return pr;
 	}
 
@@ -208,7 +208,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 * @param p
 	 */
 	private Point mRelativeToCenter(Point p) {
-		return p.subtract(new Point(getPathwayElement().getCenterX(), getPathwayElement().getCenterY()));
+		return p.subtract(new Point(getPathwayObject().getCenterX(), getPathwayObject().getCenterY()));
 	}
 
 	/**
@@ -218,18 +218,18 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 */
 	public void setRotation(double angle) {
 		if (angle < 0)
-			getPathwayElement().setRotation(angle + Math.PI * 2);
+			getPathwayObject().setRotation(angle + Math.PI * 2);
 		else if (angle > Math.PI * 2)
-			getPathwayElement().setRotation(angle - Math.PI * 2);
+			getPathwayObject().setRotation(angle - Math.PI * 2);
 		else
-			getPathwayElement().setRotation(angle);
+			getPathwayObject().setRotation(angle);
 	}
 
 	/**
 	 *
 	 */
 	public void adjustToHandle(Handle h, double vnewx, double vnewy) {
-		ShapedElement gdata = getPathwayElement();
+		ShapedElement gdata = getPathwayObject();
 		// Rotation
 		if (h == handleR) {
 			Point cur = mRelativeToCenter(new Point(mFromV(vnewx), mFromV(vnewy)));
@@ -374,7 +374,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 */
 	protected void setHandleLocation() {
 		Point p;
-		ShapedElement gdata = getPathwayElement();
+		ShapedElement gdata = getPathwayObject();
 		ShapeType shapeType = gdata.getShapeType();
 		if (shapeType == null || shapeType.isResizeable()) {
 			if (handleN != null) {
@@ -398,7 +398,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 			handleNW.setMLocation(p.x, p.y);
 		}
 		if ((shapeType == null || shapeType.isRotatable()) && (handleR != null)) {
-			p = mToExternal(getPathwayElement().getWidth() / 2 + M_ROTATION_HANDLE_POSITION, 0);
+			p = mToExternal(getPathwayObject().getWidth() / 2 + M_ROTATION_HANDLE_POSITION, 0);
 			handleR.setMLocation(p.x, p.y);
 		}
 
@@ -425,7 +425,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 */
 	protected Shape getShape(boolean rotate, boolean stroke) {
 		if (stroke) {
-			return getShape(rotate, (float) getPathwayElement().getBorderWidth());
+			return getShape(rotate, (float) getPathwayObject().getBorderWidth());
 		} else {
 			return getShape(rotate, 0);
 		}
@@ -443,7 +443,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 * @return
 	 */
 	protected java.awt.Shape getShape(boolean rotate, float sw) {
-		ShapedElement gdata = getPathwayElement();
+		ShapedElement gdata = getPathwayObject();
 		double mx = gdata.getLeft();
 		double my = gdata.getTop();
 		double mw = gdata.getWidth();
@@ -534,7 +534,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	}
 
 	protected void drawTextLabel(Graphics2D g) {
-		ShapedElement gdata = getPathwayElement();
+		ShapedElement gdata = getPathwayObject();
 		int margin = (int) vFromM(5);
 		Rectangle area = getVShape(true).getBounds();
 		String label = gdata.getTextLabel();
@@ -591,10 +591,10 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 */
 	private AttributedString getVAttributedString(String text) {
 		AttributedString ats = new AttributedString(text);
-		if (getPathwayElement().getFontStrikethru()) {
+		if (getPathwayObject().getFontStrikethru()) {
 			ats.addAttribute(TextAttribute.STRIKETHROUGH, TextAttribute.STRIKETHROUGH_ON);
 		}
-		if (getPathwayElement().getFontDecoration()) {
+		if (getPathwayObject().getFontDecoration()) {
 			ats.addAttribute(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
 		}
 
@@ -606,16 +606,16 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 * @return
 	 */
 	protected Font getVFont() {
-		String name = getPathwayElement().getFontName();
+		String name = getPathwayObject().getFontName();
 		int style = getVFontStyle();
-		return new Font(name, style, 12).deriveFont((float) vFromM(getPathwayElement().getFontSize()));
+		return new Font(name, style, 12).deriveFont((float) vFromM(getPathwayObject().getFontSize()));
 	}
 
 	/**
 	 * @param g
 	 */
 	protected void drawShape(Graphics2D g) {
-		ShapedElement gdata = getPathwayElement();
+		ShapedElement gdata = getPathwayObject();
 		Color fillcolor = gdata.getFillColor();
 		if (!hasOutline()) {
 			return; // nothing to draw.
@@ -642,7 +642,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 * @return
 	 */
 	private boolean hasOutline() {
-		ShapeType shapeType = getPathwayElement().getShapeType();
+		ShapeType shapeType = getPathwayObject().getShapeType();
 		return (!(shapeType == null || shapeType == ShapeType.NONE));
 	}
 
@@ -681,7 +681,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 		// first use getVBounds as a rough approximation
 		if (getVBounds().contains(point)) {
 			// if the shape is transparent, only check against the outline
-			if (!ColorUtils.isTransparent(getPathwayElement().getFillColor())) {
+			if (!ColorUtils.isTransparent(getPathwayObject().getFillColor())) {
 				return getVOutline().contains(point);
 			} else {
 				// otherwise check against the whole shape
@@ -702,7 +702,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 * @return the center x-coordinate
 	 */
 	public double getVCenterX() {
-		return vFromM(getPathwayElement().getCenterX());
+		return vFromM(getPathwayObject().getCenterX());
 	}
 
 	/**
@@ -712,7 +712,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 * @return the center y-coordinate
 	 */
 	public double getVCenterY() {
-		return vFromM(getPathwayElement().getCenterY());
+		return vFromM(getPathwayObject().getCenterY());
 	}
 
 	/**
@@ -724,7 +724,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 * @return
 	 */
 	public double getVWidth() {
-		return vFromM(getPathwayElement().getWidth());
+		return vFromM(getPathwayObject().getWidth());
 	}
 
 	/**
@@ -736,7 +736,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 * @return
 	 */
 	public double getVHeight() {
-		return vFromM(getPathwayElement().getHeight());
+		return vFromM(getPathwayObject().getHeight());
 	}
 
 	/**
@@ -748,7 +748,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 * @return
 	 */
 	public double getVLeft() {
-		return vFromM(getPathwayElement().getLeft());
+		return vFromM(getPathwayObject().getLeft());
 	}
 
 	/**
@@ -760,7 +760,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 * @return
 	 */
 	public double getVTop() {
-		return vFromM(getPathwayElement().getTop());
+		return vFromM(getPathwayObject().getTop());
 	}
 
 	/**
@@ -770,11 +770,11 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 */
 	public int getVFontStyle() {
 		int style = Font.PLAIN;
-		if (getPathwayElement().getFontName() != null) {
-			if (getPathwayElement().getFontWeight()) {
+		if (getPathwayObject().getFontName() != null) {
+			if (getPathwayObject().getFontWeight()) {
 				style |= Font.BOLD;
 			}
-			if (getPathwayElement().getFontStyle()) {
+			if (getPathwayObject().getFontStyle()) {
 				style |= Font.ITALIC;
 			}
 		}
@@ -787,7 +787,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 * @return
 	 */
 	protected Color getLineColor() {
-		Color linecolor = getPathwayElement().getBorderColor();
+		Color linecolor = getPathwayObject().getBorderColor();
 		/*
 		 * the selection is not colored red when in edit mode it is possible to see a
 		 * color change immediately
@@ -804,8 +804,8 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 * @param g
 	 */
 	protected void setLineStyle(Graphics2D g) {
-		LineStyleType ls = getPathwayElement().getBorderStyle();
-		float lt = (float) vFromM(getPathwayElement().getBorderWidth());
+		LineStyleType ls = getPathwayObject().getBorderStyle();
+		float lt = (float) vFromM(getPathwayObject().getBorderWidth());
 		if (ls == LineStyleType.SOLID) {
 			g.setStroke(new BasicStroke(lt));
 		} else if (ls == LineStyleType.DASHED) {

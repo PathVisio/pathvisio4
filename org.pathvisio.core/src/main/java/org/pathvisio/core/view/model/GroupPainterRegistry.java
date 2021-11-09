@@ -183,7 +183,7 @@ public class GroupPainterRegistry {
 
 			Rectangle2D rect = group.getVBounds();
 
-			String label = group.getPathwayElement().getTextLabel();
+			String label = group.getPathwayObject().getTextLabel();
 
 			int size = (int) group.vFromM(32);
 			g.setFont(new Font("Times", 0, size));

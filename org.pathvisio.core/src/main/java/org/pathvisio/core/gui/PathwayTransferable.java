@@ -292,13 +292,13 @@ public class PathwayTransferable implements Transferable {
 			throws UnsupportedFlavorException, IOException, ConverterException {
 		URL url = getFileURL(t);
 		if (url != null) {
-			engine.openPathway(url);
+			engine.openPathwayModel(url);
 		}
 
 		String xml = getText(t);
 		if (xml != null) {
-			engine.newPathway();
-			engine.getActivePathway().readFromXml(new StringReader(xml), true);
+			engine.newPathwayModel();
+			engine.getActivePathwayModel().readFromXml(new StringReader(xml), true);
 		}
 	}
 }

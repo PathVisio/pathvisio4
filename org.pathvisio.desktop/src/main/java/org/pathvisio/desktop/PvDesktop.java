@@ -33,8 +33,8 @@ import org.pathvisio.core.ApplicationEvent;
 import org.pathvisio.core.Engine.ApplicationEventListener;
 import org.pathvisio.core.data.GdbEvent;
 import org.pathvisio.core.data.GdbManager.GdbEventListener;
-import org.pathvisio.core.debug.Logger;
-import org.pathvisio.core.model.PathwayModel;
+import org.pathvisio.debug.Logger;
+import org.pathvisio.model.PathwayModel;
 import org.pathvisio.core.preferences.GlobalPreference;
 import org.pathvisio.core.preferences.PreferenceManager;
 import org.pathvisio.core.view.model.VPathwayModel;
@@ -132,17 +132,12 @@ public class PvDesktop implements ApplicationEventListener, GdbEventListener {
 		return preferencesDlg;
 	}
 
-
-
 	/**
 	 * returns the global swingEngine instance.
 	 */
 	public SwingEngine getSwingEngine() {
 		return swingEngine;
 	}
-
-
-
 
 	/**
 	 * Shortcut for getSwingEngine().getFrame() Returns frame of main application
@@ -260,7 +255,6 @@ public class PvDesktop implements ApplicationEventListener, GdbEventListener {
 		disposed = true;
 	}
 
-
 	/**
 	 * Ask the user to select a gdb. Uses the appropriate swingDbConnector for the
 	 * current database type. dbType is "Metabolite" or "Gene" and is only used in
@@ -344,12 +338,12 @@ public class PvDesktop implements ApplicationEventListener, GdbEventListener {
 	@Override
 	public void gdbEvent(GdbEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void applicationEvent(ApplicationEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

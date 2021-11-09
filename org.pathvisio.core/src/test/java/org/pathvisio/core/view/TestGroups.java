@@ -166,8 +166,8 @@ public class TestGroups extends TestCase {
 		double oldEy = vLn3.getVEndY();
 		assertEquals(vGrp1.getVCenterX(), oldEx, 0.01);
 		assertEquals(vGrp1.getVCenterY(), oldEy, 0.01);
-		assertEquals(grp1.getGraphId(), vLn3.getPathwayElement().getEndGraphRef());
-		assertNotNull(vLn3.getPathwayElement().getEndGraphRef());
+		assertEquals(grp1.getGraphId(), vLn3.getPathwayObject().getEndGraphRef());
+		assertNotNull(vLn3.getPathwayObject().getEndGraphRef());
 
 		vpwy.clearSelection();
 		vGrp1.select();
@@ -177,7 +177,7 @@ public class TestGroups extends TestCase {
 		// assure that line hasn't moved by deletion of group (bug #1058)
 		assertEquals(oldEx, vLn3.getVEndX(), 0.01);
 		assertEquals(oldEy, vLn3.getVEndY(), 0.01);
-		assertNull(vLn3.getPathwayElement().getEndGraphRef());
+		assertNull(vLn3.getPathwayObject().getEndGraphRef());
 
 	}
 

@@ -32,7 +32,7 @@ import org.pathvisio.model.PathwayElement;
 import org.pathvisio.core.model.PropertyType;
 import org.pathvisio.core.model.StaticPropertyType;
 import org.pathvisio.gui.SwingEngine;
-import org.pathvisio.gui.dialogs.PathwayElementDialog;
+import org.pathvisio.gui.dialogs.PathwayObjectDialog;
 
 /**
  * This class knows how to edit comments.
@@ -106,8 +106,8 @@ public class CommentsHandler extends AbstractCellEditor implements ContextSensit
 	public void actionPerformed(ActionEvent e) {
 
 		if(canEdit && BUTTON_COMMAND.equals(e.getActionCommand())) {
-			PathwayElementDialog d = swingEngine.getPopupDialogHandler().getInstance(currentElement, false, null, button);
-			d.selectPathwayElementPanel(PathwayElementDialog.TAB_COMMENTS);
+			PathwayObjectDialog d = swingEngine.getPopupDialogHandler().getInstance(currentElement, false, null, button);
+			d.selectPathwayElementPanel(PathwayObjectDialog.TAB_COMMENTS);
 			d.setVisible(true);
 		}
 		fireEditingCanceled();  // always fire - PathwayElementDialog saves data itself

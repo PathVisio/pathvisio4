@@ -16,9 +16,27 @@
  ******************************************************************************/
 package org.pathvisio.core.view.model;
 
+import org.pathvisio.model.Drawable;
+
 /**
- * Implement this if you wish to receive events when a VPathway is modified.
+ * This class represents the view of a {@link Drawable} PathwayElement. This
+ * class is implemented by {@link VShapedElement} and {@link VLineElement}, as
+ * well as by {@link VLinePoint}, and {@link VAnchor}.
+ * 
+ * @author finterly
  */
-public interface VPathwayListener {
-	public void vPathwayEvent(VPathwayEvent e);
+public interface VDrawable {
+
+	/**
+	 * Gets the model representation (PathwayElement) of this class
+	 * 
+	 * @return
+	 */
+	public Drawable getPathwayObject();
+	
+	/**
+	 * Returns the z-order from the model //TODO public?
+	 */
+	public int getZOrder();
+
 }

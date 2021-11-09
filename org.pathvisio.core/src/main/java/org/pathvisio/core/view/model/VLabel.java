@@ -39,7 +39,7 @@ public class VLabel extends VShapedElement {
 	 * @return
 	 */
 	@Override
-	public Label getPathwayElement() {
-		return (Label) super.getPathwayElement();
+	public Label getPathwayObject() {
+		return (Label) super.getPathwayObject();
 	}
 }

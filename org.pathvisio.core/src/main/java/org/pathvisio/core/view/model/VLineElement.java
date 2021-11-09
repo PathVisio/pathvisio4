@@ -94,16 +94,16 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	 * @return
 	 */
 	@Override
-	public LineElement getPathwayElement() {
-		return (LineElement) super.getPathwayElement();
+	public LineElement getPathwayObject() {
+		return (LineElement) super.getPathwayObject();
 	}
 
 	/**
 	 * Returns the z-order from the model
 	 */
 	@Override
-	protected int getZOrder() {
-		return getPathwayElement().getZOrder();
+	public int getZOrder() {
+		return getPathwayObject().getZOrder();
 	}
 
 	private void addPoint(LinePoint mp) {
@@ -183,19 +183,19 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 		WayPoint[] waypoints = getConnectorShape().getWayPoints();
 		int index = segmentHandles.indexOf(h);
 		if (index > -1) {
-			List<LinePoint> points = getPathwayElement().getLinePoints();
+			List<LinePoint> points = getPathwayObject().getLinePoints();
 			if (points.size() - 2 != (waypoints.length)) {
 				// Recreate points from segments
 				points = new ArrayList<LinePoint>();
-				points.add(getPathwayElement().getStartLinePoint());
+				points.add(getPathwayObject().getStartLinePoint());
 				for (int i = 0; i < waypoints.length; i++) {
-					LinePoint p = getPathwayElement().new LinePoint(ArrowHeadType.UNDIRECTED, waypoints[i].getX(),
+					LinePoint p = getPathwayObject().new LinePoint(ArrowHeadType.UNDIRECTED, waypoints[i].getX(),
 							waypoints[i].getY());
 					points.add(p);
 				}
-				points.add(getPathwayElement().getEndLinePoint());
+				points.add(getPathwayObject().getEndLinePoint());
 				gdata.dontFireEvents(1);
-				getPathwayElement().setLinePoints(points);
+				getPathwayObject().setLinePoints(points);
 			}
 			points.get(index + 1).moveTo(mFromV(vx), mFromV(vy));
 		}
@@ -217,8 +217,8 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	public Shape getVConnectorAdjusted() {
 
 		// call to getLineEndingWidth
-		double startGap = getGap(getPathwayElement().getStartLineType());
-		double endGap = getGap(getPathwayElement().getEndLineType());
+		double startGap = getGap(getPathwayObject().getStartLineType());
+		double endGap = getGap(getPathwayObject().getEndLineType());
 
 		// From the segments
 		Shape s = getConnectorShape().calculateAdjustedShape(startGap, endGap);
@@ -329,9 +329,9 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 		Segment[] segments = getConnectorShape().getSegments();
 
 		ArrowShape he = getVHead(segments[segments.length - 1].getMStart(), segments[segments.length - 1].getMEnd(),
-				getPathwayElement().getEndLineType());
+				getPathwayObject().getEndLineType());
 		ArrowShape hs = getVHead(segments[0].getMEnd(), segments[0].getMStart(),
-				getPathwayElement().getStartLineType());
+				getPathwayObject().getStartLineType());
 		return new ArrowShape[] { hs, he };
 	}
 
@@ -345,15 +345,15 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 		Segment[] segments = getConnectorShape().getSegments();
 
 		// last segment in the Connector Shape
-		double lineEndingWidth = getGap(getPathwayElement().getEndLineType());
+		double lineEndingWidth = getGap(getPathwayObject().getEndLineType());
 		Point2D adjustedSegmentEnd = segments[segments.length - 1].calculateNewEndPoint(lineEndingWidth);
 		ArrowShape he = getVHead(segments[segments.length - 1].getMStart(), adjustedSegmentEnd,
-				getPathwayElement().getEndLineType());
+				getPathwayObject().getEndLineType());
 
 		// first segment in the connector shape
-		double lineStartingWidth = getGap(getPathwayElement().getStartLineType());
+		double lineStartingWidth = getGap(getPathwayObject().getStartLineType());
 		Point2D adjustedSegmentStart = segments[0].calculateNewStartPoint(lineStartingWidth);
-		ArrowShape hs = getVHead(segments[0].getMEnd(), adjustedSegmentStart, getPathwayElement().getStartLineType());
+		ArrowShape hs = getVHead(segments[0].getMEnd(), adjustedSegmentStart, getPathwayObject().getStartLineType());
 		return new ArrowShape[] { hs, he };
 	}
 
@@ -364,8 +364,8 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 		ArrowShape hs = heads[0];
 		ArrowShape he = heads[1];
 
-		float thickness = (float) vFromM(getPathwayElement().getLineWidth());
-		if (getPathwayElement().getLineStyle() == LineStyleType.DOUBLE)
+		float thickness = (float) vFromM(getPathwayObject().getLineWidth());
+		if (getPathwayObject().getLineStyle() == LineStyleType.DOUBLE)
 			thickness *= 4;
 		BasicStroke bs = new BasicStroke(thickness);
 
@@ -380,7 +380,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 
 	private void setAnchors() {
 		// Check for new anchors
-		List<Anchor> manchors = getPathwayElement().getAnchors();
+		List<Anchor> manchors = getPathwayObject().getAnchors();
 		for (Anchor ma : manchors) {
 			if (!anchors.containsKey(ma)) {
 				anchors.put(ma, new VAnchor(ma, this));
@@ -407,7 +407,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 
 	void removeVAnchor(VAnchor va) {
 		anchors.remove(va.getAnchor());
-		getPathwayElement().removeAnchor(va.getAnchor());
+		getPathwayObject().removeAnchor(va.getAnchor());
 	}
 
 	private void updateAnchorPositions() {
@@ -421,7 +421,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 			return;
 		Point2D p = getConnectorShape().fromLineCoordinate(0.7);
 		p.setLocation(p.getX() - 5, p.getY());
-		Point2D r = getPathwayElement().toRelativeCoordinate(p);
+		Point2D r = getPathwayObject().toRelativeCoordinate(p);
 		getCitation().setRPosition(r);
 	}
 
@@ -436,7 +436,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	protected void drawHead(Graphics2D g, ArrowShape head, Color c) {
 		if (head != null) {
 			// reset stroked line to solid, but use given thickness
-			g.setStroke(new BasicStroke((float) vFromM(getPathwayElement().getLineWidth())));
+			g.setStroke(new BasicStroke((float) vFromM(getPathwayObject().getLineWidth())));
 			switch (head.getFillType()) {
 			case OPEN:
 				g.setPaint(Color.WHITE);
@@ -483,7 +483,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 
 		if (h != null) {
 			AffineTransform f = new AffineTransform();
-			double scaleFactor = vFromM(1.0 + 0.3 * getPathwayElement().getLineWidth());
+			double scaleFactor = vFromM(1.0 + 0.3 * getPathwayObject().getLineWidth());
 			f.rotate(Math.atan2(ye - ys, xe - xs), xe, ye);
 			f.translate(xe, ye);
 			f.scale(scaleFactor, scaleFactor);
@@ -530,7 +530,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	 * @return the center x-coordinate
 	 */
 	public double getVCenterX() {
-		return vFromM(getPathwayElement().getCenterX());
+		return vFromM(getPathwayObject().getCenterX());
 	}
 
 	/**
@@ -540,7 +540,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	 * @return the center y-coordinate
 	 */
 	public double getVCenterY() {
-		return vFromM(getPathwayElement().getCenterY());
+		return vFromM(getPathwayObject().getCenterY());
 	}
 
 	/**
@@ -552,7 +552,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	 * @return
 	 */
 	public double getVWidth() {
-		return vFromM(getPathwayElement().getWidth());
+		return vFromM(getPathwayObject().getWidth());
 	}
 
 	/**
@@ -564,7 +564,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	 * @return
 	 */
 	public double getVHeight() {
-		return vFromM(getPathwayElement().getHeight());
+		return vFromM(getPathwayObject().getHeight());
 	}
 
 	/**
@@ -576,7 +576,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	 * @return
 	 */
 	public double getVLeft() {
-		return vFromM(getPathwayElement().getLeft());
+		return vFromM(getPathwayObject().getLeft());
 	}
 
 	/**
@@ -588,11 +588,11 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	 * @return
 	 */
 	public double getVTop() {
-		return vFromM(getPathwayElement().getTop());
+		return vFromM(getPathwayObject().getTop());
 	}
 
 	protected void vMoveWayPointsBy(double vdx, double vdy) {
-		List<LinePoint> mps = getPathwayElement().getLinePoints();
+		List<LinePoint> mps = getPathwayObject().getLinePoints();
 		for (int i = 1; i < mps.size() - 1; i++) {
 			mps.get(i).moveBy(mFromV(vdx), mFromV(vdy));
 		}
@@ -607,11 +607,11 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	protected void vMoveBy(double vdx, double vdy) {
 		// move LinePoints directly, not every LinePoint is represented
 		// by a VPoint but we want to move them all.
-		for (LinePoint p : getPathwayElement().getLinePoints()) {
+		for (LinePoint p : getPathwayObject().getLinePoints()) {
 			p.moveBy(canvas.mFromV(vdx), canvas.mFromV(vdy));
 		}
 		// Redraw graphRefs //TODO
-		for (Anchor anchor : getPathwayElement().getAnchors()) {
+		for (Anchor anchor : getPathwayObject().getAnchors()) {
 			for (LinkableFrom ref : anchor.getLinkableFroms()) {
 				if (ref instanceof LinePoint) {
 					VPoint vp = canvas.getPoint((LinePoint) ref);
@@ -651,7 +651,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 		getConnectorShape().recalculateShape(getMLine());
 
 		WayPoint[] wps = getConnectorShape().getWayPoints();
-		List<LinePoint> mps = getPathwayElement().getLinePoints();
+		List<LinePoint> mps = getPathwayObject().getLinePoints();
 		if (wps.length == mps.size() - 2 && getConnectorShape().hasValidWaypoints(getMLine())) {
 			getMLine().adjustWayPointPreferences(wps);
 		} else {
@@ -663,7 +663,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 		for (VPoint p : points) {
 			setHandleLocation(p);
 		}
-		if (getPathwayElement().getAnchors().size() != anchors.size()) {
+		if (getPathwayObject().getAnchors().size() != anchors.size()) {
 			setAnchors();
 		}
 		checkCitation();
@@ -686,7 +686,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	protected void destroy() {
 		super.destroy();
 
-		for (LinePoint p : getPathwayElement().getLinePoints()) {
+		for (LinePoint p : getPathwayObject().getLinePoints()) {
 			canvas.pointsMtoV.remove(p);
 		}
 		List<VAnchor> remove = new ArrayList<VAnchor>(anchors.values());
@@ -702,7 +702,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	 * @return
 	 */
 	protected double getVStartX() {
-		return (int) (vFromM(getPathwayElement().getStartLinePointX()));
+		return (int) (vFromM(getPathwayObject().getStartLinePointX()));
 	}
 
 	/**
@@ -712,7 +712,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	 * @return
 	 */
 	protected double getVStartY() {
-		return (int) (vFromM(getPathwayElement().getStartLinePointY()));
+		return (int) (vFromM(getPathwayObject().getStartLinePointY()));
 	}
 
 	/**
@@ -722,7 +722,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	 * @return
 	 */
 	protected double getVEndX() {
-		return (int) (vFromM(getPathwayElement().getEndLinePointX()));
+		return (int) (vFromM(getPathwayObject().getEndLinePointX()));
 	}
 
 	/**
@@ -732,7 +732,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	 * @return
 	 */
 	protected double getVEndY() {
-		return (int) (vFromM(getPathwayElement().getEndLinePointY()));
+		return (int) (vFromM(getPathwayObject().getEndLinePointY()));
 	}
 
 	/**
@@ -778,7 +778,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	// ================================================================================
 
 	protected Color getLineColor() {
-		Color linecolor = getPathwayElement().getLineColor();
+		Color linecolor = getPathwayObject().getLineColor();
 		/*
 		 * the selection is not colored red when in edit mode it is possible to see a
 		 * color change immediately
@@ -790,8 +790,8 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	}
 
 	protected void setLineStyle(Graphics2D g) {
-		LineStyleType ls = getPathwayElement().getLineStyle();
-		float lt = (float) vFromM(getPathwayElement().getLineWidth());
+		LineStyleType ls = getPathwayObject().getLineStyle();
+		float lt = (float) vFromM(getPathwayObject().getLineWidth());
 		if (ls == LineStyleType.SOLID) {
 			g.setStroke(new BasicStroke(lt));
 		} else if (ls == LineStyleType.DASHED) {

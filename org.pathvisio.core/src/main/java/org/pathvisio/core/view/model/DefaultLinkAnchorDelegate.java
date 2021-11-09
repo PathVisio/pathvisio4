@@ -48,25 +48,25 @@ public class DefaultLinkAnchorDelegate extends AbstractLinkAnchorDelegate {
 		int numH = 1;
 		int numV = 1;
 		// more anchors if linkableTo is a shapedElement of a certain size
-		if (parent.getPathwayElement() instanceof ShapedElement) {
-			numH = ((ShapedElement) parent.getPathwayElement()).getWidth() < MIN_SIZE_LA ? 1 : numAnchors;
-			numV = ((ShapedElement) parent.getPathwayElement()).getHeight() < MIN_SIZE_LA ? 1 : numAnchors;
+		if (parent.getPathwayObject() instanceof ShapedElement) {
+			numH = ((ShapedElement) parent.getPathwayObject()).getWidth() < MIN_SIZE_LA ? 1 : numAnchors;
+			numV = ((ShapedElement) parent.getPathwayObject()).getHeight() < MIN_SIZE_LA ? 1 : numAnchors;
 		}
 		if (numH != numLinkanchorsH || numV != numLinkanchorsV) {
 			linkAnchors.clear();
 			double deltaH = 2.0 / (numH + 1);
 			for (int i = 1; i <= numH; i++) {
 				linkAnchors.add(
-						new LinkAnchor(canvas, parent, (LinkableTo) parent.getPathwayElement(), -1 + i * deltaH, -1));
+						new LinkAnchor(canvas, parent, (LinkableTo) parent.getPathwayObject(), -1 + i * deltaH, -1));
 				linkAnchors.add(
-						new LinkAnchor(canvas, parent, (LinkableTo) parent.getPathwayElement(), -1 + i * deltaH, 1));
+						new LinkAnchor(canvas, parent, (LinkableTo) parent.getPathwayObject(), -1 + i * deltaH, 1));
 			}
 			double deltaV = 2.0 / (numV + 1);
 			for (int i = 1; i <= numV; i++) {
 				linkAnchors.add(
-						new LinkAnchor(canvas, parent, (LinkableTo) parent.getPathwayElement(), -1, -1 + i * deltaV));
+						new LinkAnchor(canvas, parent, (LinkableTo) parent.getPathwayObject(), -1, -1 + i * deltaV));
 				linkAnchors.add(
-						new LinkAnchor(canvas, parent, (LinkableTo) parent.getPathwayElement(), 1, -1 + i * deltaV));
+						new LinkAnchor(canvas, parent, (LinkableTo) parent.getPathwayObject(), 1, -1 + i * deltaV));
 			}
 			numLinkanchorsH = numH;
 			numLinkanchorsV = numV;

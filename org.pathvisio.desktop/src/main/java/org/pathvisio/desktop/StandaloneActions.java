@@ -195,9 +195,9 @@ public class StandaloneActions implements ApplicationEventListener
 
 		public void actionPerformed(ActionEvent e)
 		{
-			if (swingEngine.canDiscardPathway())
+			if (swingEngine.canDiscardPathwayModel())
 			{
-				swingEngine.openPathway();
+				swingEngine.openPathwayModel();
 			}
 		}
 	}
@@ -224,9 +224,9 @@ public class StandaloneActions implements ApplicationEventListener
 
 		public void actionPerformed(ActionEvent e)
 		{
-			if (swingEngine.canDiscardPathway())
+			if (swingEngine.canDiscardPathwayModel())
 			{
-				swingEngine.newPathway();
+				swingEngine.newPathwayModel();
 			}
 		}
 	}
@@ -347,7 +347,7 @@ public class StandaloneActions implements ApplicationEventListener
 					if (pageIndex > 0){
 						return Printable.NO_SUCH_PAGE;
 					}
-					VPathwayModel vPathway = swingEngine.getEngine().getActiveVPathway();
+					VPathwayModel vPathway = swingEngine.getEngine().getActiveVPathwayModel();
 					Graphics2D g2 = (Graphics2D) graphics;
 					double xScale = pageFormat.getImageableWidth()/vPathway.getVWidth();
 					double yScale = pageFormat.getImageableHeight()/vPathway.getVHeight();

@@ -25,7 +25,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import org.pathvisio.core.Engine;
-import org.pathvisio.core.debug.Logger;
+import org.pathvisio.debug.Logger;
 import org.pathvisio.io.ConverterException;
 import org.pathvisio.io.GpmlFormat;
 import org.pathvisio.model.PathwayModel;
@@ -52,7 +52,7 @@ public class AutoSave {
 	}
 
 	private void autoSaveFile() throws ConverterException {
-		PathwayModel p = engine.getActivePathway();
+		PathwayModel p = engine.getActivePathwayModel();
 		if (p != null) {
 			GpmlFormat.writeToXml(p, autoSaveFile, true);
 			Logger.log.info("Autosaved");
@@ -102,7 +102,7 @@ public class AutoSave {
 				"Sorry, it seems PathVisio crashed.\n" + "Recover the auto-saved file?", "Crash recovery",
 				JOptionPane.YES_NO_OPTION);
 		if (result == JOptionPane.YES_OPTION) {
-			swingEngine.openPathway(autoSaveFile);
+			swingEngine.openPathwayModel(autoSaveFile);
 		}
 	}
 }

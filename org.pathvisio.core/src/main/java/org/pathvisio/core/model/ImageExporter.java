@@ -20,7 +20,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
-import org.pathvisio.event.PathwayExporter;
+import org.pathvisio.event.PathwayModelExporter;
 import org.pathvisio.io.ConverterException;
 import org.pathvisio.model.PathwayModel;
 
@@ -32,7 +32,7 @@ import org.pathvisio.model.PathwayModel;
  *
  * Subclass this to implement specific image types.
  */
-public abstract class ImageExporter implements PathwayExporter {
+public abstract class ImageExporter implements PathwayModelExporter {
 	public static final String TYPE_PNG = "png";
 	public static final String TYPE_TIFF = "tiff";
 	public static final String TYPE_PDF = "pdf";

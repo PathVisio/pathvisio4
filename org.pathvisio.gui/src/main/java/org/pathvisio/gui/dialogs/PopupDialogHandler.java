@@ -21,85 +21,85 @@ import java.awt.Frame;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.pathvisio.model.DataNode;
+import org.pathvisio.model.Interaction;
+import org.pathvisio.model.Label;
+import org.pathvisio.model.Pathway;
 import org.pathvisio.model.PathwayElement;
+import org.pathvisio.model.PathwayObject;
+import org.pathvisio.model.Shape;
 import org.pathvisio.gui.SwingEngine;
 
 /**
- * This is a factory class for the PathwayElement Popup dialog, which pops up after double-clicking an element in the pathway.
- * A dialog is constructed depending on the type of the element that was clicked.
+ * This is a factory class for the PathwayElement Popup dialog, which pops up
+ * after double-clicking an element in the pathway. A dialog is constructed
+ * depending on the type of the element that was clicked.
  * <p>
- * It is possible to add hooks to this handler, so that plugins can register new panels to be added to PathwayElement Popup dialogs.
+ * It is possible to add hooks to this handler, so that plugins can register new
+ * panels to be added to PathwayElement Popup dialogs.
  */
-public class PopupDialogHandler
-{
+public class PopupDialogHandler {
 	final private SwingEngine swingEngine;
-	
-	public PopupDialogHandler(SwingEngine swingEngine)
-	{
+
+	public PopupDialogHandler(SwingEngine swingEngine) {
 		this.swingEngine = swingEngine;
 	}
-	
+
 	/**
 	 * Implement this interface if you want to add a hook to the handler.
 	 */
-	public interface PopupDialogHook
-	{
+	public interface PopupDialogHook {
 		/**
 		 * This method is called just before the PathwayElementDialog is shown.
-		 * @param e the element which will be edited
-		 * @param dlg A partially constructed dialog, which may be modified by the hook. 
+		 * 
+		 * @param e   the element which will be edited
+		 * @param dlg A partially constructed dialog, which may be modified by the hook.
 		 */
-		void popupDialogHook (PathwayElement e, PathwayElementDialog dlg);
+		void popupDialogHook(PathwayObject e, PathwayObjectDialog dlg);
 	}
-	
+
 	private Set<PopupDialogHook> hooks = new HashSet<PopupDialogHook>();
-	
+
 	/**
 	 * register a new hook.
 	 */
-	public void addHook(PopupDialogHook hook)
-	{
+	public void addHook(PopupDialogHook hook) {
 		hooks.add(hook);
 	}
-	
-	public void removeHook(PopupDialogHook hook)
-	{
+
+	public void removeHook(PopupDialogHook hook) {
 		hooks.remove(hook);
 	}
-	
+
 	/**
 	 * Create a dialog for the given pathway element.
-	 * @param e The pathway element
+	 * 
+	 * @param e        The pathway object
 	 * @param readonly Whether the dialog should be read-only or not
 	 * @return An instance of a subclass of PathwayElementDialog (depends on the
-	 * type attribute of the given PathwayElement, e.g. type DATANODE returns a DataNodeDialog
+	 *         type attribute of the given PathwayElement, e.g. type DATANODE
+	 *         returns a DataNodeDialog
 	 */
-	public PathwayElementDialog getInstance(PathwayElement e, boolean readonly, Frame frame, Component locationComp) {
-		PathwayElementDialog result = null;
-		
-		switch(e.getObjectType()) {
-		case LABEL:
-		case SHAPE:
-			result = new LabelDialog(swingEngine, e, readonly, frame, locationComp);
-			break;
-		case DATANODE:
-			result = new DataNodeDialog(swingEngine, e, readonly, frame, locationComp);
-			break;
-		case MAPPINFO:
-			result = new PathwayPropertiesDialog(swingEngine, e, readonly, frame, "Properties", locationComp);
-			break;
-		case LINE:
-			result = new LineDialog(swingEngine, e, readonly, frame, locationComp);
-			break;
-		default:
-			result = new PathwayElementDialog(swingEngine, e, readonly, frame, "Element properties", locationComp);
-		}	
-		
-		for (PopupDialogHook hook : hooks)
-		{
+	public PathwayObjectDialog getInstance(PathwayObject e, boolean readonly, Frame frame, Component locationComp) {
+		// TODO pathway element or pathway object?
+		PathwayObjectDialog result = null;
+
+		if (e.getClass() == Label.class) {
+			// nothing? TODO
+		} else if (e.getClass() == Shape.class) {
+			result = new LabelDialog(swingEngine, (PathwayElement) e, readonly, frame, locationComp);
+		} else if (e.getClass() == DataNode.class) {
+			result = new DataNodeDialog(swingEngine, (DataNode) e, readonly, frame, locationComp);
+		} else if (e.getClass() == Pathway.class) {
+			result = new PathwayPropertiesDialog(swingEngine, (Pathway) e, readonly, frame, "Properties", locationComp);
+		} else if (e.getClass() == Interaction.class) {
+			result = new LineDialog(swingEngine, (Interaction) e, readonly, frame, locationComp);
+		} else {
+			result = new PathwayObjectDialog(swingEngine, e, readonly, frame, "Element properties", locationComp);
+		}
+		for (PopupDialogHook hook : hooks) {
 			hook.popupDialogHook(e, result);
 		}
-		
 		result.refresh();
 		return result;
 	}

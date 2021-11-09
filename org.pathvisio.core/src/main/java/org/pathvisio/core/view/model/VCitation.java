@@ -148,7 +148,7 @@ public class VCitation extends VElement implements VElementMouseListener {
 	 * @return
 	 */
 	protected String getXRefText() {
-		if (getParent().getPathwayElement().getPathwayModel() == null) {
+		if (getParent().getPathwayObject().getPathwayModel() == null) {
 			return ""; // In case a redraw is called after deletion of the model element
 		}
 		int maxNr = PreferenceManager.getCurrent().getInt(GlobalPreference.MAX_NR_CITATIONS);
@@ -160,7 +160,7 @@ public class VCitation extends VElement implements VElementMouseListener {
 		int sequence = 0;
 		int nrShowed = 0; // Counter to check maximum citation numbers
 
-		List<CitationRef> citationRefs = parent.getPathwayElement().getCitationRefs();
+		List<CitationRef> citationRefs = parent.getPathwayObject().getCitationRefs();
 		for (int i = 0; i < citationRefs.size(); i++) {
 			if (nrShowed > 0 && nrShowed >= maxNr) {
 				xrefStr = xrefStr.substring(0, xrefStr.length() - 2) + "...  ";
@@ -201,7 +201,7 @@ public class VCitation extends VElement implements VElementMouseListener {
 	 * @return
 	 */
 	protected Point2D getVPosition() {
-		PathwayElement mParent = parent.getPathwayElement();
+		PathwayElement mParent = parent.getPathwayObject();
 
 		Point2D vp = null;
 		// Check for mappinfo object, needs a special treatment,

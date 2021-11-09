@@ -14,28 +14,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
-package org.pathvisio.desktop.util;
-
-import javax.swing.JTextField;
-import javax.swing.text.BadLocationException;
-
-import org.pathvisio.debug.Logger;
+package org.pathvisio.core.view.model;
 
 /**
- * Contains a utility function to insert a piece of text at the cursor in a
- * TextField.
+ * Implement this if you wish to receive events when a VPathway is modified.
  */
-public class TextFieldUtils {
-	/**
-	 * Inserts text at cursor, ensures that there are spaces around it TODO: don't
-	 * insert spaces when not necessary.
-	 */
-	public static void insertAtCursorWithSpace(JTextField field, String toInsert) {
-		try {
-			field.getDocument().insertString(field.getCaretPosition(), " " + toInsert + " ", null);
-		} catch (BadLocationException e) {
-			Logger.log.error("BadLocationException", e);
-		}
-	}
-
+public interface VPathwayModelListener {
+	public void vPathwayModelEvent(VPathwayModelEvent e);
 }

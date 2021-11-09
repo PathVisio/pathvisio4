@@ -52,7 +52,7 @@ public abstract class VPathwayObject extends VElement implements PathwayObjectLi
 	 * 
 	 * @return
 	 */
-	public PathwayObject getPathwayElement() {
+	public PathwayObject getPathwayObject() {
 		return gdata;
 	}
 

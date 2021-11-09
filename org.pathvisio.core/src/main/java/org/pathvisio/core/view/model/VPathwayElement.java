@@ -50,8 +50,8 @@ public abstract class VPathwayElement extends VPathwayObject {
 	 * @return gdata
 	 */
 	@Override
-	public PathwayElement getPathwayElement() {
-		return getPathwayElement();
+	public PathwayElement getPathwayObject() {
+		return getPathwayObject();
 	}
 
 	/**
@@ -80,7 +80,7 @@ public abstract class VPathwayElement extends VPathwayObject {
 	 * destroy vCitation if necessary.
 	 */
 	public final void checkCitation() {
-		List<CitationRef> citationRefs = getPathwayElement().getCitationRefs();
+		List<CitationRef> citationRefs = getPathwayObject().getCitationRefs();
 		// if object has citationRefs but no vCitation, create
 		if (citationRefs.size() > 0 && vCitation == null) {
 			vCitation = createCitation();

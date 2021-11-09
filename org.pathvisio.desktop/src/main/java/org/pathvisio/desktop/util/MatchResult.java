@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.pathvisio.core.data.XrefWithSymbol;
 import org.pathvisio.model.PathwayModel;
-import org.pathvisio.core.util.Utils;
+import org.pathvisio.util.Utils;
 
 /**
  * The result of a pathway search.

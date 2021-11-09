@@ -32,18 +32,17 @@ import org.pathvisio.gui.SwingEngine;
 import org.pathvisio.gui.util.PermissiveComboBox;
 
 /**
- * Dialog asks user for pathway title and organism
- * when new pathways is created
+ * Dialog asks user for pathway title and organism when new pathways is created
+ * 
  * @author mkutmon, dslenter
- *
  */
 public class NewPathwayDialog extends OkCancelDialog {
 
 	private PermissiveComboBox organismComboBox;
-	private JTextField actionField; 
-	private JTextField titleField; 
+	private JTextField actionField;
+	private JTextField titleField;
 	private SwingEngine swingEngine;
-	
+
 	public NewPathwayDialog(SwingEngine swingEngine, String title) {
 		super(swingEngine.getFrame(), title, swingEngine.getFrame(), true, false);
 		this.swingEngine = swingEngine;
@@ -54,29 +53,29 @@ public class NewPathwayDialog extends OkCancelDialog {
 		setDialogComponent(panel);
 		setSize(300, 150);
 	}
-	
+
 	protected void addContent(JPanel panel) {
 		JPanel fieldPanel = new JPanel();
 		fieldPanel.setBorder(BorderFactory.createTitledBorder(""));
-		
+
 		GridBagConstraints panelConstraints = new GridBagConstraints();
 		panelConstraints.fill = GridBagConstraints.BOTH;
 		panelConstraints.weightx = 1;
 		panelConstraints.weighty = 1;
 		panel.add(fieldPanel, panelConstraints);
-	
+
 		fieldPanel.setLayout(new GridBagLayout());
-	
+
 		JLabel actionFieldLabel = new JLabel("");
 		JLabel titleFieldLabel = new JLabel("Title");
-		JLabel orgComboLabel = new JLabel ("Organism ");
-		
-		//actionField = new JTextField();
+		JLabel orgComboLabel = new JLabel("Organism ");
+
+		// actionField = new JTextField();
 		JLabel actionField = new JLabel("Please add a descriptive Title below:");
 		titleField = new JTextField();
 		organismComboBox = new PermissiveComboBox(Organism.latinNamesArray());
 		organismComboBox.setSelectedItem("Homo sapiens");
-	
+
 		GridBagConstraints c = new GridBagConstraints();
 		c.anchor = GridBagConstraints.FIRST_LINE_START;
 		c.weightx = 0;
@@ -85,7 +84,7 @@ public class NewPathwayDialog extends OkCancelDialog {
 		fieldPanel.add(actionFieldLabel, c);
 		fieldPanel.add(titleFieldLabel, c);
 		fieldPanel.add(orgComboLabel, c);
-		
+
 		c.gridx = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
@@ -95,16 +94,16 @@ public class NewPathwayDialog extends OkCancelDialog {
 	}
 
 	protected void okPressed() {
-		if(titleField.getText().equals("")) {
+		if (titleField.getText().equals("")) {
 			// pathway title is required
 			JOptionPane.showMessageDialog(this, "The Title is a mandatory field.", "Error", JOptionPane.ERROR_MESSAGE);
 		} else {
 			super.okPressed();
-			swingEngine.getEngine().getActivePathway().getMappInfo().setMapInfoName(titleField.getText());
-			
-			String itemSelectedFromDropDown = (String)organismComboBox.getSelectedItem();
-			if(itemSelectedFromDropDown != null)
-				swingEngine.getEngine().getActivePathway().getMappInfo().setOrganism(itemSelectedFromDropDown);
+			swingEngine.getEngine().getActivePathwayModel().getPathway().setTitle(titleField.getText());
+
+			String itemSelectedFromDropDown = (String) organismComboBox.getSelectedItem();
+			if (itemSelectedFromDropDown != null)
+				swingEngine.getEngine().getActivePathwayModel().getPathway().setOrganism(itemSelectedFromDropDown);
 		}
 	}
 }

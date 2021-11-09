@@ -87,7 +87,7 @@ public class Compat implements Engine.ApplicationEventListener {
 	public void applicationEvent(ApplicationEvent e) {
 		switch (e.getType()) {
 		case PATHWAY_OPENED: {
-			PathwayModel pwy = swingEngine.getEngine().getActivePathway();
+			PathwayModel pwy = swingEngine.getEngine().getActivePathwayModel();
 			if (usesOldEnsembl(pwy)) {
 				int result = JOptionPane.showConfirmDialog(swingEngine.getFrame(),
 						"This Pathway uses the old style references to Ensembl.\nDo you want"

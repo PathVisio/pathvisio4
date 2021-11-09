@@ -66,7 +66,7 @@ public class PathwayTableModel extends AbstractTableModel implements SelectionLi
 		shownProperties = new ArrayList<PropertyView>();
 		this.swingEngine = swingEngine;
 		swingEngine.getEngine().addApplicationEventListener(this);
-		VPathwayModel vp = swingEngine.getEngine().getActiveVPathway();
+		VPathwayModel vp = swingEngine.getEngine().getActiveVPathwayModel();
 		if(vp != null) vp.addSelectionListener(this);
 	}
 
@@ -140,7 +140,7 @@ public class PathwayTableModel extends AbstractTableModel implements SelectionLi
 		{
 			PropertyView tp = propertyValues.get(o);
 			if(tp == null) {
-				propertyValues.put(o, tp = new PropertyView(swingEngine.getEngine().getActiveVPathway(), o));
+				propertyValues.put(o, tp = new PropertyView(swingEngine.getEngine().getActiveVPathwayModel(), o));
 			}
 			if(remove) {
 				tp.removeElement(e);
@@ -193,7 +193,7 @@ public class PathwayTableModel extends AbstractTableModel implements SelectionLi
 			PropertyView p = getPropertyAt(rowIndex);
 			p.setValue(aValue);
 		}
-		swingEngine.getEngine().getActiveVPathway().redraw();
+		swingEngine.getEngine().getActiveVPathwayModel().redraw();
 	}
 
 	public String getColumnName(int column) {
@@ -203,8 +203,8 @@ public class PathwayTableModel extends AbstractTableModel implements SelectionLi
 
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
 		return columnIndex == 1 &&
-				swingEngine.getEngine().hasVPathway() &&
-				swingEngine.getEngine().getActiveVPathway().isEditMode();
+				swingEngine.getEngine().hasVPathwayModel() &&
+				swingEngine.getEngine().getActiveVPathwayModel().isEditMode();
 	}
 
 	public void selectionEvent(SelectionEvent e) {
@@ -212,12 +212,12 @@ public class PathwayTableModel extends AbstractTableModel implements SelectionLi
 		case SelectionEvent.OBJECT_ADDED:
 			//System.err.println("OBJECT ADDED");
 			if(e.affectedObject instanceof VPathwayObject)
-				addInput(((VPathwayObject)e.affectedObject).getPathwayElement());
+				addInput(((VPathwayObject)e.affectedObject).getPathwayObject());
 			break;
 		case SelectionEvent.OBJECT_REMOVED:
 			//System.err.println("OBJECT REMOVED");
 			if(e.affectedObject instanceof VPathwayObject)
-				removeInput(((VPathwayObject)e.affectedObject).getPathwayElement());
+				removeInput(((VPathwayObject)e.affectedObject).getPathwayObject());
 			break;
 		case SelectionEvent.SELECTION_CLEARED:
 			//System.err.println("CLEARED");

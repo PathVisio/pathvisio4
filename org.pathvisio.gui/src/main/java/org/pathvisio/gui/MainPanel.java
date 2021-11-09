@@ -52,15 +52,16 @@ import javax.swing.table.TableCellRenderer;
 
 import org.pathvisio.core.ApplicationEvent;
 import org.pathvisio.core.Engine.ApplicationEventListener;
-import org.pathvisio.core.debug.Logger;
+import org.pathvisio.debug.Logger;
 import org.pathvisio.model.PathwayElement;
-import org.pathvisio.core.util.Utils;
+import org.pathvisio.model.PathwayObject;
+import org.pathvisio.util.Utils;
 import org.pathvisio.core.view.model.Handle;
 import org.pathvisio.core.view.model.SelectionBox;
 import org.pathvisio.core.view.model.VElement;
 import org.pathvisio.core.view.model.VLabel;
-import org.pathvisio.core.view.model.VPathwayEvent;
-import org.pathvisio.core.view.model.VPathwayListener;
+import org.pathvisio.core.view.model.VPathwayModelEvent;
+import org.pathvisio.core.view.model.VPathwayModelListener;
 import org.pathvisio.core.view.model.VPathwayModel;
 import org.pathvisio.core.view.model.VPathwayObject;
 import org.pathvisio.gui.BackpageTextProvider.BackpageAttributes;
@@ -71,14 +72,14 @@ import org.pathvisio.gui.handler.PathwayTableModel;
 
 import com.mammothsoftware.frwk.ddb.DropDownButton;
 
-
 /**
- * this is the contents of the main window in the WikiPathways applet,
- * and contains the editor window, side panels, toolbar and menu.
+ * this is the contents of the main window in the WikiPathways applet, and
+ * contains the editor window, side panels, toolbar and menu.
  *
- * For the standalone application, the derived class MainPanelStandalone is used.
+ * For the standalone application, the derived class MainPanelStandalone is
+ * used.
  */
-public class MainPanel extends JPanel implements VPathwayListener, ApplicationEventListener {
+public class MainPanel extends JPanel implements VPathwayModelListener, ApplicationEventListener {
 
 	private JSplitPane splitPane;
 
@@ -91,11 +92,11 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 	protected JTabbedPane sidebarTabbedPane;
 
 	protected JMenuBar menuBar;
-	
+
 	private GraphicsChoiceButton itemsDropDown;
-	
+
 	private ObjectsPane objectsPane;
-	
+
 	private JTable propertyTable;
 	private JComboBox zoomCombo;
 	protected BackpagePane backpagePane;
@@ -112,12 +113,11 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 
 	private final PathwayElementMenuListener pathwayElementMenuListener;
 
-	public PathwayTableModel getModel(){
+	public PathwayTableModel getModel() {
 		return model;
 	}
 
-	public PathwayElementMenuListener getPathwayElementMenuListener()
-	{
+	public PathwayElementMenuListener getPathwayElementMenuListener() {
 		return pathwayElementMenuListener;
 	}
 
@@ -144,13 +144,15 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 
 		JMenu selectionMenu = new JMenu("Selection");
 
-		for(Action a : actions.layoutActions) addToMenu(a, selectionMenu);
-		editMenu.add (selectionMenu);
+		for (Action a : actions.layoutActions)
+			addToMenu(a, selectionMenu);
+		editMenu.add(selectionMenu);
 
 		JMenu viewMenu = new JMenu("View");
 		JMenu zoomMenu = new JMenu("Zoom");
 		viewMenu.add(zoomMenu);
-		for(Action a : actions.zoomActions) addToMenu(a, zoomMenu);
+		for (Action a : actions.zoomActions)
+			addToMenu(a, zoomMenu);
 
 		JMenu helpMenu = new JMenu("Help");
 
@@ -161,21 +163,22 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 	}
 
 	/**
-	 * Constructor for this class. Creates the main panel of this application, containing
-	 * the main GUI elements (menubar, toolbar, sidepanel, drawing pane). Actions that should
-	 * not be added to the menubar and toolbar should be specified in the hideActions parameter
-	 * @param hideActions The {@link Action}s that should not be added to the toolbar and menubar
+	 * Constructor for this class. Creates the main panel of this application,
+	 * containing the main GUI elements (menubar, toolbar, sidepanel, drawing pane).
+	 * Actions that should not be added to the menubar and toolbar should be
+	 * specified in the hideActions parameter
+	 * 
+	 * @param hideActions The {@link Action}s that should not be added to the
+	 *                    toolbar and menubar
 	 */
-	public MainPanel(SwingEngine swingEngine, Set<Action> hideActions)
-	{
+	public MainPanel(SwingEngine swingEngine, Set<Action> hideActions) {
 		this.hideActions = hideActions;
 		this.swingEngine = swingEngine;
 		pathwayElementMenuListener = new PathwayElementMenuListener(swingEngine);
 		model = new PathwayTableModel(swingEngine);
 	}
 
-	public void createAndShowGUI()
-	{
+	public void createAndShowGUI() {
 		setLayout(new BorderLayout());
 		setTransferHandler(new PathwayImportHandler());
 		swingEngine.getEngine().addApplicationEventListener(this);
@@ -190,22 +193,25 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 		// menuBar will be added by container (JFrame or JApplet)
 
 		pathwayScrollPane = new JScrollPane();
-		// set background color when no VPathway is loaded, override l&f because it is usually white.
+		// set background color when no VPathway is loaded, override l&f because it is
+		// usually white.
 		pathwayScrollPane.getViewport().setBackground(Color.LIGHT_GRAY);
-		
+
 		objectsPane = new ObjectsPane(swingEngine);
 		int numItemsPerRow = 10;
 		objectsPane.addButtons(actions.newDatanodeActions, "Data Nodes", numItemsPerRow);
 		objectsPane.addButtons(actions.newInteractionActions, "Basic interactions", numItemsPerRow);
-		//objectsPane.addButtons(actions.newRLInteractionActions, "Receptor/ligand", numItemsPerRow);
+		// objectsPane.addButtons(actions.newRLInteractionActions, "Receptor/ligand",
+		// numItemsPerRow);
 		objectsPane.addButtons(actions.newMIMInteractionActions, "MIM interactions", numItemsPerRow);
-		//objectsPane.addButtons(actions.newAnnotationActions, "Annotations", numItemsPerRow);
+		// objectsPane.addButtons(actions.newAnnotationActions, "Annotations",
+		// numItemsPerRow);
 		objectsPane.addButtons(actions.newShapeActions, "Graphical elements", numItemsPerRow);
-		
+
 		objectsPane.addButtons(actions.newCellularComponentActions, "Cellular compartments", numItemsPerRow);
-		
+
 		objectsPane.addButtons(actions.newTemplateActions, "Templates", numItemsPerRow);
-		
+
 		propertyTable = new JTable(model) {
 
 			public TableCellRenderer getCellRenderer(int row, int column) {
@@ -218,45 +224,40 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 				return e == null ? super.getCellEditor(row, column) : e;
 			}
 		};
-		//TODO: make this prettier, it's not good for the tablemodel to have
-		//a reference to the table. Quick fix for preventing TableCellEditor
-		//to remain open upon selecting a new PathwayElement
+		// TODO: make this prettier, it's not good for the tablemodel to have
+		// a reference to the table. Quick fix for preventing TableCellEditor
+		// to remain open upon selecting a new PathwayElement
 		model.setTable(propertyTable);
 
 		propertiesScrollPane = new JScrollPane(propertyTable);
 
-		bpt = new BackpageTextProvider ();
+		bpt = new BackpageTextProvider();
 		bpt.addBackpageHook(new BackpageAttributes(swingEngine.getGdbManager().getCurrentGdb()));
 		bpt.addBackpageHook(new BackpageXrefs(swingEngine.getGdbManager().getCurrentGdb()));
-		
+
 		backpagePane = new BackpagePane(bpt, swingEngine.getEngine());
 		backpagePane.addHyperlinkListener(swingEngine);
-		
+
 		sidebarTabbedPane = new JTabbedPane();
 		sidebarTabbedPane.addTab("Objects", objectsPane);
-		sidebarTabbedPane.addTab( "Properties", propertiesScrollPane );
-		sidebarTabbedPane.addTab( "Backpage", new JScrollPane(backpagePane) );
-		
+		sidebarTabbedPane.addTab("Properties", propertiesScrollPane);
+		sidebarTabbedPane.addTab("Backpage", new JScrollPane(backpagePane));
 
-		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-				pathwayScrollPane, sidebarTabbedPane);
-		
-		// set a small minimum size, to make sure we can keep resizing the side panel 
-		sidebarTabbedPane.setMinimumSize(new Dimension(50,50));
-		
+		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, pathwayScrollPane, sidebarTabbedPane);
+
+		// set a small minimum size, to make sure we can keep resizing the side panel
+		sidebarTabbedPane.setMinimumSize(new Dimension(50, 50));
+
 		splitPane.setResizeWeight(1);
 		splitPane.setOneTouchExpandable(true);
 		add(splitPane, BorderLayout.CENTER);
-		Action[] keyStrokeActions = new Action[] {
-				actions.copyAction,
-				actions.pasteAction,
-		};
+		Action[] keyStrokeActions = new Action[] { actions.copyAction, actions.pasteAction, };
 		InputMap im = getInputMap();
 		ActionMap am = getActionMap();
-		
+
 		// define shortcuts
-		for(Action a : keyStrokeActions) {
-			im.put((KeyStroke)a.getValue(Action.ACCELERATOR_KEY), a.getValue(Action.NAME));
+		for (Action a : keyStrokeActions) {
+			im.put((KeyStroke) a.getValue(Action.ACCELERATOR_KEY), a.getValue(Action.NAME));
 			am.put(a.getValue(Action.NAME), a);
 		}
 
@@ -265,54 +266,54 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 	}
 
 	/**
-	 * Constructor for this class. Creates the main panel of this application, containing
-	 * the main GUI elements (menubar, toolbar, sidepanel, drawing pane).
+	 * Constructor for this class. Creates the main panel of this application,
+	 * containing the main GUI elements (menubar, toolbar, sidepanel, drawing pane).
 	 */
-	public MainPanel(SwingEngine swingEngine)
-	{
+	public MainPanel(SwingEngine swingEngine) {
 		this(swingEngine, null);
 	}
 
-	/** update the value in the zoom combo to the actual zoom percentage of the active pathway */
-	public void updateZoomCombo()
-	{
-		VPathwayModel vpwy = swingEngine.getEngine().getActiveVPathway();
-		if (vpwy != null)
-		{
+	/**
+	 * update the value in the zoom combo to the actual zoom percentage of the
+	 * active pathway
+	 */
+	public void updateZoomCombo() {
+		VPathwayModel vpwy = swingEngine.getEngine().getActiveVPathwayModel();
+		if (vpwy != null) {
 			DecimalFormat df = new DecimalFormat("###.#");
-			zoomCombo.setSelectedItem(df.format(vpwy.getPctZoom())+"%");
+			zoomCombo.setSelectedItem(df.format(vpwy.getPctZoom()) + "%");
 		}
 	}
-	
+
 	/**
-	 * {@link ActionListener} for the Zoom combobox on the toolbar. The user can select one
-	 * of the predefined ZoomActions (50%, 100%, 200%, Zoom to fit, etc.),
-	 * or enter a number or percentage manually.
+	 * {@link ActionListener} for the Zoom combobox on the toolbar. The user can
+	 * select one of the predefined ZoomActions (50%, 100%, 200%, Zoom to fit,
+	 * etc.), or enter a number or percentage manually.
 	 */
 	protected class ZoomComboListener implements ActionListener {
 
-		public void actionPerformed(ActionEvent e){
+		public void actionPerformed(ActionEvent e) {
 			JComboBox combo = (JComboBox) e.getSource();
 			Object s = combo.getSelectedItem();
-			
+
 			if (s instanceof Action) {
 				((Action) s).actionPerformed(e);
-				
-				// after the selection of "fit to window" the new calculated zoom 
-				// percentage is displayed 
-				if(s instanceof CommonActions.ZoomToFitAction) {
+
+				// after the selection of "fit to window" the new calculated zoom
+				// percentage is displayed
+				if (s instanceof CommonActions.ZoomToFitAction) {
 					updateZoomCombo();
 				}
 			} else if (s instanceof String) {
 				String zs = (String) s;
-				zs=zs.replace("%","");
+				zs = zs.replace("%", "");
 				try {
 					double zf = Double.parseDouble(zs);
-						if(zf > 0){ // Ignore negative number
-							ZoomAction za = new ZoomAction(swingEngine.getEngine(), zf);
-							za.setEnabled(true);
-							za.actionPerformed(e);
-						}
+					if (zf > 0) { // Ignore negative number
+						ZoomAction za = new ZoomAction(swingEngine.getEngine(), zf);
+						za.setEnabled(true);
+						za.actionPerformed(e);
+					}
 				} catch (Exception ex) {
 					// Ignore bad input
 				}
@@ -321,8 +322,7 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 
 	}
 
-	protected void addCommonToolbarActions(final SwingEngine swingEngine, JToolBar tb)
-	{
+	protected void addCommonToolbarActions(final SwingEngine swingEngine, JToolBar tb) {
 		// copy, paste and undo buttons
 		tb.addSeparator();
 		addToToolbar(actions.copyAction);
@@ -340,36 +340,36 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 		zoomCombo.addActionListener(new ZoomComboListener());
 		addToToolbar(zoomCombo, TB_GROUP_SHOW_IF_VPATHWAY);
 		tb.addSeparator();
-		
-		// define the drop-down menu for data nodes 
+
+		// define the drop-down menu for data nodes
 		GraphicsChoiceButton datanodeButton = new GraphicsChoiceButton();
 		datanodeButton.setToolTipText("Select a data node to draw");
-		datanodeButton.addButtons("Data Nodes", actions.newDatanodeActions);		
+		datanodeButton.addButtons("Data Nodes", actions.newDatanodeActions);
 //		datanodeButton.addButtons("Annotations", actions.newAnnotationActions);
 		addToToolbar(datanodeButton, TB_GROUP_SHOW_IF_EDITMODE);
-		tb.addSeparator(new Dimension(2,0));
-		
-		// define the drop-down menu for shapes 
+		tb.addSeparator(new Dimension(2, 0));
+
+		// define the drop-down menu for shapes
 		GraphicsChoiceButton shapeButton = new GraphicsChoiceButton();
-		shapeButton.setToolTipText("Select a shape to draw");		
-		itemsDropDown = shapeButton;		
+		shapeButton.setToolTipText("Select a shape to draw");
+		itemsDropDown = shapeButton;
 		shapeButton.addButtons("Basic shapes", actions.newShapeActions);
-		shapeButton.addButtons("Cellular components", actions.newCellularComponentActions);		
+		shapeButton.addButtons("Cellular components", actions.newCellularComponentActions);
 		addToToolbar(shapeButton, TB_GROUP_SHOW_IF_EDITMODE);
-		tb.addSeparator(new Dimension(2,0));
-		
+		tb.addSeparator(new Dimension(2, 0));
+
 		// define the drop-down menu for interactions
 		GraphicsChoiceButton lineButton = new GraphicsChoiceButton();
 		lineButton.setToolTipText("Select an interaction to draw");
 		lineButton.addButtons("Basic interactions", actions.newInteractionActions);
 		lineButton.addButtons("MIM interactions", actions.newMIMInteractionActions);
 		addToToolbar(lineButton, TB_GROUP_SHOW_IF_EDITMODE);
-		tb.addSeparator(new Dimension(2,0));
-		
+		tb.addSeparator(new Dimension(2, 0));
+
 		// define the drop-down menu for templates
 		GraphicsChoiceButton templateButton = new GraphicsChoiceButton();
-		templateButton.setToolTipText("Select a template to draw");		
-		templateButton.addButtons("Templates", actions.newTemplateActions);	
+		templateButton.setToolTipText("Select a template to draw");
+		templateButton.addButtons("Templates", actions.newTemplateActions);
 		addToToolbar(templateButton, TB_GROUP_SHOW_IF_EDITMODE);
 		tb.addSeparator();
 
@@ -377,13 +377,12 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 		addToToolbar(actions.layoutActions);
 	}
 
-	protected void addToolBarActions(final SwingEngine swingEngine, JToolBar tb)
-	{
+	protected void addToolBarActions(final SwingEngine swingEngine, JToolBar tb) {
 		tb.setLayout(new WrapLayout(1, 1));
 
 		addToToolbar(actions.importAction);
 		addToToolbar(actions.exportAction);
-		
+
 		addCommonToolbarActions(swingEngine, tb);
 	}
 
@@ -394,9 +393,9 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 
 	public void addToToolbar(Component c, String group) {
 		JToolBar tb = getToolBar();
-		if(tb == null) {
-			Logger.log.warn("Trying to register toolbar action while no toolbar is available " +
-					"(running in headless mode?)");
+		if (tb == null) {
+			Logger.log.warn(
+					"Trying to register toolbar action while no toolbar is available " + "(running in headless mode?)");
 			return;
 		}
 		tb.add(c);
@@ -408,13 +407,13 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 	}
 
 	public void addToToolbar(Action[] actions) {
-		for(Action a : actions) {
+		for (Action a : actions) {
 			addToToolbar(a);
 		}
 	}
 
 	public JButton addToToolbar(Action a, String group) {
-		if(mayAddAction(a)) {
+		if (mayAddAction(a)) {
 			JButton b = getToolBar().add(a);
 			b.setFocusable(false);
 			addToToolbarGroup(b, group);
@@ -432,14 +431,15 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 	}
 
 	public void addToMenu(Action a, JMenu parent) {
-		if(mayAddAction(a)) {
+		if (mayAddAction(a)) {
 			parent.add(a);
 		}
 	}
 
 	public Set<Component> getToolbarGroup(String group) {
 		Set<Component> tbg = toolbarGroups.get(group);
-		if(tbg == null) tbg = new HashSet<Component>();
+		if (tbg == null)
+			tbg = new HashSet<Component>();
 		return tbg;
 	}
 
@@ -459,67 +459,64 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 		return backpagePane;
 	}
 
-	public void vPathwayEvent(VPathwayEvent e) {
-		VPathwayModel vp = (VPathwayModel)e.getSource();
-		switch(e.getType()) {
+	public void vPathwayModelEvent(VPathwayModelEvent e) {
+		VPathwayModel vp = (VPathwayModel) e.getSource();
+		switch (e.getType()) {
 		case ELEMENT_DOUBLE_CLICKED:
 			VElement pwe = e.getAffectedElement();
-			if(pwe instanceof Handle)
-			{
-				pwe = ((Handle)pwe).getParent();
+			if (pwe instanceof Handle) {
+				pwe = ((Handle) pwe).getParent();
 			}
-			if(pwe instanceof VPathwayObject &&
-					!(pwe instanceof SelectionBox)) {
-				PathwayElement p = ((VPathwayObject)pwe).getPathwayElement();
-				if(p != null) {
+			if (pwe instanceof VPathwayObject && !(pwe instanceof SelectionBox)) {
+				PathwayObject p = ((VPathwayObject) pwe).getPathwayObject();
+				if (p != null) {
 					swingEngine.getPopupDialogHandler().getInstance(p, !vp.isEditMode(), null, this).setVisible(true);
 				}
 			}
 			break;
 		case EDIT_MODE_ON:
-			for(Component b : getToolbarGroup(TB_GROUP_SHOW_IF_EDITMODE)) {
+			for (Component b : getToolbarGroup(TB_GROUP_SHOW_IF_EDITMODE)) {
 				b.setEnabled(true);
 			}
 			break;
 		case EDIT_MODE_OFF:
-			for(Component b : getToolbarGroup(TB_GROUP_SHOW_IF_EDITMODE)) {
+			for (Component b : getToolbarGroup(TB_GROUP_SHOW_IF_EDITMODE)) {
 				b.setEnabled(false);
 			}
 			break;
 		case HREF_ACTIVATED:
-			if(e.getAffectedElement() instanceof VLabel) {
+			if (e.getAffectedElement() instanceof VLabel) {
 				try {
-					hyperlinkUpdate(new HyperlinkEvent(e.getSource(), HyperlinkEvent.EventType.ACTIVATED, new URL(((VLabel)e.getAffectedElement()).getPathwayElement().getHref())));
+					hyperlinkUpdate(new HyperlinkEvent(e.getSource(), HyperlinkEvent.EventType.ACTIVATED,
+							new URL(((VLabel) e.getAffectedElement()).getPathwayObject().getHref())));
 				} catch (MalformedURLException e1) {
-					swingEngine.getEngine().getActiveVPathway().selectObject(e.getAffectedElement());
+					swingEngine.getEngine().getActiveVPathwayModel().selectObject(e.getAffectedElement());
 					swingEngine.handleMalformedURLException("The specified link address is not valid.", this, e1);
 				}
 			}
 		}
 	}
-	
+
 	public void hyperlinkUpdate(HyperlinkEvent e) {
 		swingEngine.hyperlinkUpdate(e);
 	}
 
 	public void applicationEvent(ApplicationEvent e) {
-		switch(e.getType()) {
-		case VPATHWAY_CREATED:
-			{
-				VPathwayModel vp = (VPathwayModel)e.getSource();
-				vp.addVPathwayListener(this);
-				vp.addVPathwayListener(pathwayElementMenuListener);
-				for(Component b : getToolbarGroup(TB_GROUP_SHOW_IF_VPATHWAY)) {
-					b.setEnabled(true);
-				}
+		switch (e.getType()) {
+		case VPATHWAY_CREATED: {
+			VPathwayModel vp = (VPathwayModel) e.getSource();
+			vp.addVPathwayListener(this);
+			vp.addVPathwayListener(pathwayElementMenuListener);
+			for (Component b : getToolbarGroup(TB_GROUP_SHOW_IF_VPATHWAY)) {
+				b.setEnabled(true);
 			}
+		}
 			break;
-		case VPATHWAY_DISPOSED:
-			{
-				VPathwayModel vp = (VPathwayModel)e.getSource();
-				vp.removeVPathwayListener(this);
-				vp.removeVPathwayListener(pathwayElementMenuListener);
-			}
+		case VPATHWAY_DISPOSED: {
+			VPathwayModel vp = (VPathwayModel) e.getSource();
+			vp.removeVPathwayListener(this);
+			vp.removeVPathwayListener(pathwayElementMenuListener);
+		}
 			break;
 		}
 
@@ -529,38 +526,33 @@ public class MainPanel extends JPanel implements VPathwayListener, ApplicationEv
 		return menuBar;
 	}
 
-	public JTabbedPane getSideBarTabbedPane()
-	{
+	public JTabbedPane getSideBarTabbedPane() {
 		return sidebarTabbedPane;
 	}
 
-	public void dispose()
-	{
+	public void dispose() {
 		backpagePane.dispose();
 	}
 
 	/**
 	 * hook of the objects tab
 	 */
-	public ObjectsPane getObjectsPane()
-	{
+	public ObjectsPane getObjectsPane() {
 		return objectsPane;
 	}
-	
+
 	/**
 	 * hook of the drop-down menu
 	 */
-	public GraphicsChoiceButton getItemsDropDown()
-	{
+	public GraphicsChoiceButton getItemsDropDown() {
 		return itemsDropDown;
 	}
-	
+
 	/**
 	 * add items with text to the drop-down menu (e.g. -> arrow)
 	 */
-	public void addMenuItems(Action [] aa, DropDownButton lineButton)
-	{
-		for(Action a : aa) {
+	public void addMenuItems(Action[] aa, DropDownButton lineButton) {
+		for (Action a : aa) {
 			lineButton.addComponent(new JMenuItem(a));
 		}
 	}

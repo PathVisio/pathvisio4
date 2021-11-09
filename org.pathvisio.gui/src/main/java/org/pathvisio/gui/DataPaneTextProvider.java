@@ -21,10 +21,15 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.pathvisio.core.debug.Logger;
-import org.pathvisio.core.debug.WorkerThreadOnly;
-import org.pathvisio.core.model.ObjectType;
-import org.pathvisio.model.PathwayElement;
+import org.pathvisio.debug.Logger;
+import org.pathvisio.debug.WorkerThreadOnly;
+import org.pathvisio.model.DataNode;
+import org.pathvisio.model.DataNode.State;
+import org.pathvisio.model.Group;
+import org.pathvisio.model.Interaction;
+import org.pathvisio.model.Pathway;
+import org.pathvisio.model.PathwayObject;
+import org.pathvisio.model.Xrefable;
 import org.pathvisio.core.util.Resources;
 
 /**
@@ -40,36 +45,32 @@ import org.pathvisio.core.util.Resources;
  */
 public class DataPaneTextProvider {
 	/**
-	 * Hook into the backpage text provider, use this to generate a fragment of
-	 * text for the backpage
+	 * Hook into the backpage text provider, use this to generate a fragment of text
+	 * for the backpage
 	 */
 	public static interface DataHook {
 		/**
-		 * Return a fragment of html-formatted text. The returned fragment
-		 * should not contain &lt;html> or &lt;body> tags, but it can contain
-		 * most other html tags.
+		 * Return a fragment of html-formatted text. The returned fragment should not
+		 * contain &lt;html> or &lt;body> tags, but it can contain most other html tags.
 		 * <p>
 		 * The function getHtml is normally called from a worker thread.
 		 */
 //		@WorkerThreadOnly
 //		public String getHtml(SwingEngine swe);
 		@WorkerThreadOnly
-		public Object getHtml(PathwayElement e);
+		public Object getHtml(PathwayObject e);
 	}
 
 	/**
 	 * A @{link DataHook} that generates a section of the data panel showing:
-	 * currently loaded databases
-	 * currently loaded datasets
-	 * currently loaded visualizations
+	 * currently loaded databases currently loaded datasets currently loaded
+	 * visualizations
 	 * 
 	 */
-	public static class DataAttributes implements DataHook
-	{
+	public static class DataAttributes implements DataHook {
 		private SwingEngine swe;
-		
-		public DataAttributes (SwingEngine swe)
-		{
+
+		public DataAttributes(SwingEngine swe) {
 			this.swe = swe;
 		}
 //		String gdb = swe.getGdbManager().getGeneDb().toString();
@@ -77,11 +78,11 @@ public class DataPaneTextProvider {
 //		String text = gdb + mdb ;
 
 		@Override
-		public Object getHtml(PathwayElement e) {
+		public Object getHtml(PathwayObject e) {
 			// TODO Auto-generated method stub
 			return null;
 		}
-		
+
 //		@Override
 //		public String getHtml(SwingEngine swe) {
 //			String text = "";
@@ -99,11 +100,8 @@ public class DataPaneTextProvider {
 //			return text;
 //		}
 
-		
-		}
-		
-		
-	
+	}
+
 	/**
 	 * Register a BackpageHook with this text provider. Backpage fragments are
 	 * generated in the order that the hooks were registered.
@@ -122,14 +120,14 @@ public class DataPaneTextProvider {
 	 * generates html for a given PathwayElement. Combines the base header with
 	 * fragments from all BackpageHooks into one html String.
 	 */
-	public String getAnnotationHTML(PathwayElement e) {
+	public String getAnnotationHTML(PathwayObject e) {
 		if (e == null) {
 			return "<p>No pathway element is selected.</p>";
-		} else if (e.getObjectType() != ObjectType.DATANODE
-				&& e.getObjectType() != ObjectType.LINE) {
-			return "<p>It is currently not possible to annotate this type of pathway element." +
-					"<BR>Only DataNodes and Interactions can be annotated.</p>";
-		} else if (e.getDataSource() == null || e.getXref().getId().equals("")) {
+		} else if (e.getClass() != Pathway.class && e.getClass() != DataNode.class && e.getClass() != State.class
+				&& e.getClass() != Interaction.class && e.getClass() != Group.class) {
+			return "<p>It is currently not possible to annotate this type of pathway element."
+					+ "<BR>Only Pathways, DataNodes, States, Interactions and Groups can be annotated.</p>";
+		} else if (((Xrefable) e).getXref().getDataSource() == null || ((Xrefable) e).getXref().getId().equals("")) {
 			return "<p>This pathway element has not yet been annotated.</p>";
 		}
 		StringBuilder builder = new StringBuilder(backpagePanelHeader);
@@ -139,15 +137,15 @@ public class DataPaneTextProvider {
 		builder.append("</body></html>");
 		return builder.toString();
 	}
-	
+
 	/**
-	 * generates html for PathVisio Data. Combines the base header with
-	 * fragments from all BackpageHooks into one html String.
+	 * generates html for PathVisio Data. Combines the base header with fragments
+	 * from all BackpageHooks into one html String.
 	 */
 	public static String getDataHTML(SwingEngine swe) {
 		if (swe == null) {
 			return "<p>No pathway element is selected.</p>";
-		} 
+		}
 		StringBuilder builder = new StringBuilder();
 		String gdb = "" + swe.getGdbManager().getGeneDb();
 		String mdb = "" + swe.getGdbManager().getMetaboliteDb();
@@ -165,22 +163,20 @@ public class DataPaneTextProvider {
 	private String backpagePanelHeader;
 
 	/**
-	 * Reads the header of the HTML content displayed in the browser. This
-	 * header is displayed in the file specified in the {@link HEADERFILE} field
+	 * Reads the header of the HTML content displayed in the browser. This header is
+	 * displayed in the file specified in the {@link HEADERFILE} field
 	 */
 	private void initializeHeader() {
 		try {
-			BufferedReader input = new BufferedReader(new InputStreamReader(
-					Resources.getResourceURL(HEADERFILE).openStream()));
+			BufferedReader input = new BufferedReader(
+					new InputStreamReader(Resources.getResourceURL(HEADERFILE).openStream()));
 			String line;
 			backpagePanelHeader = "";
 			while ((line = input.readLine()) != null) {
 				backpagePanelHeader += line.trim();
 			}
 		} catch (Exception e) {
-			Logger.log.error(
-					"Unable to read header file for data browser: "
-							+ e.getMessage(), e);
+			Logger.log.error("Unable to read header file for data browser: " + e.getMessage(), e);
 		}
 	}
 

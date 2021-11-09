@@ -38,8 +38,8 @@ public class VState extends VShapedElement {
 	 * @return
 	 */
 	@Override
-	public State getPathwayElement() {
-		return (State) super.getPathwayElement();
+	public State getPathwayObject() {
+		return (State) super.getPathwayObject();
 	}
 
 	public void doDraw(Graphics2D g) {
@@ -55,7 +55,7 @@ public class VState extends VShapedElement {
 
 	protected void vMoveBy(double vdx, double vdy) {
 		Point2D mNewPos = new Point2D.Double(mFromV(getVCenterX() + vdx), mFromV(getVCenterY() + vdy));
-		Point2D newRel = getPathwayElement().getDataNode().toRelativeCoordinate(mNewPos);
+		Point2D newRel = getPathwayObject().getDataNode().toRelativeCoordinate(mNewPos);
 		double x = newRel.getX();
 		double y = newRel.getY();
 		if (x > 1)
@@ -66,8 +66,8 @@ public class VState extends VShapedElement {
 			y = 1;
 		if (y < -1)
 			y = -1;
-		getPathwayElement().setRelX(x);
-		getPathwayElement().setRelY(y);
+		getPathwayObject().setRelX(x);
+		getPathwayObject().setRelY(y);
 	}
 
 	@Override

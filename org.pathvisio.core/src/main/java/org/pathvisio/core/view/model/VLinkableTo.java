@@ -38,7 +38,7 @@ public interface VLinkableTo extends LinkProvider {
 
 	public int getZOrder(); //TODO has to be public 
 
-	abstract PathwayObject getPathwayElement();
+	abstract PathwayObject getPathwayObject();
 
 	public VPathwayModel getDrawing();
 

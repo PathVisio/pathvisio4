@@ -53,9 +53,12 @@ import org.bridgedb.IDMapperException;
 import org.bridgedb.IDMapperStack;
 import org.bridgedb.Xref;
 import org.pathvisio.core.data.XrefWithSymbol;
-import org.pathvisio.core.debug.Logger;
-import org.pathvisio.core.model.DataNodeType;
+import org.pathvisio.debug.Logger;
+import org.pathvisio.model.type.DataNodeType;
+import org.pathvisio.util.XrefUtils;
+import org.pathvisio.model.DataNode;
 import org.pathvisio.model.PathwayElement;
+import org.pathvisio.model.PathwayObject;
 import org.pathvisio.core.util.ProgressKeeper;
 import org.pathvisio.gui.DataSourceModel;
 import org.pathvisio.gui.ProgressDialog;
@@ -67,16 +70,25 @@ import org.pathvisio.gui.handler.DataSourceHandler;
 import org.pathvisio.gui.util.PermissiveComboBox;
 
 /**
- * Dialog for editing DataNodes. In addition to the standard comments and literature tabs,
- * this has a tab for looking up accession numbers for genes and metabolites.
+ * Dialog for editing DataNodes. In addition to the standard comments and
+ * literature tabs, this has a tab for looking up accession numbers for genes
+ * and metabolites.
  */
-public class DataNodeDialog extends PathwayElementDialog {
+public class DataNodeDialog extends PathwayObjectDialog {
 
-	protected DataNodeDialog(SwingEngine swingEngine, PathwayElement e, boolean readonly, Frame frame, Component locationComp) {
+	protected DataNodeDialog(SwingEngine swingEngine, DataNode e, boolean readonly, Frame frame,
+			Component locationComp) {
 		super(swingEngine, e, readonly, frame, "DataNode properties", locationComp);
 		curDlg = this;
 		getRootPane().setDefaultButton(null);
 		setButton.requestFocus();
+	}
+
+	/**
+	 * Get the pathway element for this dialog
+	 */
+	protected DataNode getInput() {
+		return (DataNode) super.getInput();
 	}
 
 	CompleterQueryTextArea symText;
@@ -88,22 +100,23 @@ public class DataNodeDialog extends PathwayElementDialog {
 
 	public void refresh() {
 		super.refresh();
-		symText.setText(getInput().getTextLabel());
-		idText.setText(getInput().getElementID());
-		dsm.setSelectedItem(input.getDataSource());
-		String dnType = getInput().getDataNodeType();
-		typeCombo.setSelectedItem(DataNodeType.byName(dnType));
+		DataNode input = getInput();
+		symText.setText(input.getTextLabel());
+		idText.setText(input.getXref().getId());
+		dsm.setSelectedItem(input.getXref().getDataSource());
+		String dnType = input.getType().getName();
+		typeCombo.setSelectedItem(DataNodeType.fromName(dnType));
 		String[] dsType = null; // null is default: no filtering
-		if (DataSourceHandler.DSTYPE_BY_DNTYPE.containsKey(dnType)) dsType = 
-			DataSourceHandler.DSTYPE_BY_DNTYPE.get(dnType);
+		if (DataSourceHandler.DSTYPE_BY_DNTYPE.containsKey(dnType))
+			dsType = DataSourceHandler.DSTYPE_BY_DNTYPE.get(dnType);
 		dsm.setTypeFilter(dsType);
 		pack();
 	}
 
-	private void applyAutoFill(XrefWithSymbol ref)
-	{
+	private void applyAutoFill(XrefWithSymbol ref) {
 		String sym = ref.getSymbol();
-		if (sym == null || sym.equals ("")) sym = ref.getId();
+		if (sym == null || sym.equals(""))
+			sym = ref.getId();
 		symText.setText(sym);
 		idText.setText(ref.getId());
 		String type = ref.getDataSource().getType();
@@ -119,14 +132,12 @@ public class DataNodeDialog extends PathwayElementDialog {
 	}
 
 	/**
-	 * Search for symbols or ids in the synonym databases that match
-	 * the given text
+	 * Search for symbols or ids in the synonym databases that match the given text
 	 */
-	private void search(String aText)
-	{
-		if(aText == null || "".equals(aText.trim())) {
-			JOptionPane.showMessageDialog(this, "No search term specified, " +
-			"please type something in the 'Search' field");
+	private void search(String aText) {
+		if (aText == null || "".equals(aText.trim())) {
+			JOptionPane.showMessageDialog(this,
+					"No search term specified, " + "please type something in the 'Search' field");
 			return;
 		}
 		final String text = aText.trim();
@@ -138,71 +149,60 @@ public class DataNodeDialog extends PathwayElementDialog {
 		SwingWorker<List<XrefWithSymbol>, Void> sw = new SwingWorker<List<XrefWithSymbol>, Void>() {
 			private static final int QUERY_LIMIT = 200;
 
-			protected List<XrefWithSymbol> doInBackground() throws IDMapperException
-			{
+			protected List<XrefWithSymbol> doInBackground() throws IDMapperException {
 				IDMapperStack gdb = swingEngine.getGdbManager().getCurrentGdb();
 
-			    //The result set
+				// The result set
 				List<XrefWithSymbol> result = new ArrayList<XrefWithSymbol>();
-	    		
-	    		for (Map.Entry<Xref, String> i :
-		    		gdb.freeAttributeSearch( text, AttributeMapper.MATCH_ID, QUERY_LIMIT).entrySet())
-		    	{
-	    			// GO terms are annotated as symbols in BridgeDb databases
-		    		// those are filtered from the results
-		    		if(!i.getKey().getDataSource().getType().equals("ontology") ||
-		    				!i.getKey().getDataSource().getType().equals("probe")) {
-		    			result.add (new XrefWithSymbol (i.getKey(), i.getValue()));
-		    		}
-		    	}
-		    	for (Map.Entry<Xref, String> i :
-		    		gdb.freeAttributeSearch( text, "Symbol", QUERY_LIMIT).entrySet())
-		    	{
-		    		// GO terms are annotated as symbols in BridgeDb databases
-		    		// those are filtered from the results
-		    		if(!i.getKey().getDataSource().getType().equals("ontology") &&
-		    				!i.getKey().getDataSource().getType().equals("probe")) {
-		    			result.add (new XrefWithSymbol (i.getKey(), i.getValue()));	
-		    		}
-		    		
-		    	}
+
+				for (Map.Entry<Xref, String> i : gdb.freeAttributeSearch(text, AttributeMapper.MATCH_ID, QUERY_LIMIT)
+						.entrySet()) {
+					// GO terms are annotated as symbols in BridgeDb databases
+					// those are filtered from the results
+					if (!i.getKey().getDataSource().getType().equals("ontology")
+							|| !i.getKey().getDataSource().getType().equals("probe")) {
+						result.add(new XrefWithSymbol(i.getKey(), i.getValue()));
+					}
+				}
+				for (Map.Entry<Xref, String> i : gdb.freeAttributeSearch(text, "Symbol", QUERY_LIMIT).entrySet()) {
+					// GO terms are annotated as symbols in BridgeDb databases
+					// those are filtered from the results
+					if (!i.getKey().getDataSource().getType().equals("ontology")
+							&& !i.getKey().getDataSource().getType().equals("probe")) {
+						result.add(new XrefWithSymbol(i.getKey(), i.getValue()));
+					}
+
+				}
 				return result;
 			}
 
 			@Override
-			public void done()
-			{
+			public void done() {
 				progress.finished();
-				if (!progress.isCancelled())
-				{
+				if (!progress.isCancelled()) {
 					List<XrefWithSymbol> results = null;
-					try
-					{
+					try {
 						results = get();
-						//Show results to user
-						if(results != null && results.size() > 0) {
+						// Show results to user
+						if (results != null && results.size() > 0) {
 							DatabaseSearchDialog resultDialog = new DatabaseSearchDialog("Results", results, curDlg);
 							resultDialog.setVisible(true);
 							XrefWithSymbol selected = resultDialog.getSelected();
-							if(selected != null) {
+							if (selected != null) {
 								applyAutoFill(selected);
 							}
 						} else {
-							JOptionPane.showMessageDialog(DataNodeDialog.this,
-									"No results for '" + text + "'");
+							JOptionPane.showMessageDialog(DataNodeDialog.this, "No results for '" + text + "'");
 						}
 					} catch (InterruptedException e) {
-						//Ignore, thread interrupted. Same as cancel.
-					}
-					catch (ExecutionException e) {
-						if(swingEngine.getGdbManager().getCurrentGdb().getMappers().size() == 0) {
-							JOptionPane.showMessageDialog(DataNodeDialog.this,
-									"No identifier mapping database loaded.", "Error",
-									JOptionPane.ERROR_MESSAGE);
+						// Ignore, thread interrupted. Same as cancel.
+					} catch (ExecutionException e) {
+						if (swingEngine.getGdbManager().getCurrentGdb().getMappers().size() == 0) {
+							JOptionPane.showMessageDialog(DataNodeDialog.this, "No identifier mapping database loaded.",
+									"Error", JOptionPane.ERROR_MESSAGE);
 						} else {
 							JOptionPane.showMessageDialog(DataNodeDialog.this,
-									"Exception occurred while searching,\n" +
-									"see error log for details.", "Error",
+									"Exception occurred while searching,\n" + "see error log for details.", "Error",
 									JOptionPane.ERROR_MESSAGE);
 							Logger.log.error("Error while searching", e);
 						}
@@ -233,13 +233,13 @@ public class DataNodeDialog extends PathwayElementDialog {
 		panel.add(searchPanel, panelConstraints);
 		panel.add(fieldPanel, panelConstraints);
 
-		//Search panel elements
+		// Search panel elements
 		searchPanel.setLayout(new GridBagLayout());
 
 		final JTextField searchText = new JTextField();
 		final JButton searchButton = new JButton("Search");
 
-		//Key listener to search when user presses Enter
+		// Key listener to search when user presses Enter
 		searchText.addKeyListener(new KeyAdapter() {
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -265,27 +265,26 @@ public class DataNodeDialog extends PathwayElementDialog {
 		searchConstraints.weightx = 0;
 		searchPanel.add(searchButton, searchConstraints);
 
-		//Manual entry panel elements
+		// Manual entry panel elements
 		fieldPanel.setLayout(new GridBagLayout());
 
 		JLabel symLabel = new JLabel("Text label");
 		JLabel idLabel = new JLabel("Identifier");
 		JLabel dbLabel = new JLabel("Database");
-		JLabel typeLabel = new JLabel ("Biological Type");
+		JLabel typeLabel = new JLabel("Biological Type");
 		symText = new CompleterQueryTextArea(new OptionProvider() {
 			public List<String> provideOptions(String text) {
-				if(text == null) return Collections.emptyList();
+				if (text == null)
+					return Collections.emptyList();
 
 				IDMapperStack gdb = swingEngine.getGdbManager().getCurrentGdb();
 				List<String> symbols = new ArrayList<String>();
-				try
-				{
-					if(gdb.getMappers().size() > 0) {
-						symbols.addAll
-							(gdb.freeAttributeSearch(text, "Symbol", 10).values());
+				try {
+					if (gdb.getMappers().size() > 0) {
+						symbols.addAll(gdb.freeAttributeSearch(text, "Symbol", 10).values());
 					}
+				} catch (IDMapperException ignore) {
 				}
-				catch (IDMapperException ignore) {}
 				return symbols;
 			}
 		}, true);
@@ -293,19 +292,21 @@ public class DataNodeDialog extends PathwayElementDialog {
 		symText.setRows(2);
 		idText = new CompleterQueryTextField(new OptionProvider() {
 			public List<String> provideOptions(String text) {
-				if(text == null) return Collections.emptyList();
+				if (text == null)
+					return Collections.emptyList();
 
 				IDMapperStack gdb = swingEngine.getGdbManager().getCurrentGdb();
 				Set<Xref> refs = new HashSet<Xref>();
-				try
-				{
-					if(gdb.getMappers().size() > 0) refs = gdb.freeSearch(text, 100);
+				try {
+					if (gdb.getMappers().size() > 0)
+						refs = gdb.freeSearch(text, 100);
+				} catch (IDMapperException ignore) {
 				}
-				catch (IDMapperException ignore) {}
 
-				//Only take identifiers
+				// Only take identifiers
 				List<String> ids = new ArrayList<String>();
-				for (Xref ref : refs) ids.add(ref.getId());
+				for (Xref ref : refs)
+					ids.add(ref.getId());
 				return ids;
 			}
 		}, true);
@@ -337,41 +338,60 @@ public class DataNodeDialog extends PathwayElementDialog {
 		fieldPanel.add(dbCombo, c);
 
 		symText.getDocument().addDocumentListener(new DocumentListener() {
-			public void changedUpdate(DocumentEvent e) { setText();	}
-			public void insertUpdate(DocumentEvent e) {	setText(); }
-			public void removeUpdate(DocumentEvent e) { setText(); }
+			public void changedUpdate(DocumentEvent e) {
+				setText();
+			}
+
+			public void insertUpdate(DocumentEvent e) {
+				setText();
+			}
+
+			public void removeUpdate(DocumentEvent e) {
+				setText();
+			}
+
 			private void setText() {
 				getInput().setTextLabel(symText.getText());
 			}
 		});
 
 		idText.getDocument().addDocumentListener(new DocumentListener() {
-			public void changedUpdate(DocumentEvent e) { setText();	}
-			public void insertUpdate(DocumentEvent e) {	setText(); }
-			public void removeUpdate(DocumentEvent e) { setText(); }
+			public void changedUpdate(DocumentEvent e) {
+				setText();
+			}
+
+			public void insertUpdate(DocumentEvent e) {
+				setText();
+			}
+
+			public void removeUpdate(DocumentEvent e) {
+				setText();
+			}
+
 			private void setText() {
-				getInput().setElementID(idText.getText());
+				// Sets Xref id by creating new Xref
+				getInput().setXref(new Xref(idText.getText(), getInput().getXref().getDataSource()));
 			}
 		});
 
-		dsm.addListDataListener(new ListDataListener()
-		{
+		dsm.addListDataListener(new ListDataListener() {
 
-			public void contentsChanged(ListDataEvent arg0)
-			{
-				getInput().setDataSource((DataSource)dsm.getSelectedItem());
-
+			public void contentsChanged(ListDataEvent arg0) {
+				// Sets Xref dataSource by creating new Xref
+				getInput().setXref(new Xref(getInput().getXref().getId(), (DataSource) dsm.getSelectedItem()));
 			}
 
-			public void intervalAdded(ListDataEvent arg0) {	}
+			public void intervalAdded(ListDataEvent arg0) {
+			}
 
-			public void intervalRemoved(ListDataEvent arg0) { }
+			public void intervalRemoved(ListDataEvent arg0) {
+			}
 		});
 
 		typeCombo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				DataNodeType item = (DataNodeType)typeCombo.getSelectedItem();
-				getInput().setDataNodeType(item);
+				DataNodeType item = (DataNodeType) typeCombo.getSelectedItem();
+				getInput().setType(item);
 				refresh();
 			}
 		});

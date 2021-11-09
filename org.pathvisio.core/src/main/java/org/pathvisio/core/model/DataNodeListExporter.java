@@ -30,7 +30,7 @@ import org.bridgedb.DataSource;
 import org.bridgedb.IDMapperException;
 import org.bridgedb.Xref;
 import org.pathvisio.core.data.GdbManager;
-import org.pathvisio.event.PathwayExporter;
+import org.pathvisio.event.PathwayModelExporter;
 import org.pathvisio.io.ConverterException;
 import org.pathvisio.model.DataNode;
 import org.pathvisio.model.PathwayModel;
@@ -41,7 +41,7 @@ import org.pathvisio.model.PathwayModel;
  * 
  * @author thomas
  */
-public class DataNodeListExporter implements PathwayExporter {
+public class DataNodeListExporter implements PathwayModelExporter {
 	/**
 	 * Use this String as argument in {@link #setResultCode(String)} to indicate
 	 * that the exporter has to keep the original database code as used in the

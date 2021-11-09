@@ -70,8 +70,8 @@ public class VInfoBox extends VPathwayElement {
 	 * @return
 	 */
 	@Override
-	public Pathway getPathwayElement() {
-		return (Pathway) super.getPathwayElement();
+	public Pathway getPathwayObject() {
+		return (Pathway) super.getPathwayObject();
 	}
 
 	protected VCitation createCitation() {
@@ -97,8 +97,8 @@ public class VInfoBox extends VPathwayElement {
 
 		// Draw Name, Organism, Data-Source, Version, Author, Maintained-by, Email,
 		// Availability and last modified
-		String[][] text = new String[][] { { "Title: ", getPathwayElement().getTitle() },
-				{ "Organism: ", getPathwayElement().getOrganism() },
+		String[][] text = new String[][] { { "Title: ", getPathwayObject().getTitle() },
+				{ "Organism: ", getPathwayObject().getOrganism() },
 //				{"Source: ", gdata.getSource()}, //TODO 
 //				{"Version: ", gdata.getVersion()},
 //				{"License: ", gdata.getLicense()},

@@ -63,7 +63,7 @@ public class VAnchor extends VElement implements VLinkableTo, Adjustable {
 	 * TODO
 	 */
 	@Override
-	public PathwayObject getPathwayElement() {
+	public PathwayObject getPathwayObject() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -158,7 +158,7 @@ public class VAnchor extends VElement implements VLinkableTo, Adjustable {
 		if (isSelected()) {
 			c = selectColor;
 		} else {
-			c = line.getPathwayElement().getLineColor();
+			c = line.getPathwayObject().getLineColor();
 		}
 
 		AnchorShape arrowShape = getAnchorShape();
@@ -215,7 +215,7 @@ public class VAnchor extends VElement implements VLinkableTo, Adjustable {
 	 */
 	@Override
 	public int getZOrder() {
-		return line.getPathwayElement().getZOrder() + 1;
+		return getAnchor().getZOrder(); 
 	}
 
 }

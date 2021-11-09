@@ -27,9 +27,8 @@ import javax.swing.KeyStroke;
 import org.bridgedb.DataSource;
 import org.bridgedb.Xref;
 import org.pathvisio.core.Engine;
-import org.pathvisio.core.debug.StopWatch;
+import org.pathvisio.debug.StopWatch;
 import org.pathvisio.io.ConverterException;
-import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.model.PathwayModel;
 import org.pathvisio.model.type.DataNodeType;
 import org.pathvisio.util.XrefUtils;
@@ -37,11 +36,12 @@ import org.pathvisio.model.DataNode;
 import org.pathvisio.model.Interaction;
 import org.pathvisio.model.PathwayElement;
 import org.pathvisio.core.preferences.PreferenceManager;
-import org.pathvisio.core.view.GeneProduct;
-import org.pathvisio.core.view.Line;
-import org.pathvisio.core.view.VPathway;
-import org.pathvisio.core.view.VPathwayElement;
-import org.pathvisio.gui.view.VPathwaySwing;
+import org.pathvisio.core.view.model.VDataNode;
+import org.pathvisio.core.view.model.VElement;
+import org.pathvisio.core.view.model.VLineElement;
+import org.pathvisio.core.view.model.VPathwayModel;
+import org.pathvisio.core.view.model.VPathwayObject;
+import org.pathvisio.gui.view.VPathwayModelSwing;
 
 import buildsystem.Measure;
 import junit.framework.TestCase;
@@ -147,9 +147,9 @@ public class TestAndMeasure extends TestCase {
 		final PathwayModel pwy1 = new PathwayModel();
 		final PathwayModel pwy2 = new PathwayModel();
 		final PathwayModel pwy3 = new PathwayModel();
-		final VPathway vpwy3 = new VPathway(null);
+		final VPathwayModel vpwy3 = new VPathwayModel(null);
 		final PathwayModel pwy4 = new PathwayModel();
-		final VPathway vpwy4 = new VPathway(null);
+		final VPathwayModel vpwy4 = new VPathwayModel(null);
 
 		individialTest(new ObjectTester() {
 			public Object create() {
@@ -197,14 +197,14 @@ public class TestAndMeasure extends TestCase {
 
 		individialTest(new ObjectTester() {
 			public Object create() {
-				DataNode elt = new DataNode("INSR", DataNodeType.GENEPRODUCT));
+				DataNode elt = new DataNode("INSR", DataNodeType.GENEPRODUCT);
 				elt.setCenterX(5);
 				elt.setCenterY(10);
 				elt.setWidth(8);
 				elt.setHeight(10);
 				elt.setXref(XrefUtils.createXref("3463", "ncbigene"));
 				pwy3.add(elt);
-				VPathwayElement velt = new GeneProduct(vpwy3, elt);
+				VDataNode velt = new VDataNode(vpwy3, elt);
 				return velt;
 			}
 
@@ -222,7 +222,7 @@ public class TestAndMeasure extends TestCase {
 //				elt.setStartGraphRef("abc"); TODO
 //				elt.setEndGraphRef("def"); TODO
 				pwy4.add(elt);
-				VPathwayElement velt = new Line(vpwy4, elt);
+				VLineElement velt = new VLineElement(vpwy4, elt);
 				return velt;
 			}
 
@@ -249,10 +249,10 @@ public class TestAndMeasure extends TestCase {
 		mw.start();
 		sw.start();
 		JScrollPane sp = new JScrollPane();
-		VPathwaySwing wrapper = new VPathwaySwing(sp);
+		VPathwayModelSwing wrapper = new VPathwayModelSwing(sp);
 
 		Engine engine = new Engine();
-		VPathway vpwy = wrapper.createVPathway();
+		VPathwayModel vpwy = wrapper.createVPathway();
 		vpwy.activateUndoManager(engine);
 		vpwy.fromModel(pwy);
 
@@ -271,7 +271,7 @@ public class TestAndMeasure extends TestCase {
 
 		mw.start();
 		sw.start();
-		for (VPathwayElement elt : vpwy.getDrawingObjects()) {
+		for (VElement elt : vpwy.getDrawingObjects()) {
 			elt.select();
 		}
 		measure.add("Speed::Hs_Apoptosis select all", "" + sw.stop(), "msec");

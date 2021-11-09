@@ -26,7 +26,7 @@ import org.pathvisio.core.view.MouseEvent;
 /**
  * event sent by VPathway upon modification of one or more VPathwayElements.
  */
-public class VPathwayEvent extends EventObject {
+public class VPathwayModelEvent extends EventObject {
 
 	/** Possible event types */
 	public static enum VPathwayEventType
@@ -48,34 +48,34 @@ public class VPathwayEvent extends EventObject {
 	private Graphics2D g2d;
 	private MouseEvent mouseEvent;
 
-	public VPathwayEvent(VPathwayModel source, VPathwayEventType type) {
+	public VPathwayModelEvent(VPathwayModel source, VPathwayEventType type) {
 		super(source);
 		this.type = type;
 	}
 
-	public VPathwayEvent(VPathwayModel source, List<VElement> affectedElements, VPathwayEventType type) {
+	public VPathwayModelEvent(VPathwayModel source, List<VElement> affectedElements, VPathwayEventType type) {
 		this(source, type);
 		this.affectedElements = affectedElements;
 	}
 
-	public VPathwayEvent(VPathwayModel source, VElement affectedElement, VPathwayEventType type) {
+	public VPathwayModelEvent(VPathwayModel source, VElement affectedElement, VPathwayEventType type) {
 		this(source, type);
 		List<VElement> afe = new ArrayList<VElement>();
 		afe.add(affectedElement);
 		this.affectedElements = afe;
 	}
 
-	public VPathwayEvent(VPathwayModel source, VElement affectedElement, Graphics2D g2d, VPathwayEventType type) {
+	public VPathwayModelEvent(VPathwayModel source, VElement affectedElement, Graphics2D g2d, VPathwayEventType type) {
 		this(source, affectedElement, type);
 		this.g2d = g2d;
 	}
 
-	public VPathwayEvent(VPathwayModel source, VElement affectedElement, MouseEvent e, VPathwayEventType type) {
+	public VPathwayModelEvent(VPathwayModel source, VElement affectedElement, MouseEvent e, VPathwayEventType type) {
 		this(source, affectedElement, type);
 		mouseEvent = e;
 	}
 
-	public VPathwayEvent(VPathwayModel source, List<VElement> affectedElements, MouseEvent e, VPathwayEventType type) {
+	public VPathwayModelEvent(VPathwayModel source, List<VElement> affectedElements, MouseEvent e, VPathwayEventType type) {
 		this(source, affectedElements, type);
 		mouseEvent = e;
 	}

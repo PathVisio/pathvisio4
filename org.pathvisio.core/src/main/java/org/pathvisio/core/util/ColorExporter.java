@@ -39,12 +39,12 @@ import org.pathvisio.model.DataNode;
 import org.pathvisio.model.Group;
 import org.pathvisio.core.preferences.PreferenceManager;
 import org.pathvisio.core.view.model.VElement;
-import org.pathvisio.core.view.model.VPathwayEvent;
-import org.pathvisio.core.view.model.VPathwayListener;
+import org.pathvisio.core.view.model.VPathwayModelEvent;
+import org.pathvisio.core.view.model.VPathwayModelListener;
 import org.pathvisio.core.view.model.VPathwayModel;
 import org.pathvisio.core.view.model.VPathwayObject;
 import org.pathvisio.core.view.model.VShapedElement;
-import org.pathvisio.core.view.model.VPathwayEvent.VPathwayEventType;
+import org.pathvisio.core.view.model.VPathwayModelEvent.VPathwayEventType;
 import org.pathvisio.core.view.shape.MIMShapes;
 
 /**
@@ -55,7 +55,7 @@ import org.pathvisio.core.view.shape.MIMShapes;
  * 
  * @author thomas
  */
-public class ColorExporter implements VPathwayListener {
+public class ColorExporter implements VPathwayModelListener {
 	Map<PathwayObject, List<Color>> colors;
 	VPathwayModel vPathway;
 
@@ -75,11 +75,11 @@ public class ColorExporter implements VPathwayListener {
 		exporter.doExport(outputFile, vPathway);
 	}
 
-	public void vPathwayEvent(VPathwayEvent e) {
+	public void vPathwayModelEvent(VPathwayModelEvent e) {
 		if (e.getType() == VPathwayEventType.ELEMENT_DRAWN) {
 			VElement vpwe = e.getAffectedElement();
 			if (vpwe instanceof VPathwayObject) {
-				PathwayElement pwe = ((VPathwayObject) vpwe).getPathwayElement();
+				PathwayElement pwe = ((VPathwayObject) vpwe).getPathwayObject();
 				List<Color> elmColors = colors.get(pwe);
 				if (elmColors != null && elmColors.size() > 0) {
 					Logger.log.info("Coloring " + pwe + " with " + elmColors);
@@ -106,7 +106,7 @@ public class ColorExporter implements VPathwayListener {
 		g2d.setClip(area);
 		g2d.setColor(Color.black);
 		if (pwe instanceof VShapedElement) {
-			String label = ((ShapedElement) pwe.getPathwayElement()).getTextLabel();
+			String label = ((ShapedElement) pwe.getPathwayObject()).getTextLabel();
 			if (label != null && !"".equals(label)) {
 				TextLayout tl = new TextLayout(label, g2d.getFont(), g2d.getFontRenderContext());
 				Rectangle2D tb = tl.getBounds();
@@ -131,7 +131,7 @@ public class ColorExporter implements VPathwayListener {
 			Rectangle r = new Rectangle(area.x + w * i, area.y, w + ((i == nr - 1) ? left : 0), area.height);
 			g2d.fill(r);
 		}
-		g2d.setColor(vpe.getPathwayElement().getColor());
+		g2d.setColor(vpe.getPathwayObject().getColor());
 		g2d.drawRect(area.x, area.y, area.width - 1, area.height - 1);
 	}
 
@@ -142,7 +142,7 @@ public class ColorExporter implements VPathwayListener {
 	private void doHighlight() {
 		for (VElement vpe : vPathway.getDrawingObjects()) {
 			if (vpe instanceof VPathwayObject) {
-				PathwayElement pwe = ((VPathwayObject) vpe).getPathwayElement();
+				PathwayElement pwe = ((VPathwayObject) vpe).getPathwayObject();
 				List<Color> elmColors = colors.get(pwe);
 				if (elmColors != null && elmColors.size() > 0) {
 					if (pwe.getClass() != DataNode.class && pwe.getClass() != Group.class) {

@@ -60,8 +60,8 @@ public class VGroup extends VShapedElement implements VElementMouseListener {
 	 * @return
 	 */
 	@Override
-	public Group getPathwayElement() {
-		return (Group) super.getPathwayElement();
+	public Group getPathwayObject() {
+		return (Group) super.getPathwayObject();
 	}
 
 //	/**
@@ -156,9 +156,9 @@ public class VGroup extends VShapedElement implements VElementMouseListener {
 		for (VElement vpe : canvas.getDrawingObjects()) {
 			if (vpe instanceof VGroupable && vpe != this) {
 				VGroupable vpeg = (VGroupable) vpe;
-				Groupable pe = vpeg.getPathwayElement();
+				Groupable pe = vpeg.getPathwayObject();
 				Group ref = pe.getGroupRef();
-				if (ref != null && ref.equals(getPathwayElement())) {
+				if (ref != null && ref.equals(getPathwayObject())) {
 					gg.add((VPathwayObject) vpeg);
 				}
 			}
@@ -214,7 +214,7 @@ public class VGroup extends VShapedElement implements VElementMouseListener {
 			flags += FLAG_ANCHORSVISIBLE;
 
 		// Draw the group style appearance
-		GroupPainter p = GroupPainterRegistry.getPainter(getPathwayElement().getType().toString());
+		GroupPainter p = GroupPainterRegistry.getPainter(getPathwayObject().getType().toString());
 		p.drawGroup(g2d, this, flags);
 	}
 
@@ -267,9 +267,9 @@ public class VGroup extends VShapedElement implements VElementMouseListener {
 	protected Shape getVShape(boolean rotate) {
 		Rectangle2D mb = null;
 		if (rotate) {
-			mb = getPathwayElement().getRotatedBounds();
+			mb = getPathwayObject().getRotatedBounds();
 		} else {
-			mb = getPathwayElement().getBounds();
+			mb = getPathwayObject().getBounds();
 		}
 		return canvas.vFromM(mb);
 	}

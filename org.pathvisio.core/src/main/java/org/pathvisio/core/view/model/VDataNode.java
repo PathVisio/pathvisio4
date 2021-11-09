@@ -41,8 +41,8 @@ public class VDataNode extends VShapedElement {
 	 * @return
 	 */
 	@Override
-	public DataNode getPathwayElement() {
-		return (DataNode) super.getPathwayElement();
+	public DataNode getPathwayObject() {
+		return (DataNode) super.getPathwayObject();
 	}
 
 }

@@ -370,7 +370,7 @@ public class SelectionBox extends VElement implements Adjustable {
 				if (o.vIntersects(bounds)) { // && !(o instanceof Group)
 					// exclude objects in a group to avoid double selection
 					if (o instanceof VGroupable) {
-						Groupable pe = ((VGroupable) o).getPathwayElement();
+						Groupable pe = ((VGroupable) o).getPathwayObject();
 						Group ref = ((Groupable) pe).getGroupRef();
 						if (ref != null) {
 							continue;

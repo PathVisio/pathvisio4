@@ -28,7 +28,7 @@ import java.util.Map;
 import org.bridgedb.DataSource;
 import org.bridgedb.Xref;
 import org.pathvisio.debug.Logger;
-import org.pathvisio.event.PathwayExporter;
+import org.pathvisio.event.PathwayModelExporter;
 import org.pathvisio.io.ConverterException;
 import org.pathvisio.model.DataNode;
 import org.pathvisio.model.PathwayModel;
@@ -42,7 +42,7 @@ import org.pathvisio.model.PathwayObject;
  * EuGene supports several id systems but has its own naming for them, this
  * exporter also handles the translation.
  */
-public class EUGeneExporter implements PathwayExporter {
+public class EUGeneExporter implements PathwayModelExporter {
 	public String[] getExtensions() {
 		return new String[] { "pwf" };
 	}

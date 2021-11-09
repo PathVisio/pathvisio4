@@ -24,14 +24,14 @@ import org.pathvisio.model.Groupable;
  * 
  * @author finterly
  */
-public interface VGroupable {
+public interface VGroupable extends VDrawable{
 
 	/**
 	 * Gets the model representation (PathwayElement) of this class
 	 * 
 	 * @return
 	 */
-	public Groupable getPathwayElement();
+	public Groupable getPathwayObject();
 
 	/**
 	 * Get the x-coordinate of the center point of this object adjusted to the
@@ -88,5 +88,6 @@ public interface VGroupable {
 	 * @return
 	 */
 	public double getVTop();
+	
 
 }

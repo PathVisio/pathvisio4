@@ -16,6 +16,7 @@
  ******************************************************************************/
 package org.pathvisio.core.view.model;
 
+import org.pathvisio.model.Drawable;
 import org.pathvisio.model.LineElement.LinePoint;
 import org.pathvisio.core.preferences.GlobalPreference;
 import org.pathvisio.core.preferences.PreferenceManager;
@@ -27,7 +28,7 @@ import org.pathvisio.core.view.model.LinAlg.Point;
  * 
  * @author unknown, finterly
  */
-public class VPoint implements Adjustable {
+public class VPoint implements VDrawable, Adjustable {
 	// the handle that goes with this VPoint.
 	// This Handle is created, destroyed and generally managed by Line, not by
 	// VPoint
@@ -61,6 +62,14 @@ public class VPoint implements Adjustable {
 		this.canvas = canvas;
 		this.linePoint = mPoint;
 		this.line = line;
+	}
+	
+	/**
+	 * TODO 
+	 */
+	@Override
+	public Drawable getPathwayObject() {
+		return linePoint;
 	}
 
 	protected void unlink() {
@@ -138,4 +147,14 @@ public class VPoint implements Adjustable {
 	public double getVHeight() {
 		return 0;
 	}
+	
+	/**
+	 * Returns the z-order from the model //TODO public?
+	 */
+	@Override
+	public int getZOrder() {
+		return getLinePoint().getZOrder(); 
+	}
+
+
 }

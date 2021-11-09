@@ -29,9 +29,11 @@ import org.pathvisio.core.ApplicationEvent;
 import org.pathvisio.core.Engine;
 import org.pathvisio.core.Engine.ApplicationEventListener;
 import org.pathvisio.model.PathwayElement;
+import org.pathvisio.model.PathwayObject;
+import org.pathvisio.model.Xrefable;
 import org.pathvisio.event.PathwayObjectEvent;
 import org.pathvisio.event.PathwayObjectListener;
-import org.pathvisio.core.model.StaticProperty;
+import org.pathvisio.prop.StaticProperty;
 import org.pathvisio.core.view.model.VElement;
 import org.pathvisio.core.view.model.VPathwayModel;
 import org.pathvisio.core.view.model.VPathwayObject;
@@ -54,8 +56,8 @@ import org.pathvisio.gui.DataPaneTextProvider;
  * It is the responsibility of the instantiator to also call the dispose()
  * method, otherwise the background thread is not killed.
  */
-public class DataPane extends JEditorPane implements ApplicationEventListener,
-		SelectionListener, PathwayObjectListener {
+public class DataPane extends JEditorPane
+		implements ApplicationEventListener, SelectionListener, PathwayObjectListener {
 	private final DataPaneTextProvider dpt;
 	private Engine engine;
 	private ExecutorService executor;
@@ -64,7 +66,7 @@ public class DataPane extends JEditorPane implements ApplicationEventListener,
 		super();
 
 		engine.addApplicationEventListener(this);
-		VPathwayModel vp = engine.getActiveVPathway();
+		VPathwayModel vp = engine.getActiveVPathwayModel();
 		if (vp != null)
 			vp.addSelectionListener(this);
 
@@ -82,8 +84,7 @@ public class DataPane extends JEditorPane implements ApplicationEventListener,
 		setEditorKit(new HTMLEditorKit() {
 			protected Parser getParser() {
 				try {
-					Class c = Class
-							.forName("javax.swing.text.html.parser.ParserDelegator");
+					Class c = Class.forName("javax.swing.text.html.parser.ParserDelegator");
 					Parser defaultParser = (Parser) c.newInstance();
 					return defaultParser;
 				} catch (Throwable e) {
@@ -93,9 +94,9 @@ public class DataPane extends JEditorPane implements ApplicationEventListener,
 		});
 	}
 
-	private PathwayElement input;
+	private PathwayObject input;
 
-	public void setInput(final PathwayElement e) {
+	public void setInput(final PathwayObject e) {
 		// System.err.println("===== SetInput Called ==== " + e);
 		if (e == input)
 			return; // Don't set same input twice
@@ -116,14 +117,14 @@ public class DataPane extends JEditorPane implements ApplicationEventListener,
 
 	private void doQuery() {
 		setText("Loading");
-		currRef = input.getXref();
+		currRef = ((Xrefable) input).getXref();
 
 		executor.execute(new Runnable() {
 			public void run() {
 				if (input == null)
 					return;
 				final String txt = dpt.getAnnotationHTML(input);
-			
+
 				SwingUtilities.invokeLater(new Runnable() {
 					public void run() {
 						setText(txt);
@@ -145,7 +146,7 @@ public class DataPane extends JEditorPane implements ApplicationEventListener,
 				// the backpage checks and gives the correct error if
 				// it's not a datanode or line
 				if (o instanceof VPathwayObject) {
-					setInput(((VPathwayObject) o).getPathwayElement());
+					setInput(((VPathwayObject) o).getPathwayObject());
 					break;
 				}
 			}
@@ -176,11 +177,10 @@ public class DataPane extends JEditorPane implements ApplicationEventListener,
 	Xref currRef;
 
 	public void gmmlObjectModified(PathwayObjectEvent e) {
-		PathwayElement pe = e.getModifiedPathwayElement();
-		if (input != null
-				&& (e.affectsProperty(StaticProperty.GENEID) || e
-						.affectsProperty(StaticProperty.DATASOURCE))) {
-			Xref nref = new Xref(pe.getElementID(), input.getDataSource());
+		PathwayObject pe = e.getModifiedPathwayObject();
+		// static property for xref? TODO
+		if (input != null && (e.affectsProperty(StaticProperty.XREF))) {
+			Xref nref = new Xref(((Xrefable) pe).getXref().getId(), ((Xrefable) input).getXref().getDataSource());
 			if (!nref.equals(currRef)) {
 				doQuery();
 			}
@@ -192,7 +192,7 @@ public class DataPane extends JEditorPane implements ApplicationEventListener,
 	public void dispose() {
 		assert (!disposed);
 		engine.removeApplicationEventListener(this);
-		VPathwayModel vpwy = engine.getActiveVPathway();
+		VPathwayModel vpwy = engine.getActiveVPathwayModel();
 		if (vpwy != null)
 			vpwy.removeSelectionListener(this);
 		executor.shutdown();

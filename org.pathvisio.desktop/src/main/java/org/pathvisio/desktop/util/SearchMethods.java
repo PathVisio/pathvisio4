@@ -33,8 +33,8 @@ import org.bridgedb.IDMapperException;
 import org.bridgedb.Xref;
 import org.pathvisio.core.Engine;
 import org.pathvisio.core.data.XrefWithSymbol;
-import org.pathvisio.core.debug.Logger;
-import org.pathvisio.core.util.FileUtils;
+import org.pathvisio.debug.Logger;
+import org.pathvisio.util.FileUtils;
 import org.pathvisio.core.util.PathwayParser;
 import org.pathvisio.core.util.PathwayParser.ParseException;
 import org.xml.sax.SAXException;
@@ -42,11 +42,10 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
- * Utility functions for searching a directory tree of pathway files
- * for pathways that match certain criteria.
+ * Utility functions for searching a directory tree of pathway files for
+ * pathways that match certain criteria.
  */
-public class SearchMethods
-{
+public class SearchMethods {
 	public static final String MSG_NOT_IN_GDB = "Gene not found in selected gene database";
 	public static final String MSG_NOTHING_FOUND = "Nothing found";
 	public static final String MSG_CANCELLED = "cancelled";
@@ -55,57 +54,45 @@ public class SearchMethods
 	public static final double TOTAL_WORK = 1000.0;
 
 	/**
-	 * A helper class,
-	 * let's one match a Pathway to certain search criteria
+	 * A helper class, let's one match a Pathway to certain search criteria
 	 */
-	private static abstract interface PathwayMatcher
-	{
+	private static abstract interface PathwayMatcher {
 		/**
-		 * searches file for a match
-		 * returns a search result or null if the file doesn't match.
+		 * searches file for a match returns a search result or null if the file doesn't
+		 * match.
 		 */
-		MatchResult testMatch (File f);
+		MatchResult testMatch(File f);
 	}
 
 	/**
-	 * Implementation of pathwayMatcher that matches
-	 * if the pathway contains a specific xref,
-	 * or crossrefs of that xref.
+	 * Implementation of pathwayMatcher that matches if the pathway contains a
+	 * specific xref, or crossrefs of that xref.
 	 */
-	public static class ByXrefMatcher implements PathwayMatcher
-	{
+	public static class ByXrefMatcher implements PathwayMatcher {
 		private Set<Xref> refs;
 
-		public ByXrefMatcher(IDMapper gdb, Xref ref) throws SearchException
-		{
-			try
-			{
+		public ByXrefMatcher(IDMapper gdb, Xref ref) throws SearchException {
+			try {
 				refs = gdb.mapID(ref);
+			} catch (IDMapperException ex) {
+				throw new SearchException(MSG_GDB_ERROR);
 			}
-			catch (IDMapperException ex)
-			{
-				throw new SearchException (MSG_GDB_ERROR);
-			}
-			if(refs == null || refs.size() == 0) throw new SearchException(MSG_NOT_IN_GDB);
+			if (refs == null || refs.size() == 0)
+				throw new SearchException(MSG_NOT_IN_GDB);
 		}
 
-		public MatchResult testMatch(File f)
-		{
-			//Get all genes in the pathway
-			try
-			{
+		public MatchResult testMatch(File f) {
+			// Get all genes in the pathway
+			try {
 				XMLReader xmlReader = XMLReaderFactory.createXMLReader();
 				PathwayParser parser = new PathwayParser(f, xmlReader);
 				List<XrefWithSymbol> genes = parser.getGenes();
-				//Check if one of the given ids is in the pathway
-				for (XrefWithSymbol gene : genes)
-				{
-					//ignore symbol when comparing with refs from db.
-					Xref geneWithoutSymbol =
-						new Xref(gene.getId(), gene.getDataSource());
-					if(refs.contains(geneWithoutSymbol))
-					{
-						//Gene found, add pathway to search result and break
+				// Check if one of the given ids is in the pathway
+				for (XrefWithSymbol gene : genes) {
+					// ignore symbol when comparing with refs from db.
+					Xref geneWithoutSymbol = new Xref(gene.getId(), gene.getDataSource());
+					if (refs.contains(geneWithoutSymbol)) {
+						// Gene found, add pathway to search result and break
 						List<String> idsFound = new ArrayList<String>();
 						List<XrefWithSymbol> matched = new ArrayList<XrefWithSymbol>();
 						idsFound.add(gene.getId());
@@ -113,14 +100,10 @@ public class SearchMethods
 						return new MatchResult(f, idsFound, null, matched);
 					}
 				}
-			}
-			catch (ParseException e)
-			{
+			} catch (ParseException e) {
 				// ignore pathways that generate an exception.
 				// They simply won't show up in search results.
-			}
-			catch (SAXException e)
-			{
+			} catch (SAXException e) {
 				// ignore pathways that generate an exception.
 				// They simply won't show up in search results.
 			}
@@ -129,56 +112,44 @@ public class SearchMethods
 	}
 
 	/**
-	 * Implementation of Pathway Matcher that matches the
-	 * pathway only if any of the symbols of the datanodes
-	 * matches a given regular expression.
+	 * Implementation of Pathway Matcher that matches the pathway only if any of the
+	 * symbols of the datanodes matches a given regular expression.
 	 */
-	public static class ByPatternMatcher implements PathwayMatcher
-	{
+	public static class ByPatternMatcher implements PathwayMatcher {
 		private Pattern pattern;
 
-		public ByPatternMatcher (String regex)
-		{
-			//Compile regex
+		public ByPatternMatcher(String regex) {
+			// Compile regex
 			pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
 		}
 
-		public MatchResult testMatch(File f)
-		{
-			try
-			{
+		public MatchResult testMatch(File f) {
+			try {
 				XMLReader xmlReader = XMLReaderFactory.createXMLReader();
 				PathwayParser parser = new PathwayParser(f, xmlReader);
 				List<XrefWithSymbol> genes = parser.getGenes();
-				//Find what symbols match
+				// Find what symbols match
 				List<XrefWithSymbol> matched = new ArrayList<XrefWithSymbol>();
 				List<String> idsFound = new ArrayList<String>();
 				List<String> namesFound = new ArrayList<String>();
 
-				for(XrefWithSymbol gene : genes)
-				{
+				for (XrefWithSymbol gene : genes) {
 					Matcher m = pattern.matcher(gene.getSymbol());
-					if(m.find())
-					{
+					if (m.find()) {
 						matched.add(gene);
 						idsFound.add(gene.getId());
 						namesFound.add(gene.getSymbol());
 					}
 				}
 
-				if(matched.size() > 0)
-				{
-					return new MatchResult (f, idsFound, namesFound, matched);
+				if (matched.size() > 0) {
+					return new MatchResult(f, idsFound, namesFound, matched);
 				}
 
-			}
-			catch (ParseException e)
-			{
+			} catch (ParseException e) {
 				// ignore pathways that generate an exception.
 				// They simply won't show up in search results.
-			}
-			catch (SAXException e)
-			{
+			} catch (SAXException e) {
 				// ignore pathways that generate an exception.
 				// They simply won't show up in search results.
 			}
@@ -187,71 +158,57 @@ public class SearchMethods
 	}
 
 	/**
-	 * searchHelper: apply a certain Pathway Matcher to a directory
-	 * full of pathways. Keep a progress monitor and check if it is cancelled by
-	 * the user
+	 * searchHelper: apply a certain Pathway Matcher to a directory full of
+	 * pathways. Keep a progress monitor and check if it is cancelled by the user
 	 */
-	public static void searchHelper (final PathwayMatcher search, final File folder,
-			final SearchTableModel srs, final JLabel lblNumFound, Component parent)
-	{
+	public static void searchHelper(final PathwayMatcher search, final File folder, final SearchTableModel srs,
+			final JLabel lblNumFound, Component parent) {
 		final int totalWork = 1000;
 
-		final ProgressMonitor pmon = new ProgressMonitor(
-				parent, "Pathway search", "searching pathways...",
-				0, totalWork);
+		final ProgressMonitor pmon = new ProgressMonitor(parent, "Pathway search", "searching pathways...", 0,
+				totalWork);
 
-		SwingWorker<Integer, MatchResult> worker = new SwingWorker<Integer, MatchResult>()
-		{
+		SwingWorker<Integer, MatchResult> worker = new SwingWorker<Integer, MatchResult>() {
 			@Override
-			protected Integer doInBackground()
-			{
-				//get all pathway files in the folder and subfolders
+			protected Integer doInBackground() {
+				// get all pathway files in the folder and subfolders
 				List<File> pathways = FileUtils.getFiles(folder, Engine.PATHWAY_FILE_EXTENSION, true);
 
-				pmon.setProgress((int)(totalWork * 0.2));
+				pmon.setProgress((int) (totalWork * 0.2));
 
 				int i = 0;
 				int matchCount = 0;
 
-				for(File f : pathways)
-				{
-					if(pmon.isCanceled())
-					{
+				for (File f : pathways) {
+					if (pmon.isCanceled()) {
 						pmon.close();
 						return matchCount;
 					}
-					MatchResult sr = search.testMatch (f);
-					if (sr != null)
-					{
-						publish (sr);
+					MatchResult sr = search.testMatch(f);
+					if (sr != null) {
+						publish(sr);
 						matchCount++;
 					}
 
 					i++;
-					pmon.setProgress((int)(totalWork * 0.2 + totalWork * 0.8 * i / pathways.size()));
+					pmon.setProgress((int) (totalWork * 0.2 + totalWork * 0.8 * i / pathways.size()));
 				}
-				pmon.close (); // just to be sure
+				pmon.close(); // just to be sure
 				return matchCount;
 			}
 
-			protected void process (List<MatchResult> matches)
-			{
-				for (MatchResult mr : matches)
-				{
+			protected void process(List<MatchResult> matches) {
+				for (MatchResult mr : matches) {
 					srs.addRow(mr);
 				}
 			}
 
 			@Override
-			protected void done()
-			{
-				try
-				{
+			protected void done() {
+				try {
 					int matchCount = get();
 					lblNumFound.setText(matchCount + " " + (matchCount == 1 ? "result" : "results") + " found");
-				}
-				catch (Exception e)
-				{
+				} catch (Exception e) {
 					Logger.log.warn("Exception when getting match count", e);
 				}
 			}
@@ -263,11 +220,9 @@ public class SearchMethods
 	/**
 	 * Base class for exceptions during search
 	 */
-	public static class SearchException extends Exception
-	{
+	public static class SearchException extends Exception {
 
-		SearchException(String msg)
-		{
+		SearchException(String msg) {
 			super(msg);
 		}
 	}

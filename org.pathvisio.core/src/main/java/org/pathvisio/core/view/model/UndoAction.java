@@ -60,7 +60,7 @@ public class UndoAction {
 		 * Engine.getCurrent().getActiveVPathway().setUndoManager(um);
 		 */
 		if (undoMgr != null) {
-			undoMgr.getEngine().replacePathway(originalState);
+			undoMgr.getEngine().replacePathwayModel(originalState);
 		}
 	}
 }

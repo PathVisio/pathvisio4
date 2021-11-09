@@ -36,7 +36,7 @@ import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 
 import org.pathvisio.core.ApplicationEvent;
-import org.pathvisio.core.debug.Logger;
+import org.pathvisio.debug.Logger;
 import org.pathvisio.core.preferences.GlobalPreference;
 import org.pathvisio.core.preferences.PreferenceManager;
 import org.pathvisio.gui.BackpageTextProvider.BackpageAttributes;
@@ -48,20 +48,16 @@ import org.pathvisio.gui.WrapLayout;
 /**
  * the mainPanel for the standalone (non-applet) version of PathVisio.
  */
-public class MainPanelStandalone extends MainPanel
-{
+public class MainPanelStandalone extends MainPanel {
 	protected JMenuBar menuBar;
 
 	private StandaloneActions standaloneActions = null;
 	private List<File> recent;
-	
-	public static GlobalPreference[] mostRecentArray = new GlobalPreference[] {
-    	GlobalPreference.MOST_RECENT_1, GlobalPreference.MOST_RECENT_2,
-    	GlobalPreference.MOST_RECENT_3, GlobalPreference.MOST_RECENT_4,
-    	GlobalPreference.MOST_RECENT_5, GlobalPreference.MOST_RECENT_6,
-    	GlobalPreference.MOST_RECENT_7, GlobalPreference.MOST_RECENT_8,
-    	GlobalPreference.MOST_RECENT_9, GlobalPreference.MOST_RECENT_10,
-    };
+
+	public static GlobalPreference[] mostRecentArray = new GlobalPreference[] { GlobalPreference.MOST_RECENT_1,
+			GlobalPreference.MOST_RECENT_2, GlobalPreference.MOST_RECENT_3, GlobalPreference.MOST_RECENT_4,
+			GlobalPreference.MOST_RECENT_5, GlobalPreference.MOST_RECENT_6, GlobalPreference.MOST_RECENT_7,
+			GlobalPreference.MOST_RECENT_8, GlobalPreference.MOST_RECENT_9, GlobalPreference.MOST_RECENT_10, };
 
 	@Override
 	protected void addMenuActions(JMenuBar mb) {
@@ -72,7 +68,7 @@ public class MainPanelStandalone extends MainPanel
 
 		recentPathwaysMenu = new JMenu("Open Recent");
 		initRecentPathwayList();
-		fileMenu.add (recentPathwaysMenu);
+		fileMenu.add(recentPathwaysMenu);
 		addToMenu(actions.standaloneSaveAction, fileMenu);
 		addToMenu(actions.standaloneSaveAsAction, fileMenu);
 		fileMenu.addSeparator();
@@ -81,7 +77,7 @@ public class MainPanelStandalone extends MainPanel
 		fileMenu.addSeparator();
 		addToMenu(standaloneActions.printAction, fileMenu);
 		addToMenu(actions.exitAction, fileMenu);
-		
+
 		JMenu editMenu = new JMenu("Edit");
 		addToMenu(actions.undoAction, editMenu);
 		addToMenu(actions.copyAction, editMenu);
@@ -91,28 +87,30 @@ public class MainPanelStandalone extends MainPanel
 		addToMenu(standaloneActions.preferencesAction, editMenu);
 
 		JMenu selectionMenu = new JMenu("Selection");
-		for(Action a : actions.layoutActions) addToMenu(a, selectionMenu);
+		for (Action a : actions.layoutActions)
+			addToMenu(a, selectionMenu);
 
-		editMenu.add (selectionMenu);
+		editMenu.add(selectionMenu);
 
 		JMenu dataMenu = new JMenu("Data");
-		addToMenu (standaloneActions.selectGeneDbAction, dataMenu);
-		addToMenu (standaloneActions.selectMetaboliteDbAction, dataMenu);
+		addToMenu(standaloneActions.selectGeneDbAction, dataMenu);
+		addToMenu(standaloneActions.selectMetaboliteDbAction, dataMenu);
 		/**
 		 * @author anwesha
 		 */
-		addToMenu (standaloneActions.selectInteractionDbAction, dataMenu);
+		addToMenu(standaloneActions.selectInteractionDbAction, dataMenu);
 
 		JMenu viewMenu = new JMenu("View");
 		JMenu zoomMenu = new JMenu("Zoom");
 		viewMenu.add(zoomMenu);
-		for(Action a : actions.zoomActions) addToMenu(a, zoomMenu);
+		for (Action a : actions.zoomActions)
+			addToMenu(a, zoomMenu);
 
-		JMenu pluginsMenu = new JMenu("Plugins");//new
+		JMenu pluginsMenu = new JMenu("Plugins");// new
 //		pluginsMenu.add(standaloneActions.pluginManagerAction);
 		pluginsMenu.add(standaloneActions.newPluginManagerAction);
 		pluginsMenu.add(standaloneActions.loadLocalBundlesAction);
-		
+
 		JMenu helpMenu = new JMenu("Help");
 		helpMenu.add(actions.aboutAction);
 		helpMenu.add(standaloneActions.helpAction);
@@ -121,14 +119,13 @@ public class MainPanelStandalone extends MainPanel
 		mb.add(editMenu);
 		mb.add(dataMenu);
 		mb.add(viewMenu);
-		mb.add(pluginsMenu);//new
+		mb.add(pluginsMenu);// new
 		mb.add(helpMenu);
 	}
 
 	private final PvDesktop desktop;
 
-	public MainPanelStandalone(PvDesktop desktop)
-	{
+	public MainPanelStandalone(PvDesktop desktop) {
 		super(desktop.getSwingEngine(), null);
 		this.desktop = desktop;
 
@@ -136,20 +133,19 @@ public class MainPanelStandalone extends MainPanel
 	}
 
 	@Override
-	public void createAndShowGUI()
-	{
+	public void createAndShowGUI() {
 		super.createAndShowGUI();
 
 		dpt = new DataPaneTextProvider();
-		
+
 		// data hook for showing basic annotation and expression data on the data panel
 		dpt.addDataHook(new BackpageAttributes(swingEngine.getGdbManager().getCurrentGdb()));
 		DataPane dataPane = new DataPane(dpt, swingEngine.getEngine());
 		dataPane.addHyperlinkListener(swingEngine);
-		sidebarTabbedPane.addTab( "Data", new JScrollPane(dataPane) );
-		
+		sidebarTabbedPane.addTab("Data", new JScrollPane(dataPane));
+
 		SearchPane searchPane = new SearchPane(swingEngine);
-		sidebarTabbedPane.addTab ("Search", searchPane);
+		sidebarTabbedPane.addTab("Search", searchPane);
 
 		String osName = System.getProperty("os.name").toLowerCase();
 		if (osName.startsWith("mac os x")) {
@@ -163,7 +159,7 @@ public class MainPanelStandalone extends MainPanel
 		switch (e.getType()) {
 		case PATHWAY_OPENED:
 		case PATHWAY_SAVE:
-			putInRecentPathwayList(swingEngine.getEngine().getActivePathway().getSourceFile());
+			putInRecentPathwayList(swingEngine.getEngine().getActivePathwayModel().getSourceFile());
 			refreshRecentPathwaysMenu();
 			break;
 		}
@@ -171,28 +167,22 @@ public class MainPanelStandalone extends MainPanel
 
 	JMenu recentPathwaysMenu;
 
-	private void refreshRecentPathwaysMenu()
-	{
+	private void refreshRecentPathwaysMenu() {
 		PreferenceManager prefs = PreferenceManager.getCurrent();
 
 		recentPathwaysMenu.removeAll();
 		int added = 0;
 		recentPathwaysMenu.setMnemonic(KeyEvent.VK_R);
-		for (int i = 0; i < 10; i++)
-		{
-			if (!prefs.get(mostRecentArray[i]).equals ("" + null))
-			{
+		for (int i = 0; i < 10; i++) {
+			if (!prefs.get(mostRecentArray[i]).equals("" + null)) {
 				final File file = prefs.getFile(mostRecentArray[i]);
 				JMenuItem menuItem = new JMenuItem(file.getName(), KeyEvent.VK_0 + i);
 				menuItem.setAccelerator(KeyStroke.getKeyStroke(menuItem.getMnemonic(), InputEvent.CTRL_DOWN_MASK));
 				menuItem.setToolTipText(file.getAbsolutePath());
-				menuItem.addActionListener(new ActionListener()
-				{
-					public void actionPerformed(ActionEvent e)
-					{
-						if (swingEngine.canDiscardPathway())
-						{
-							swingEngine.importPathway(file);
+				menuItem.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						if (swingEngine.canDiscardPathwayModel()) {
+							swingEngine.importPathwayModel(file);
 						}
 					}
 				});
@@ -204,8 +194,7 @@ public class MainPanelStandalone extends MainPanel
 	}
 
 	@Override
-	protected void addToolBarActions(final SwingEngine swingEngine, JToolBar tb)
-	{
+	protected void addToolBarActions(final SwingEngine swingEngine, JToolBar tb) {
 		tb.setLayout(new WrapLayout(1, 1));
 
 		addToToolbar(standaloneActions.newAction);
@@ -216,68 +205,65 @@ public class MainPanelStandalone extends MainPanel
 		addCommonToolbarActions(swingEngine, tb);
 	}
 
-	public void putInRecentPathwayList(File pwf)
-	{
+	public void putInRecentPathwayList(File pwf) {
 		PreferenceManager prefs = PreferenceManager.getCurrent();
-        recent.remove(pwf);
+		recent.remove(pwf);
 		recent.add(0, pwf);
-		if(recent.size() > 10) recent.remove(recent.size()-1);
+		if (recent.size() > 10)
+			recent.remove(recent.size() - 1);
 
-	    for (int i = 0; i < recent.size(); ++i)
-	    {
+		for (int i = 0; i < recent.size(); ++i) {
 
-	    	prefs.setFile(mostRecentArray[i], recent.get(i));
-	    }
+			prefs.setFile(mostRecentArray[i], recent.get(i));
+		}
 	}
 
-	public void initRecentPathwayList()
-	{
+	public void initRecentPathwayList() {
 		PreferenceManager prefs = PreferenceManager.getCurrent();
 		recent = new LinkedList<File>();
-		for (int i = 0; i < 10; ++i)
-		{
-			if (!prefs.get(mostRecentArray[i]).equals ("" + null))
-			{
+		for (int i = 0; i < 10; ++i) {
+			if (!prefs.get(mostRecentArray[i]).equals("" + null)) {
 				recent.add(prefs.getFile(mostRecentArray[i]));
 			}
 		}
 		refreshRecentPathwaysMenu();
 	}
 
-
 	/**
-	 * Initializes Mac event listeners via reflection so there is no compile-time dependencies on Apple classes.
-	 * Effectively performs the folowing:
+	 * Initializes Mac event listeners via reflection so there is no compile-time
+	 * dependencies on Apple classes. Effectively performs the folowing:
+	 * 
 	 * <pre>
-	 *   com.apple.eawt.Application app = Application.getApplication();
-	 *   app.addApplicationListener(new ApplicationAdapter() {
-	 *     public void handleAbout(ApplicationEvent e) {
-	 *       e.setHandled(true);
-	 *       new HelpAboutAction().actionPerformed(null);
-	 *     }
-	 *     public void handleQuit(ApplicationEvent e) {
-	 *       e.setHandled(false);
-	 *       new ExitGateAction().actionPerformed(null);
-	 *     }
-	 *     public void handlePreferences(ApplicationEvent e) {
-	 *       e.setHandled(true);
-	 *       optionsDialog.showDialog();
-	 *       optionsDialog.dispose();
-	 *     }
-	 *   });
+	 * com.apple.eawt.Application app = Application.getApplication();
+	 * app.addApplicationListener(new ApplicationAdapter() {
+	 * 	public void handleAbout(ApplicationEvent e) {
+	 * 		e.setHandled(true);
+	 * 		new HelpAboutAction().actionPerformed(null);
+	 * 	}
+	 * 
+	 * 	public void handleQuit(ApplicationEvent e) {
+	 * 		e.setHandled(false);
+	 * 		new ExitGateAction().actionPerformed(null);
+	 * 	}
+	 * 
+	 * 	public void handlePreferences(ApplicationEvent e) {
+	 * 		e.setHandled(true);
+	 * 		optionsDialog.showDialog();
+	 * 		optionsDialog.dispose();
+	 * 	}
+	 * });
 	 *
-	 *   app.setEnabledPreferencesMenu(true);
+	 * app.setEnabledPreferencesMenu(true);
 	 * </pre>
 	 */
 	protected void initMacListeners() {
 		try {
 			// load the Apple classes
-			final Class<?> eawtApplicationClass =
-					getClass().getClassLoader().loadClass("com.apple.eawt.Application");
-			final Class<?> eawtApplicationListenerInterface =
-					getClass().getClassLoader().loadClass("com.apple.eawt.ApplicationListener");
-			final Class<?> eawtApplicationEventClass =
-					getClass().getClassLoader().loadClass("com.apple.eawt.ApplicationEvent");
+			final Class<?> eawtApplicationClass = getClass().getClassLoader().loadClass("com.apple.eawt.Application");
+			final Class<?> eawtApplicationListenerInterface = getClass().getClassLoader()
+					.loadClass("com.apple.eawt.ApplicationListener");
+			final Class<?> eawtApplicationEventClass = getClass().getClassLoader()
+					.loadClass("com.apple.eawt.ApplicationEvent");
 
 			// method used in the InvocationHandler
 			final Method appEventSetHandledMethod = eawtApplicationEventClass.getMethod("setHandled", boolean.class);
@@ -300,11 +286,12 @@ public class MainPanelStandalone extends MainPanel
 					} else if ("handleOpenFile".equals(method.getName())) {
 						String filename = null;
 						try {
-							Method getFilenameMethod = appEvent.getClass().getDeclaredMethod("getFilename", (Class<?>[]) null);
+							Method getFilenameMethod = appEvent.getClass().getDeclaredMethod("getFilename",
+									(Class<?>[]) null);
 							filename = (String) getFilenameMethod.invoke(appEvent, (Object[]) null);
 							Logger.log.info("Opening filename: " + filename);
-							if (swingEngine.canDiscardPathway()) {
-								swingEngine.openPathway(new File(filename));
+							if (swingEngine.canDiscardPathwayModel()) {
+								swingEngine.openPathwayModel(new File(filename));
 							}
 						} catch (Exception ex) {
 							Logger.log.error("Error opening " + filename, ex);
@@ -319,7 +306,7 @@ public class MainPanelStandalone extends MainPanel
 
 			// Create an ApplicationListener proxy instance
 			Object applicationListenerObject = Proxy.newProxyInstance(getClass().getClassLoader(),
-					new Class<?>[]{ eawtApplicationListenerInterface }, handler);
+					new Class<?>[] { eawtApplicationListenerInterface }, handler);
 
 			// get hold of the Application object
 			Method getApplicationMethod = eawtApplicationClass.getMethod("getApplication");

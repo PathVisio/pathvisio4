@@ -72,7 +72,7 @@ public class Test extends TestCase {
 
 		for (VElement e : vPwy.getDrawingObjects()) {
 			if (e instanceof VPathwayObject) {
-				PathwayElement pe = ((VPathwayObject) e).getPathwayElement();
+				PathwayElement pe = ((VPathwayObject) e).getPathwayObject();
 				if (pe == eltDn) {
 					vDn = (VPathwayObject) e;
 				} else if (pe == eltSh) {

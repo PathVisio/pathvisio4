@@ -28,7 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.border.EmptyBorder;
 
-import org.pathvisio.core.debug.Logger;
+import org.pathvisio.debug.Logger;
 
 /**
  * This class implements a basic wizard dialog, where the programmer can
