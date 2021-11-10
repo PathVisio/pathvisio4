@@ -31,9 +31,8 @@ import org.pathvisio.model.LineElement.Anchor;
 import org.pathvisio.model.LineElement.LinePoint;
 import org.pathvisio.model.PathwayObject;
 import org.pathvisio.core.view.Adjustable;
-import org.pathvisio.core.view.model.Handle.Freedom;
-import org.pathvisio.core.view.shape.AnchorShape;
-import org.pathvisio.core.view.shape.ShapeRegistry;
+import org.pathvisio.model.shape.AnchorShape;
+import org.pathvisio.model.shape.ShapeRegistry;
 
 /**
  * VAnchor is the view representation of {@link Anchor}.
@@ -44,7 +43,7 @@ import org.pathvisio.core.view.shape.ShapeRegistry;
  * @author unknown, finterly
  */
 public class VAnchor extends VElement implements VLinkableTo, Adjustable {
-	
+
 	private Anchor mAnchor;
 	private VLineElement line;
 	private Handle handle;
@@ -215,7 +214,7 @@ public class VAnchor extends VElement implements VLinkableTo, Adjustable {
 	 */
 	@Override
 	public int getZOrder() {
-		return getAnchor().getZOrder(); 
+		return getAnchor().getZOrder();
 	}
 
 }

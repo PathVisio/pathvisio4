@@ -45,9 +45,12 @@ import javax.swing.Timer;
 import org.pathvisio.core.Engine;
 import org.pathvisio.debug.Logger;
 import org.pathvisio.model.type.GroupType;
+import org.pathvisio.model.Annotation;
+import org.pathvisio.model.Citation;
 import org.pathvisio.model.DataNode;
 import org.pathvisio.model.DataNode.State;
 import org.pathvisio.model.Drawable;
+import org.pathvisio.model.Evidence;
 import org.pathvisio.model.GraphLink.LinkableTo;
 import org.pathvisio.model.GraphicalLine;
 import org.pathvisio.model.Group;
@@ -1681,24 +1684,6 @@ public class VPathwayModel implements PathwayModelListener {
 	}
 
 	/**
-	 * Makes a copy of all PathwayElements in current selection, and puts them in
-	 * the global clipboard.
-	 */
-	public void copyToClipboard() {
-		List<PathwayElement> result = new ArrayList<PathwayElement>();
-		for (VElement g : drawingObjects) {
-			// pathway element or pathway object? TODO
-			if (g.isSelected() && g instanceof VPathwayElement && !(g instanceof SelectionBox)) {
-				result.add(((VPathwayElement) g).getPathwayObject().copy());
-			}
-		}
-		if (result.size() > 0) {
-			if (parent != null)
-				parent.copyToClipboard(getPathwayModel(), result);
-		}
-	}
-
-	/**
 	 * Handles aligning layoutTypes ALIGN_*
 	 * 
 	 * @param alignType
@@ -2130,53 +2115,71 @@ public class VPathwayModel implements PathwayModelListener {
 		return selection.getSelection();
 	}
 
+	// ================================================================================
+	// Copy and Paste Methods
+	// ================================================================================
+	/**
+	 * Makes a copy of all PathwayElements in current selection, and puts them in
+	 * the global clipboard.
+	 */
+	public void copyToClipboard() {
+		List<PathwayElement> result = new ArrayList<PathwayElement>();
+		for (VElement g : drawingObjects) {
+			// pathway element or pathway object? TODO
+			if (g.isSelected() && g instanceof VPathwayElement && !(g instanceof SelectionBox)) {
+				result.add(((VPathwayElement) g).getPathwayObject().copy());
+			}
+		}
+		if (result.size() > 0) {
+			if (parent != null)
+				parent.copyToClipboard(getPathwayModel(), result);
+		}
+	}
 
-	public void paste(List<PathwayObject> elements) {
+	/**
+	 * @param elements
+	 */
+	public void paste(List<PathwayElement> elements) {
 		paste(elements, 0, 0);
 	}
 
-	public void paste(List<PathwayObject> elements, double xShift, double yShift) {
+	/**
+	 * @param elements
+	 * @param xShift
+	 * @param yShift
+	 */
+	public void paste(List<PathwayElement> elements, double xShift, double yShift) {
 		undoManager.newAction("Paste");
 		clearSelection();
 
-		Map<String, String> idmap = new HashMap<String, String>();
-		Set<String> newids = new HashSet<String>();
+		List<Annotation> annotations = new ArrayList<Annotation>();
+		List<Citation> citations = new ArrayList<Citation>();
+		List<Evidence> evidences = new ArrayList<Evidence>();
 
-		// Step 1: generate new unique ids for copied items
-		generateNewIds(elements, idmap, newids);
-
-		// Step 2: do the actual copying
-		for (PathwayObject o : elements) {
+		// Copy pathway objects of given list
+		for (PathwayElement o : elements) {
 			// if pathway, skip because it should be unique
 			if (o.getClass() == Pathway.class) {
 				continue;
 			}
-
-			if (o.getObjectType() == ObjectType.BIOPAX) {
-				// Merge the copied biopax elements with existing
-				data.getBiopax().mergeBiopax((BiopaxElement) o);
-				continue;
+			if (o instanceof PathwayElement) {
+				// copy annotations, citations, evidences...? TODO 
 			}
-
 			lastAdded = null;
 
-			// if line pathway element
+			// shift location of pathway element for pasting? TODO 
 			if (o instanceof LineElement) {
 				for (LinePoint mp : ((LineElement) o).getLinePoints()) {
 					mp.setX(mp.getX() + xShift);
 					mp.setY(mp.getY() + yShift);
 				}
-				// if shaped pathway element
 			} else if (o instanceof ShapedElement) {
 				((ShapedElement) o).setLeft(((ShapedElement) o).getLeft() + xShift);
 				((ShapedElement) o).setTop(((ShapedElement) o).getTop() + yShift);
-			} // else
+			} 
 
 			// make another copy to preserve clipboard contents for next paste
-			PathwayElement p = ((PathwayElement) o).copy();
-
-			// use the idMap to set consistent new id's
-			replaceIdsAndRefs(p, idmap);
+			PathwayElement p = o.copy();
 
 			data.add(p); // causes lastAdded to be set
 			lastAdded.select();
@@ -2185,7 +2188,7 @@ public class VPathwayModel implements PathwayModelListener {
 			}
 		}
 
-		// Step 3: refresh connector shapes
+		// Refresh connector shapes
 		for (PathwayObject o : elements) {
 			if (o instanceof LineElement) {
 				((LineElement) o).getConnectorShape().recalculateShape(((LineElement) o));
@@ -2195,6 +2198,9 @@ public class VPathwayModel implements PathwayModelListener {
 		redraw();
 	}
 
+	/**
+	 * 
+	 */
 	public void pasteFromClipboard() {
 		if (isEditMode()) { // Only paste in edit mode
 			if (parent != null)
@@ -2203,7 +2209,7 @@ public class VPathwayModel implements PathwayModelListener {
 	}
 
 	/**
-	 * paste from clip board at the current cursor position
+	 * Paste from clip board at the current cursor position.
 	 */
 	public void positionPasteFromClipboard(Point cursorPosition) {
 		if (isEditMode()) {

@@ -43,8 +43,8 @@ import org.pathvisio.event.PathwayObjectEvent;
 import org.pathvisio.core.preferences.GlobalPreference;
 import org.pathvisio.core.preferences.PreferenceManager;
 import org.pathvisio.core.view.Adjustable;
-import org.pathvisio.core.view.shape.ArrowShape;
-import org.pathvisio.core.view.shape.ShapeRegistry;
+import org.pathvisio.model.shape.ArrowShape;
+import org.pathvisio.model.shape.ShapeRegistry;
 
 /**
  * This class represents a Line {@link LineElement} on the pathway, or rather a

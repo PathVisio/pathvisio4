@@ -45,7 +45,6 @@ import org.pathvisio.core.view.model.VPathwayModel;
 import org.pathvisio.core.view.model.VPathwayObject;
 import org.pathvisio.core.view.model.VShapedElement;
 import org.pathvisio.core.view.model.VPathwayModelEvent.VPathwayEventType;
-import org.pathvisio.core.view.shape.MIMShapes;
 
 /**
  * Utility that takes a set of graphId/Color pairs and exports a pathway image
@@ -79,7 +78,7 @@ public class ColorExporter implements VPathwayModelListener {
 		if (e.getType() == VPathwayEventType.ELEMENT_DRAWN) {
 			VElement vpwe = e.getAffectedElement();
 			if (vpwe instanceof VPathwayObject) {
-				PathwayElement pwe = ((VPathwayObject) vpwe).getPathwayObject();
+				PathwayObject pwe = ((VPathwayObject) vpwe).getPathwayObject();
 				List<Color> elmColors = colors.get(pwe);
 				if (elmColors != null && elmColors.size() > 0) {
 					Logger.log.info("Coloring " + pwe + " with " + elmColors);

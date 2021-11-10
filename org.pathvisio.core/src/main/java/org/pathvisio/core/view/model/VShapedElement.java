@@ -43,7 +43,7 @@ import org.pathvisio.core.preferences.PreferenceManager;
 import org.pathvisio.core.view.Adjustable;
 import org.pathvisio.core.view.model.Handle.Freedom;
 import org.pathvisio.core.view.model.LinAlg.Point;
-import org.pathvisio.core.view.shape.ShapeRegistry;
+import org.pathvisio.model.shape.ShapeRegistry;
 
 /**
  * This class represents the view of {@link ShapedElement} pathway elements:

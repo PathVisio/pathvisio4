@@ -34,7 +34,6 @@ import org.pathvisio.event.PathwayModelImporter;
 import org.pathvisio.core.model.RasterImageExporter;
 import org.pathvisio.core.preferences.GlobalPreference;
 import org.pathvisio.core.preferences.PreferenceManager;
-import org.pathvisio.core.view.shape.MIMShapes;
 
 /**
  * Converter.java
@@ -99,7 +98,7 @@ public class Converter {
 
 		// Enable MiM support (for export to graphics formats)
 		PreferenceManager.getCurrent().setBoolean(GlobalPreference.MIM_SUPPORT, true);
-		MIMShapes.registerShapes();
+//		MIMShapes.registerShapes(); TODO 
 
 		File inputFile = null;
 		File outputFile = null;

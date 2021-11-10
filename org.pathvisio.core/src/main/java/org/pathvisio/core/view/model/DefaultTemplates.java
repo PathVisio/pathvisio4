@@ -50,7 +50,6 @@ import org.pathvisio.core.preferences.GlobalPreference;
 import org.pathvisio.core.preferences.PreferenceManager;
 import org.pathvisio.core.util.Resources;
 import org.pathvisio.core.view.Template;
-import org.pathvisio.core.view.shape.MIMShapes;
 
 /**
  * Contains a set of templates, patterns of PathwayElements that can be added to
@@ -495,7 +494,7 @@ public abstract class DefaultTemplates {
 		@Override
 		public PathwayElement[] addElements(PathwayModel p, double mx, double my) {
 			super.addElements(p, mx, my);
-			lastLine.setEndLineType(MIMShapes.MIM_INHIBITION);
+			lastLine.setEndLineType(ArrowHeadType.INHIBITION);
 			return new PathwayElement[] { lastLine, lastStartNode, lastEndNode };
 		}
 
@@ -513,7 +512,7 @@ public abstract class DefaultTemplates {
 		@Override
 		public PathwayElement[] addElements(PathwayModel p, double mx, double my) {
 			super.addElements(p, mx, my);
-			lastLine.setEndLineType(MIMShapes.MIM_STIMULATION);
+			lastLine.setEndLineType(ArrowHeadType.STIMULATION);
 			return new PathwayElement[] { lastLine, lastStartNode, lastEndNode };
 		}
 
@@ -539,7 +538,7 @@ public abstract class DefaultTemplates {
 			lastEndNode.setType(DataNodeType.PROTEIN);
 			lastStartNode.setTextLabel("Protein");
 			lastEndNode.setTextLabel("P-Protein");
-			lastLine.getEndLinePoint().setArrowHead(MIMShapes.MIM_MODIFICATION);
+			lastLine.getEndLinePoint().setArrowHead(ArrowHeadType.CONVERSION);
 			// instantiates and adds a state to data node and pathway model
 			State e = lastEndNode.addState("P", StateType.PROTEIN_MODIFICATION, 1.0, 1.0);
 			// set graphics
@@ -585,7 +584,7 @@ public abstract class DefaultTemplates {
 			lastEndNode.setShapeType(ShapeType.ROUNDED_RECTANGLE);
 			lastEndNode.setTextLabel("Product");
 
-			lastLine.setEndLineType(MIMShapes.MIM_CONVERSION);
+			lastLine.setEndLineType(ArrowHeadType.CONVERSION);
 			Anchor anchor = lastLine.addAnchor(0.5, AnchorShapeType.SQUARE);
 
 			InteractionTemplate lnt = new InteractionTemplate("line", LineStyleType.SOLID, ArrowHeadType.UNDIRECTED,
@@ -594,7 +593,7 @@ public abstract class DefaultTemplates {
 
 			lastCatLine.getStartLinePoint().linkTo(lastCatalyst, 0, 1);
 			lastCatLine.getEndLinePoint().linkTo(anchor, 0, 0);
-			lastCatLine.setEndLineType(MIMShapes.MIM_CATALYSIS);
+			lastCatLine.setEndLineType(ArrowHeadType.CATALYSIS);
 
 			return new PathwayElement[] { lastStartNode, lastEndNode, lastLine, lastCatalyst };
 		}
@@ -638,7 +637,7 @@ public abstract class DefaultTemplates {
 			lastEndNode.setTextColor(COLOR_METABOLITE);
 			lastEndNode.setShapeType(ShapeType.ROUNDED_RECTANGLE);
 			lastEndNode.setTextLabel("Metabolite 2");
-			lastLine.getEndLinePoint().setArrowHead(MIMShapes.MIM_CONVERSION);
+			lastLine.getEndLinePoint().setArrowHead(ArrowHeadType.CONVERSION);
 
 			Anchor anchor = lastLine.addAnchor(0.5, AnchorShapeType.SQUARE);
 
@@ -648,7 +647,7 @@ public abstract class DefaultTemplates {
 
 			lastCatLine.getStartLinePoint().linkTo(lastCatalyst, 0, 1);
 			lastCatLine.getEndLinePoint().linkTo(anchor, 0, 0);
-			lastCatLine.getEndLinePoint().setArrowHead(MIMShapes.MIM_CATALYSIS);
+			lastCatLine.getEndLinePoint().setArrowHead(ArrowHeadType.CATALYSIS);
 
 			InteractionTemplate rev = new InteractionTemplate("line", LineStyleType.SOLID, ArrowHeadType.UNDIRECTED,
 					ArrowHeadType.UNDIRECTED, ConnectorType.STRAIGHT);
@@ -656,7 +655,7 @@ public abstract class DefaultTemplates {
 
 			lastReverseLine.getStartLinePoint().linkTo(lastEndNode, -1, 0.5);
 			lastReverseLine.getEndLinePoint().linkTo(lastStartNode, 1, 0.5);
-			lastReverseLine.getEndLinePoint().setArrowHead(MIMShapes.MIM_CONVERSION);
+			lastReverseLine.getEndLinePoint().setArrowHead(ArrowHeadType.CONVERSION);
 
 			Anchor anchor2 = lastReverseLine.addAnchor(0.5, AnchorShapeType.SQUARE);
 
@@ -666,7 +665,7 @@ public abstract class DefaultTemplates {
 
 			lastCatLine2.getStartLinePoint().linkTo(lastCatalyst2, 0, -1);
 			lastCatLine2.getEndLinePoint().linkTo(anchor2, 0, 0);
-			lastCatLine2.getEndLinePoint().setArrowHead(MIMShapes.MIM_CATALYSIS);
+			lastCatLine2.getEndLinePoint().setArrowHead(ArrowHeadType.CATALYSIS);
 			// These elements are selected in PV, so users can move them around.
 			return new PathwayElement[] { lastStartNode, lastEndNode, lastLine, lastCatalyst, lastCatalyst2 };
 		}
