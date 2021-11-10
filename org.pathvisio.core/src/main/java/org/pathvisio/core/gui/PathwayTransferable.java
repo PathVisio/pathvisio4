@@ -41,6 +41,7 @@ import org.pathvisio.model.PathwayModel;
 import org.pathvisio.model.PathwayObject;
 import org.pathvisio.model.Pathway;
 import org.pathvisio.model.PathwayElement;
+import org.pathvisio.model.Citation;
 import org.pathvisio.model.Groupable;
 import org.pathvisio.model.LineElement;
 import org.pathvisio.model.LineElement.Anchor;
@@ -110,11 +111,12 @@ public class PathwayTransferable implements Transferable {
 		}
 
 		// Create dummy parent so we can copy over
-		// the referenced biopax elements
-		PathwayElement biopax = pathway.getBiopax();
+		// the referenced biopax elements?
+		// How to copy over references? 
 		PathwayModel dummyParent = new PathwayModel();
-		if (biopax != null) {
-			dummyParent.add(biopax.copy());
+		for (Citation citation: pathway.getCitations()) {
+			Citation newCitation = citation.copy();
+			dummyParent.addCitation(newCitation);
 		}
 
 		for (PathwayElement e : elements) {

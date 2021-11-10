@@ -875,7 +875,8 @@ public class VPathwayModel implements PathwayModelListener {
 				mouseDownViewMode(e);
 			}
 			if (pressedObject != null) {
-				fireVPathwayEvent(new VPathwayModelEvent(this, pressedObject, e, VPathwayEventType.ELEMENT_CLICKED_DOWN));
+				fireVPathwayEvent(
+						new VPathwayModelEvent(this, pressedObject, e, VPathwayEventType.ELEMENT_CLICKED_DOWN));
 			}
 		}
 	}
@@ -1607,7 +1608,8 @@ public class VPathwayModel implements PathwayModelListener {
 			VPathwayObject deleted = getPathwayElementView(e.getAffectedData());
 			if (deleted != null) {
 				if (deleted.getPathwayObject() instanceof LineElement) {
-					removeRefFromConnectingAnchors(((LineElement) deleted.getPathwayObject()).getStartLinePoint().getElementRef(),
+					removeRefFromConnectingAnchors(
+							((LineElement) deleted.getPathwayObject()).getStartLinePoint().getElementRef(),
 							((LineElement) deleted.getPathwayObject()).getEndLinePoint().getElementRef());
 				}
 				deleted.markDirty();
@@ -1685,7 +1687,7 @@ public class VPathwayModel implements PathwayModelListener {
 	public void copyToClipboard() {
 		List<PathwayElement> result = new ArrayList<PathwayElement>();
 		for (VElement g : drawingObjects) {
-			// pathway element or pathway object? TODO 
+			// pathway element or pathway object? TODO
 			if (g.isSelected() && g instanceof VPathwayElement && !(g instanceof SelectionBox)) {
 				result.add(((VPathwayElement) g).getPathwayObject().copy());
 			}
@@ -2112,8 +2114,7 @@ public class VPathwayModel implements PathwayModelListener {
 	public List<VGroupable> getSelectedNonGroupGraphics() {
 		List<VGroupable> result = new ArrayList<VGroupable>();
 		for (VElement g : drawingObjects) {
-			if (g.isSelected() && g instanceof VGroupable && !(g instanceof SelectionBox)
-					&& !((g instanceof VGroup))) {
+			if (g.isSelected() && g instanceof VGroupable && !(g instanceof SelectionBox) && !((g instanceof VGroup))) {
 				result.add((VGroupable) g);
 			}
 		}
@@ -2129,112 +2130,9 @@ public class VPathwayModel implements PathwayModelListener {
 		return selection.getSelection();
 	}
 
-	private void generatePasteId(String oldId, Set<String> idset, Map<String, String> idmap, Set<String> newids) {
-		if (oldId != null) {
-			String x;
-			do {
-				/*
-				 * generate a unique id. at the same time, check that it is not equal to one of
-				 * the unique ids that we generated since the start of this method
-				 */
-				x = data.getUniqueId(idset);
-			} while (newids.contains(x));
-			newids.add(x); // make sure we don't generate this one
-			// again
-
-			idmap.put(oldId, x);
-		}
-	}
-
-	/**
-	 * Generate new id's for a bunch of elements to be pasted, but do not actually
-	 * set them. Instead, store these new ids in a map, so that we can later update
-	 * both the graphIds and graphReferences, as well as groupIds and
-	 * groupReferences.
-	 *
-	 * idMap and newIds should be an empty map / set. It will be filled by this
-	 * method.
-	 */
-	private void generateNewIds(List<PathwayObject> elements, Map<String, String> idmap, Set<String> newids) {
-		for (PathwayObject o : elements) {
-			String id = o.getElementId();
-//			String groupId = o.getGroupId(); TODO not needed?
-			generatePasteId(id, data.getElementIds(), idmap, newids);
-//			generatePasteId(groupId, data.getGroupIds(), idmap, newids); TODO 
-			// For a line, also process the point ids
-			if (o instanceof LineElement) {
-				for (LinePoint mp : ((LineElement) o).getLinePoints())
-					generatePasteId(mp.getElementId(), data.getElementIds(), idmap, newids);
-				for (Anchor ma : ((LineElement) o).getAnchors())
-					generatePasteId(ma.getElementId(), data.getElementIds(), idmap, newids);
-			}
-		}
-	}
 
 	public void paste(List<PathwayObject> elements) {
 		paste(elements, 0, 0);
-	}
-
-	/**
-	 * Updates all id's and references of a single PathwayElement, using the
-	 * provided idMap.
-	 *
-	 * This will - replace elementId of elements, anchors and points - replace
-	 * elementRefs if it's in the map, otherwise set to null - replace groupRefs if
-	 * it's in the map, otherwise set to null
-	 */
-	private void replaceIdsAndRefs(PathwayElement p, Map<String, String> idmap) {
-		// set new unique id
-		if (p.getElementId() != null) {
-			p.setElementId(idmap.get(p.getElementId()));
-		}
-		if (p instanceof LineElement) {
-			for (LinePoint mp : ((LineElement) p).getLinePoints()) {
-				mp.setElementId(idmap.get(mp.getElementId()));
-			}
-			for (Anchor ma : ((LineElement) p).getAnchors()) {
-				ma.setElementId(idmap.get(ma.getElementId()));
-			}
-			// update elementRef
-			LinkableTo y = ((LineElement) p).getStartElementRef();
-			if (y != null) {
-				if (idmap.containsKey(y)) {
-					((LineElement) p).getStartElementRef().setElementId(idmap.get(y));
-				} else {
-					((LineElement) p).getStartElementRef().setElementId(null);
-				}
-			}
-			y = ((LineElement) p).getEndElementRef();
-			if (y != null) {
-				if (idmap.containsKey(y)) {
-					((LineElement) p).getEndElementRef().setElementId(idmap.get(y));
-				} else {
-					((LineElement) p).getEndElementRef().setElementId(null);
-				}
-			}
-		}
-//		// set new group id TODO not needed? 
-//		String gid = p.getGroupId();
-//		if (gid != null) {
-//			p.setGroupId(idmap.get(gid));
-//		}
-		// update graphref
-		y = p.getGraphRef();
-		if (y != null) {
-			if (idmap.containsKey(y)) {
-				p.setGraphRef(idmap.get(y));
-			}
-			// If the ref points to an item outside the selection, keep using original!
-		}
-		// update groupref
-		String groupRef = p.getGroupRef();
-		if (groupRef != null) {
-			if (idmap.containsKey(groupRef)) {
-				p.setGroupRef(idmap.get(groupRef));
-			} else {
-				p.setGroupRef(null);
-			}
-		}
 	}
 
 	public void paste(List<PathwayObject> elements, double xShift, double yShift) {
