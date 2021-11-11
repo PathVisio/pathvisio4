@@ -47,6 +47,7 @@ import org.pathvisio.debug.Logger;
 import org.pathvisio.model.type.GroupType;
 import org.pathvisio.model.Annotation;
 import org.pathvisio.model.Citation;
+import org.pathvisio.model.CopyElement;
 import org.pathvisio.model.DataNode;
 import org.pathvisio.model.DataNode.State;
 import org.pathvisio.model.Drawable;
@@ -2127,7 +2128,7 @@ public class VPathwayModel implements PathwayModelListener {
 		for (VElement g : drawingObjects) {
 			// pathway element or pathway object? TODO
 			if (g.isSelected() && g instanceof VPathwayElement && !(g instanceof SelectionBox)) {
-				result.add(((VPathwayElement) g).getPathwayObject().copy());
+				result.add(((VPathwayElement) g).getPathwayObject().copy().getNewElement());
 			}
 		}
 		if (result.size() > 0) {
@@ -2162,12 +2163,9 @@ public class VPathwayModel implements PathwayModelListener {
 			if (o.getClass() == Pathway.class) {
 				continue;
 			}
-			if (o instanceof PathwayElement) {
-				// copy annotations, citations, evidences...? TODO 
-			}
 			lastAdded = null;
 
-			// shift location of pathway element for pasting? TODO 
+			// shift location of pathway element for pasting? TODO
 			if (o instanceof LineElement) {
 				for (LinePoint mp : ((LineElement) o).getLinePoints()) {
 					mp.setX(mp.getX() + xShift);
@@ -2176,16 +2174,20 @@ public class VPathwayModel implements PathwayModelListener {
 			} else if (o instanceof ShapedElement) {
 				((ShapedElement) o).setLeft(((ShapedElement) o).getLeft() + xShift);
 				((ShapedElement) o).setTop(((ShapedElement) o).getTop() + yShift);
-			} 
+			}
 
 			// make another copy to preserve clipboard contents for next paste
-			PathwayElement p = o.copy();
+			CopyElement c = o.copy();
+			PathwayElement p = c.getNewElement();
 
 			data.add(p); // causes lastAdded to be set
+			c.loadReferences(); // load annotations/citations/evidences/ref
 			lastAdded.select();
 			if (!(lastAdded instanceof VGroup)) { // avoids "double selecting" grouped objects
 				selection.addToSelection(lastAdded);
 			}
+			//TODO handle LinePoints? Links?
+			//TODO handle Groups??? 
 		}
 
 		// Refresh connector shapes

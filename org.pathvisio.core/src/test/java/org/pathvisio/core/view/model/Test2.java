@@ -14,7 +14,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
-package org.pathvisio.core.model;
+package org.pathvisio.core.view.model;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,12 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import junit.framework.TestCase;
-
 import org.bridgedb.DataSource;
 import org.bridgedb.Xref;
 import org.pathvisio.core.data.XrefWithSymbol;
-import org.pathvisio.core.preferences.PreferenceManager;
 import org.pathvisio.core.view.model.DefaultTemplates;
 import org.pathvisio.event.PathwayModelEvent;
 import org.pathvisio.event.PathwayModelListener;
@@ -35,21 +32,20 @@ import org.pathvisio.event.PathwayObjectEvent;
 import org.pathvisio.event.PathwayObjectListener;
 import org.pathvisio.io.ConverterException;
 import org.pathvisio.model.DataNode;
+import org.pathvisio.model.GraphLink.LinkableTo;
 import org.pathvisio.model.Interaction;
-import org.pathvisio.model.Label;
-import org.pathvisio.model.Pathway;
-import org.pathvisio.model.PathwayElement;
 import org.pathvisio.model.PathwayModel;
-import org.pathvisio.model.PathwayObject;
 import org.pathvisio.model.type.DataNodeType;
+import org.pathvisio.core.preferences.PreferenceManager;
 import org.pathvisio.prop.StaticProperty;
-import org.pathvisio.util.Utils;
+
+import junit.framework.TestCase;
 
 /**
  * 
  * @author unknown
  */
-public class Test extends TestCase implements PathwayModelListener, PathwayObjectListener {
+public class Test2 extends TestCase implements PathwayModelListener, PathwayObjectListener {
 
 	PathwayModel data;
 	DataNode o;
@@ -63,7 +59,7 @@ public class Test extends TestCase implements PathwayModelListener, PathwayObjec
 		PreferenceManager.init();
 		data = new PathwayModel();
 		data.addListener(this);
-		o = new DataNode("", null);
+		o = new DataNode("", DataNodeType.UNDEFINED);
 		received = new ArrayList<PathwayModelEvent>();
 		receivedElementEvents = new ArrayList<PathwayObjectEvent>();
 		o.addListener(this);
@@ -199,23 +195,21 @@ public class Test extends TestCase implements PathwayModelListener, PathwayObjec
 	 *
 	 */
 	public void testRef() {
-		assertTrue("query non-existing list of ref", data.getReferringObjects("abcde").size() == 0);
+		assertTrue("query non-existing list of ref", data.getReferringLinkableFroms(o).size() == 0);
 
 		// create link
-		o.setElementId("1");
-		l.setStartElementRef("1");
-		assertTrue("reference created", data.getReferringObjects("1").contains(l.getStartLinePoint()));
+		l.setStartElementRef(o);
+		assertTrue("reference created", data.getReferringLinkableFroms(o).contains(l.getStartLinePoint()));
 
-		l.setStartElementRef("2");
-		assertTrue("reference removed", data.getReferringObjects("1").size() == 0);
+		l.setStartElementRef(null);
+		assertTrue("reference removed", data.getReferringLinkableFroms(o).size() == 0);
 
 		DataNode o2 = new DataNode("", DataNodeType.UNDEFINED);
 		data.add(o2);
 
 		// create link in opposite order
-		o.setElementId("2");
-		l.setEndElementRef("2");
-		assertTrue("reference created (2)", data.getReferringObjects("2").contains(l.getEndLinePoint()));
+		l.setEndElementRef(o);
+		assertTrue("reference created (2)", data.getReferringLinkableFroms(o).contains(l.getEndLinePoint()));
 	}
 
 	/**
@@ -226,9 +220,9 @@ public class Test extends TestCase implements PathwayModelListener, PathwayObjec
 				new Xref("3456", DataSource.getExistingByFullName("Affy")),
 				new Xref("1007_at", DataSource.getExistingByFullName("Entrez Gene")),
 				new Xref("3456", DataSource.getExistingByFullName("Entrez Gene")),
-				new Xref("3456", DataSource.getExistingByFullName("Entrez Gene")),
-				new XrefWithSymbol("3456", DataSource.getExistingByFullName("Entrez Gene"), "INSR"),
-				new XrefWithSymbol("3456", DataSource.getExistingByFullName("Entrez Gene"), "Insulin Receptor"), };
+				new Xref("3456", DataSource.getExistingByFullName("Entrez Gene")), 
+				new XrefWithSymbol("3456", DataSource.getExistingByFullName("Entrez Gene"), "INSR"), //TODO
+				new XrefWithSymbol("3456", DataSource.getExistingByFullName("Entrez Gene"), "Insulin Receptor"), }; //TODO
 
 		for (int i = 0; i < testList.length; ++i) {
 			Object refi = testList[i];
@@ -330,16 +324,16 @@ public class Test extends TestCase implements PathwayModelListener, PathwayObjec
 	public void testRef2() {
 		o.setElementId("1");
 
-		PathwayElement o2 = new DataNode("", DataNodeType.UNDEFINED);
+		LinkableTo o2 = new DataNode("", DataNodeType.UNDEFINED);
 		// note: parent not set yet!
-		o2.setElementId("3");
-		data.add(o2); // reference should now be created
+		data.add((PathwayObject) o2); // reference should now be created
 
-		assertNull("default endGraphRef is null", l.getEndGraphRef());
+		assertNull("default endGraphRef is null", l.getEndElementRef());
 
-		l.setEndGraphRef("3");
+		l.setEndElementRef(o2);
 
-		assertTrue("reference created through adding", data.getReferringObjects("3").contains(l.getEndLinePoint()));
+		assertTrue("reference created through adding",
+				data.getReferringLinkableFroms(o2).contains(l.getEndLinePoint()));
 	}
 
 	public void testXml2007() throws IOException, ConverterException {
@@ -528,28 +522,4 @@ public class Test extends TestCase implements PathwayModelListener, PathwayObjec
 		gmmlObjectModified(e);
 	}
 
-	/**
-	 * Dangling references, pointing to nothing, can occur in theory. These should
-	 * be removed.
-	 */
-	public void testDanglingRef() throws IOException, ConverterException {
-		// create a dangling ref
-		assertEquals(data.fixReferences(), 0);
-
-		l.setStartElementRef("dangle");
-
-		File temp = File.createTempFile("data.test", ".gpml");
-		temp.deleteOnExit();
-
-		assertEquals(data.fixReferences(), 1);
-		assertEquals(data.fixReferences(), 0);
-
-		// should still validate
-		try {
-			data.writeToXml(temp, true);
-		} catch (ConverterException e) {
-			e.printStackTrace();
-			fail("Dangling reference should have been removed");
-		}
-	}
 }

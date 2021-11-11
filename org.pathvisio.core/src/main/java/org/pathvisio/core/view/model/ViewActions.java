@@ -743,7 +743,7 @@ public class ViewActions implements VPathwayModelListener, SelectionListener {
 			int unGrouped = 0;
 			List<VDrawable> selection = vPathwayModel.getSelectedGraphics();
 			for (VDrawable g : selection) {
-				// TODO group only? 
+				// TODO group only?
 				if (((VGroupable) g).getPathwayObject().getGroupRef() == null) {
 					unGrouped++;
 				}

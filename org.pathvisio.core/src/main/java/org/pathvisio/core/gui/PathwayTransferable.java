@@ -25,12 +25,15 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.BidiMap;
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.jdom2.Document;
-import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.pathvisio.core.Engine;
@@ -40,11 +43,16 @@ import org.pathvisio.io.GpmlFormat;
 import org.pathvisio.model.PathwayModel;
 import org.pathvisio.model.PathwayObject;
 import org.pathvisio.model.Pathway;
+import org.pathvisio.model.Group;
 import org.pathvisio.model.PathwayElement;
-import org.pathvisio.model.Citation;
+import org.pathvisio.model.CopyElement;
+import org.pathvisio.model.DataNode;
+import org.pathvisio.model.GraphLink.LinkableTo;
 import org.pathvisio.model.Groupable;
 import org.pathvisio.model.LineElement;
 import org.pathvisio.model.LineElement.Anchor;
+import org.pathvisio.model.LineElement.LinePoint;
+import org.pathvisio.model.type.DataNodeType;
 
 /**
  * helps transfer Pathways or bits of pathway over the clipboard
@@ -110,43 +118,93 @@ public class PathwayTransferable implements Transferable {
 			}
 		}
 
-		// Create dummy parent so we can copy over
-		// the referenced biopax elements?
-		// How to copy over references? 
-		PathwayModel dummyParent = new PathwayModel();
-		for (Citation citation: pathway.getCitations()) {
-			Citation newCitation = citation.copy();
-			dummyParent.addCitation(newCitation);
-		}
+//		// Create dummy parent so we can copy over TODO 
+//		// the referenced biopax elements?
+//		// How to copy over references? 
+//		PathwayModel dummyParent = new PathwayModel();
+//		for (Citation citation: pathway.getCitations()) {
+//			Citation newCitation = citation.copy();
+//			dummyParent.addCitation(newCitation);
+//		}
+
+		BidiMap<PathwayElement, PathwayElement> copyMap = new DualHashBidiMap<>();
 
 		for (PathwayElement e : elements) {
 			// Check for valid graphRef (with respect to other copied elements)
-			PathwayElement enew = e.copy();
-			if (enew instanceof LineElement) {
-				if (!ids.contains(((LineElement) enew).getStartElementRef())) {
-					((LineElement) enew).setStartElementRef(null);
-				}
-				if (!ids.contains(((LineElement) enew).getEndElementRef())) {
-					((LineElement) enew).setEndElementRef(null);
-				}
+			CopyElement c = e.copy();
+			PathwayElement enew = c.getNewElement();
+			copyMap.put(enew, e);
+			// do not add group yet
+			if (e.getClass() == Group.class) {
+				continue;
 			}
 			pnew.add(enew);
-			if (biopax != null) {
-				if (e.getClass() == Pathway.class) {
-					dummyParent.getPathway().copyValuesFrom(e);
-				} else {
-					dummyParent.add(e);
-				}
+			c.loadReferences(); // load annotations/citations/evidences/ref
+		}
 
-				// Copy over biopax references
-				for (String ref : new ArrayList<String>(enew.getBiopaxRefs()))
-					enew.removeBiopaxRef(ref); // Rest original refs
-
-				BiopaxReferenceManager bpr = e.getBiopaxReferenceManager();
-				BiopaxReferenceManager bprnew = enew.getBiopaxReferenceManager();
-				for (BiopaxNode bpe : bpr.getReferences()) {
-					bprnew.addElementReference(BiopaxNode.fromXML((Element) bpe.getWrapped().clone()));
+		/*
+		 * Below we handle proper linking of LinePoints, adding of Groups the new
+		 * pathway, and Alias DataNode.
+		 */
+		for (PathwayElement enew : copyMap.keySet()) {
+			PathwayElement esrc = copyMap.get(enew);
+			/*
+			 * If both LineElement and the LinkableTo elementRef are copied. Link
+			 * corresponding LinePoint(s) to LinkableTo(s) in the new pathway.
+			 */
+			if (enew instanceof LineElement && esrc instanceof LineElement) {
+				// link Start elementRef if applicable
+				LinkableTo srcRef = ((LineElement) esrc).getStartElementRef();
+				if (srcRef != null) {
+					LinkableTo newRef = (LinkableTo) copyMap.getKey(srcRef);
+					if (newRef != null) {
+						((LineElement) enew).getStartLinePoint().linkTo(newRef);
+					}
 				}
+				// link End elementRef if applicable
+				srcRef = ((LineElement) esrc).getEndElementRef();
+				if (srcRef != null) {
+					LinkableTo newRef = (LinkableTo) copyMap.getKey(srcRef);
+					if (newRef != null) {
+						((LineElement) enew).getEndLinePoint().linkTo(newRef);
+					}
+				}
+			}
+
+			/*
+			 * If all pathway element members of a group were also copied, we may add a
+			 * Group(s) to the new pathway by setting groupRef.
+			 */
+			if (enew.getClass() == Group.class && esrc.getClass() == Group.class) {
+				List<Groupable> newMembers = new ArrayList<Groupable>();
+				boolean complete = true;
+				while (complete) {
+					for (Groupable srcMember : ((Group) esrc).getPathwayElements()) {
+						if (!copyMap.containsValue((PathwayElement) srcMember)) {
+							complete = false;
+							System.out.println(
+									"Group not copied, not all members of the group were selected to be copied.");
+						} else {
+							newMembers.add((Groupable) copyMap.getKey(srcMember));
+						}
+					}
+				}
+				if (complete) {
+					pnew.addGroup((Group) enew);
+					((Group) enew).addPathwayElements(newMembers);
+				}
+			}
+			/*
+			 * If Alias DataNode:
+			 * 
+			 * write warning if the Group aliasRef refers to is not present in the new
+			 * pathway. TODO...depends on if pasting to same pathway or not and if group is
+			 * also included...
+			 */
+			if (enew.getClass() == DataNode.class && ((DataNode) enew).getType() == DataNodeType.ALIAS) {
+				if (pnew.hasPathwayObject(((DataNode) enew).getAliasRef())) {
+				}
+				//TODO 
 			}
 		}
 
