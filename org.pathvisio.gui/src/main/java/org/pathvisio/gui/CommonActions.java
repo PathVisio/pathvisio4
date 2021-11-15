@@ -33,8 +33,6 @@ import org.pathvisio.core.ApplicationEvent;
 import org.pathvisio.core.Engine;
 import org.pathvisio.core.Globals;
 import org.pathvisio.core.Engine.ApplicationEventListener;
-import org.pathvisio.core.biopax.BiopaxReferenceManager;
-import org.pathvisio.core.biopax.PublicationXref;
 import org.pathvisio.model.type.ConnectorType;
 import org.pathvisio.model.type.DataNodeType;
 import org.pathvisio.model.type.LineStyleType;
@@ -45,6 +43,7 @@ import org.pathvisio.model.PathwayModel.StatusFlagListener;
 import org.pathvisio.model.PathwayObject;
 import org.pathvisio.model.Label;
 import org.pathvisio.model.PathwayElement;
+import org.pathvisio.model.PathwayElement.CitationRef;
 import org.pathvisio.model.type.ShapeType;
 import org.pathvisio.core.util.Resources;
 import org.pathvisio.core.view.LayoutType;
@@ -58,7 +57,6 @@ import org.pathvisio.core.view.model.VPathwayElement;
 import org.pathvisio.core.view.model.VPathwayModel;
 import org.pathvisio.core.view.model.VPathwayObject;
 import org.pathvisio.core.view.model.ViewActions;
-import org.pathvisio.core.view.shape.MIMShapes;
 import org.pathvisio.gui.dialogs.AboutDlg;
 import org.pathvisio.gui.dialogs.PathwayObjectDialog;
 import org.pathvisio.gui.dialogs.PublicationXRefDialog;
@@ -251,9 +249,10 @@ public class CommonActions implements ApplicationEventListener {
 				new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.TRIANGLE)),
 				new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.PENTAGON)),
 				new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.HEXAGON)),
-//				 new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.EDGE)),
+				new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.EDGE)),
 				new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.BRACE)),
-				new NewElementAction(e, new DefaultTemplates.ShapeTemplate(MIMShapes.MIM_DEGRADATION_SHAPE)), };
+//				new NewElementAction(e, new DefaultTemplates.ShapeTemplate(MIMShapes.MIM_DEGRADATION_SHAPE)), 
+		};
 
 		// actions for "Basic interactions" section
 		newInteractionActions = new Action[] {
@@ -280,17 +279,18 @@ public class CommonActions implements ApplicationEventListener {
 
 		// actions for "Receptor/ligand interactions" section
 		newRLInteractionActions = new Action[] {
-				new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("ligandround", LineStyleType.SOLID,
-								ArrowHeadType.UNDIRECTED, ArrowHeadType.LIGAND_ROUND, ConnectorType.STRAIGHT)),
-				new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("ligandsquare", LineStyleType.SOLID,
-								ArrowHeadType.UNDIRECTED, ArrowHeadType.LIGAND_SQUARE, ConnectorType.STRAIGHT)),
-				new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("receptorround", LineStyleType.SOLID,
-								ArrowHeadType.UNDIRECTED, ArrowHeadType.RECEPTOR_ROUND, ConnectorType.STRAIGHT)),
-				new NewElementAction(e, new DefaultTemplates.InteractionTemplate("receptorsquare", LineStyleType.SOLID,
-						ArrowHeadType.UNDIRECTED, ArrowHeadType.RECEPTOR_SQUARE, ConnectorType.STRAIGHT)), };
+//				new NewElementAction(e,
+//						new DefaultTemplates.InteractionTemplate("ligandround", LineStyleType.SOLID,
+//								ArrowHeadType.UNDIRECTED, ArrowHeadType.LIGAND_ROUND, ConnectorType.STRAIGHT)),
+//				new NewElementAction(e,
+//						new DefaultTemplates.InteractionTemplate("ligandsquare", LineStyleType.SOLID,
+//								ArrowHeadType.UNDIRECTED, ArrowHeadType.LIGAND_SQUARE, ConnectorType.STRAIGHT)),
+//				new NewElementAction(e,
+//						new DefaultTemplates.InteractionTemplate("receptorround", LineStyleType.SOLID,
+//								ArrowHeadType.UNDIRECTED, ArrowHeadType.RECEPTOR_ROUND, ConnectorType.STRAIGHT)),
+//				new NewElementAction(e, new DefaultTemplates.InteractionTemplate("receptorsquare", LineStyleType.SOLID,
+//						ArrowHeadType.UNDIRECTED, ArrowHeadType.RECEPTOR_SQUARE, ConnectorType.STRAIGHT)),
+		};
 
 		// actions for "Cellular Compartment" section
 		newCellularComponentActions = new Action[] {
@@ -322,48 +322,49 @@ public class CommonActions implements ApplicationEventListener {
 
 		// actions for "Molecular Interaction Map Interactions" section
 		newMIMInteractionActions = new Action[] {
-				new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("Necessary stimulation", LineStyleType.SOLID,
-								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_NECESSARY_STIMULATION, ConnectorType.STRAIGHT)),
-				new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("Binding", LineStyleType.SOLID,
-								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_BINDING, ConnectorType.STRAIGHT)),
-				new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("Conversion", LineStyleType.SOLID,
-								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_CONVERSION, ConnectorType.STRAIGHT)),
-				new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("Stimulation", LineStyleType.SOLID,
-								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_STIMULATION, ConnectorType.STRAIGHT)),
-				new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("Modification", LineStyleType.SOLID,
-								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_MODIFICATION, ConnectorType.STRAIGHT)),
-				new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("Catalysis", LineStyleType.SOLID,
-								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_CATALYSIS, ConnectorType.STRAIGHT)),
-				new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("Inhibition", LineStyleType.SOLID,
-								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_INHIBITION, ConnectorType.STRAIGHT)),
-				new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("Cleavage", LineStyleType.SOLID,
-								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_CLEAVAGE, ConnectorType.STRAIGHT)),
-				/*
-				 * new NewElementAction(e, new DefaultTemplates.LineTemplate( "Covalent bond",
-				 * LineStyle.SOLID, LineType.LINE, MIMShapes.MIM_COVALENT_BOND,
-				 * ConnectorType.STRAIGHT) ), new NewElementAction(e, new
-				 * DefaultTemplates.LineTemplate( "Branching left", LineStyle.SOLID,
-				 * LineType.LINE, MIMShapes.MIM_BRANCHING_LEFT, ConnectorType.STRAIGHT) ), new
-				 * NewElementAction(e, new DefaultTemplates.LineTemplate( "Branching right",
-				 * LineStyle.SOLID, LineType.LINE, MIMShapes.MIM_BRANCHING_RIGHT,
-				 * ConnectorType.STRAIGHT) ),
-				 */ new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("Transcription-translation", LineStyleType.SOLID,
-								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_TRANSLATION, ConnectorType.STRAIGHT)),
-				/*
-				 * new NewElementAction(e, new DefaultTemplates.LineTemplate( "Gap",
-				 * LineStyle.SOLID, LineType.LINE, MIMShapes.MIM_GAP, ConnectorType.STRAIGHT) ),
-				 */ new NewElementAction(e,
-						new DefaultTemplates.InteractionTemplate("Translocation", LineStyleType.SOLID,
-								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_TRANSLOCATION, ConnectorType.STRAIGHT)), };
+//				new NewElementAction(e,
+//						new DefaultTemplates.InteractionTemplate("Necessary stimulation", LineStyleType.SOLID,
+//								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_NECESSARY_STIMULATION, ConnectorType.STRAIGHT)),
+//				new NewElementAction(e,
+//						new DefaultTemplates.InteractionTemplate("Binding", LineStyleType.SOLID,
+//								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_BINDING, ConnectorType.STRAIGHT)),
+//				new NewElementAction(e,
+//						new DefaultTemplates.InteractionTemplate("Conversion", LineStyleType.SOLID,
+//								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_CONVERSION, ConnectorType.STRAIGHT)),
+//				new NewElementAction(e,
+//						new DefaultTemplates.InteractionTemplate("Stimulation", LineStyleType.SOLID,
+//								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_STIMULATION, ConnectorType.STRAIGHT)),
+//				new NewElementAction(e,
+//						new DefaultTemplates.InteractionTemplate("Modification", LineStyleType.SOLID,
+//								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_MODIFICATION, ConnectorType.STRAIGHT)),
+//				new NewElementAction(e,
+//						new DefaultTemplates.InteractionTemplate("Catalysis", LineStyleType.SOLID,
+//								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_CATALYSIS, ConnectorType.STRAIGHT)),
+//				new NewElementAction(e,
+//						new DefaultTemplates.InteractionTemplate("Inhibition", LineStyleType.SOLID,
+//								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_INHIBITION, ConnectorType.STRAIGHT)),
+//				new NewElementAction(e,
+//						new DefaultTemplates.InteractionTemplate("Cleavage", LineStyleType.SOLID,
+//								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_CLEAVAGE, ConnectorType.STRAIGHT)),
+//				/*
+//				 * new NewElementAction(e, new DefaultTemplates.LineTemplate( "Covalent bond",
+//				 * LineStyle.SOLID, LineType.LINE, MIMShapes.MIM_COVALENT_BOND,
+//				 * ConnectorType.STRAIGHT) ), new NewElementAction(e, new
+//				 * DefaultTemplates.LineTemplate( "Branching left", LineStyle.SOLID,
+//				 * LineType.LINE, MIMShapes.MIM_BRANCHING_LEFT, ConnectorType.STRAIGHT) ), new
+//				 * NewElementAction(e, new DefaultTemplates.LineTemplate( "Branching right",
+//				 * LineStyle.SOLID, LineType.LINE, MIMShapes.MIM_BRANCHING_RIGHT,
+//				 * ConnectorType.STRAIGHT) ),
+//				 */ new NewElementAction(e,
+//						new DefaultTemplates.InteractionTemplate("Transcription-translation", LineStyleType.SOLID,
+//								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_TRANSLATION, ConnectorType.STRAIGHT)),
+//				/*
+//				 * new NewElementAction(e, new DefaultTemplates.LineTemplate( "Gap",
+//				 * LineStyle.SOLID, LineType.LINE, MIMShapes.MIM_GAP, ConnectorType.STRAIGHT) ),
+//				 */ new NewElementAction(e,
+//						new DefaultTemplates.InteractionTemplate("Translocation", LineStyleType.SOLID,
+//								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_TRANSLOCATION, ConnectorType.STRAIGHT)), 
+				 };
 
 		saveAction = new SaveAction(se, true, false);
 		saveAsAction = new SaveAction(se, true, true);
@@ -698,13 +699,17 @@ public class CommonActions implements ApplicationEventListener {
 			if (element instanceof VPathwayElement) {
 
 				PathwayElement pwElm = ((VPathwayElement) element).getPathwayObject();
-				BiopaxReferenceManager m = pwElm.getBiopaxReferenceManager();
-				PublicationXref xref = new PublicationXref();
+				// TODO
+				CitationRef xref = pwElm.addCitation(null, null);
 
 				PublicationXRefDialog d = new PublicationXRefDialog(xref, null, parent);
 				d.setVisible(true);
 				if (d.getExitCode().equals(PublicationXRefDialog.OK)) {
-					m.addElementReference(xref);
+					// Citation was already added? TODO
+					// before: m.addElementReference(xref);
+				} else {
+					// remove invalid citation?
+					pwElm.removeCitationRef(xref);
 				}
 			}
 		}

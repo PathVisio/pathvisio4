@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.BorderFactory;
+import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -317,7 +318,7 @@ public class DataNodeDialog extends PathwayObjectDialog {
 		dsm.setPrimaryFilter(true);
 		dsm.setSpeciesFilter(swingEngine.getCurrentOrganism());
 		dbCombo = new PermissiveComboBox(dsm);
-		typeCombo = new PermissiveComboBox(DataNodeType.getValues());
+		typeCombo = new PermissiveComboBox((ComboBoxModel) DataNodeType.getValues()); //TODO 
 
 		GridBagConstraints c = new GridBagConstraints();
 		c.ipadx = c.ipady = 5;

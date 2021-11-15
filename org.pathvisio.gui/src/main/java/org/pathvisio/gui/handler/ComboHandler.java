@@ -28,7 +28,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
-import org.pathvisio.core.model.PropertyType;
+import org.pathvisio.prop.PropertyType;
 
 /**
  * This class knows how to handle an enumeration.  It renders and edits enumerated values using a combobox.

@@ -57,7 +57,7 @@ public class CommentsHandler extends AbstractCellEditor implements ContextSensit
 	//-- TypeHandler methods --//
 
 	public PropertyType getType() {
-		return StaticPropertyType.COMMENTS;
+		return StaticPropertyType.COMMENT;
 	}
 
 	public TableCellRenderer getLabelRenderer() {

@@ -44,6 +44,7 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.bridgedb.DataSource;
 import org.bridgedb.Xref;
 import org.pathvisio.core.data.PubMedQuery;
 import org.pathvisio.core.data.PubMedResult;
@@ -88,20 +89,25 @@ public class PublicationXRefDialog extends OkCancelDialog {
 			field.setText(text);
 	}
 
-	//TODO 
+	// TODO
 	protected void refresh() {
 		setText(input.getCitation().getXref().getId(), xrefIdentifier);
 		setText(input.getCitation().getXref().getDataSource().getCompactIdentifierPrefix(), xrefDataSource);
 	}
 
 	protected void okPressed() {
-		String identifier = xrefIdentifier.getText().trim();
-		String dataSource = xrefDataSource.getText();
-		Xref xref = XrefUtils.createXref(identifier, dataSource);
-		//TODO !!!
-		if (xref != null) {
-			input.getCitable().removeCitationRef(input);
-			input.getCitable().addCitation(xref, null);
+		// TODO is this correct????
+		String oldIdentifier = input.getCitation().getXref().getId();
+		DataSource oldDataSource = input.getCitation().getXref().getDataSource();
+		String newIdentifier = xrefIdentifier.getText().trim();
+		String newDataSourceStr = xrefDataSource.getText();
+		DataSource newDataSource = XrefUtils.getXrefDataSource(newDataSourceStr);
+		if (oldIdentifier != newIdentifier || oldDataSource != newDataSource) {
+			Xref xref = new Xref(newIdentifier, newDataSource);
+			if (xref != null) {
+				input.getCitable().removeCitationRef(input);
+				input.getCitable().addCitation(xref, null);
+			}
 		}
 		super.okPressed();
 	}
@@ -138,6 +144,7 @@ public class PublicationXRefDialog extends OkCancelDialog {
 		super.actionPerformed(e);
 	}
 
+	//TODO removed author stuff 
 	protected Component createDialogPane() {
 		JPanel contents = new JPanel();
 		contents.setLayout(new GridBagLayout());
@@ -151,20 +158,14 @@ public class PublicationXRefDialog extends OkCancelDialog {
 		doc.setDocumentFilter(new DocumentFilter() {
 			public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
 					throws BadLocationException {
-				string = replaceSeparators(string);
 				super.insertString(fb, offset, string, attr);
 				highlight((StyledDocument) fb.getDocument());
 			}
 
 			public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
 					throws BadLocationException {
-				text = replaceSeparators(text);
 				super.replace(fb, offset, length, text, attrs);
 				highlight((StyledDocument) fb.getDocument());
-			}
-
-			String replaceSeparators(String authors) {
-				return authors.replaceAll(PublicationXref.AUTHOR_SEP, PublicationXref.AUTHOR_SEP + "\n");
 			}
 
 			void highlight(StyledDocument doc) {
@@ -173,17 +174,10 @@ public class PublicationXRefDialog extends OkCancelDialog {
 				SimpleAttributeSet sep = new SimpleAttributeSet();
 				sep.addAttribute(StyleConstants.ColorConstants.Foreground, Color.RED);
 				sep.addAttribute(StyleConstants.CharacterConstants.Bold, Boolean.TRUE);
-
-				String text = authors.getText();
-				Pattern p = Pattern.compile(PublicationXref.AUTHOR_SEP);
-				Matcher m = p.matcher(text);
-				while (m.find()) {
-					doc.setCharacterAttributes(m.start(), 1, sep, true);
-				}
 			}
+			
 		});
 
-		authors = new JTextPane(doc);
 
 		JButton query = new JButton(QUERY);
 		query.addActionListener(this);

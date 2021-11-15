@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
+import javax.swing.ComboBoxModel;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -149,7 +150,7 @@ public class LineDialog extends PathwayObjectDialog implements ItemListener {
 		dsm.setPrimaryFilter(true);
 		dsm.setSpeciesFilter(swingEngine.getCurrentOrganism());
 		dbCombo = new PermissiveComboBox(dsm);
-		typeCombo = new PermissiveComboBox(ArrowHeadType.getValues());
+		typeCombo = new PermissiveComboBox((ComboBoxModel) ArrowHeadType.getValues()); //TODO 
 
 		GridBagConstraints c = new GridBagConstraints();
 		c.ipadx = c.ipady = 5;

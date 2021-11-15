@@ -32,12 +32,14 @@ import javax.swing.table.TableCellRenderer;
 import org.pathvisio.core.ApplicationEvent;
 import org.pathvisio.core.Engine.ApplicationEventListener;
 import org.pathvisio.model.PathwayElement;
+import org.pathvisio.model.PathwayObject;
 import org.pathvisio.event.PathwayObjectEvent;
 import org.pathvisio.event.PathwayObjectListener;
 import org.pathvisio.core.view.model.VPathwayModel;
 import org.pathvisio.core.view.model.VPathwayObject;
 import org.pathvisio.core.view.model.SelectionBox.SelectionEvent;
 import org.pathvisio.core.view.model.SelectionBox.SelectionListener;
+import org.pathvisio.core.view.model.VPathwayElement;
 import org.pathvisio.gui.SwingEngine;
 
 /**
@@ -108,6 +110,7 @@ public class PathwayTableModel extends AbstractTableModel implements SelectionLi
 		}
 	}
 
+	// TODO PathwayObject or Element? 
 	private void addInput(PathwayElement pwElm) {
 		stopEditing();
 		//System.err.println("Input added");
@@ -211,13 +214,14 @@ public class PathwayTableModel extends AbstractTableModel implements SelectionLi
 		switch(e.type) {
 		case SelectionEvent.OBJECT_ADDED:
 			//System.err.println("OBJECT ADDED");
-			if(e.affectedObject instanceof VPathwayObject)
-				addInput(((VPathwayObject)e.affectedObject).getPathwayObject());
+			//TODO PathwayElement or Object? 
+			if(e.affectedObject instanceof VPathwayElement)
+				addInput(((VPathwayElement)e.affectedObject).getPathwayObject());
 			break;
 		case SelectionEvent.OBJECT_REMOVED:
 			//System.err.println("OBJECT REMOVED");
-			if(e.affectedObject instanceof VPathwayObject)
-				removeInput(((VPathwayObject)e.affectedObject).getPathwayObject());
+			if(e.affectedObject instanceof VPathwayElement)
+				removeInput(((VPathwayElement)e.affectedObject).getPathwayObject());
 			break;
 		case SelectionEvent.SELECTION_CLEARED:
 			//System.err.println("CLEARED");

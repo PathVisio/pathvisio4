@@ -30,8 +30,8 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
-import org.pathvisio.core.model.PropertyType;
-import org.pathvisio.core.model.StaticPropertyType;
+import org.pathvisio.prop.PropertyType;
+import org.pathvisio.prop.StaticPropertyType;
 
 /**
  * This class knows how to handle colors.  It renders and edits color values.

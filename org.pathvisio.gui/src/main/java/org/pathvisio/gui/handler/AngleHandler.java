@@ -29,7 +29,7 @@ import org.pathvisio.prop.StaticPropertyType;
 public class AngleHandler extends NumberHandler {
 
 	public AngleHandler() {
-		super(StaticPropertyType.ANGLE, Double.class, NumberFormat.getNumberInstance());
+		super(StaticPropertyType.ROTATION, Double.class, NumberFormat.getNumberInstance());
 	}
 
 
