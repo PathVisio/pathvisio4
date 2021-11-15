@@ -66,6 +66,7 @@ import org.pathvisio.model.Shape;
 import org.pathvisio.model.ShapedElement;
 import org.pathvisio.model.PathwayElement;
 import org.pathvisio.model.LineElement.Anchor;
+import org.pathvisio.model.LineElement.GenericPoint;
 import org.pathvisio.model.LineElement.LinePoint;
 import org.pathvisio.model.Pathway;
 import org.pathvisio.event.PathwayModelEvent;
@@ -630,7 +631,8 @@ public class VPathwayModel implements PathwayModelListener {
 					// do nothing if another line linked to object
 				} else if (currentLinkAnchor.getLinkableTo() instanceof Anchor
 						&& currentLinkAnchor.getLinkableTo() == elementRef) {
-					currentLinkAnchor.getLinkableTo().setElementId(null); // TODO what is this for?
+					((Anchor) currentLinkAnchor.getLinkableTo()).getLineElement()
+							.removeAnchor(((Anchor) currentLinkAnchor.getLinkableTo()));// TODO removes anchor...
 				}
 				currentLinkAnchor.unhighlight();
 			}
@@ -1612,9 +1614,7 @@ public class VPathwayModel implements PathwayModelListener {
 			VPathwayObject deleted = getPathwayElementView(e.getAffectedData());
 			if (deleted != null) {
 				if (deleted.getPathwayObject() instanceof LineElement) {
-					removeRefFromConnectingAnchors(
-							((LineElement) deleted.getPathwayObject()).getStartLinePoint().getElementRef(),
-							((LineElement) deleted.getPathwayObject()).getEndLinePoint().getElementRef());
+					removeRefFromConnectingAnchors((LineElement) deleted.getPathwayObject());
 				}
 				deleted.markDirty();
 				removeDrawingObject(deleted, false);
@@ -1642,31 +1642,40 @@ public class VPathwayModel implements PathwayModelListener {
 	 * same anchor) if so - ignore graphId otherwise - loop through pathway and find
 	 * any lines with anchors that contain GraphIds for the deleted line and remove.
 	 * 
+	 * TODO What I think this method does it that it deletes an anchor if nothing is
+	 * pointing to it anymore...
+	 * 
 	 * @param linkableTo1
 	 * @param linkableTo2
 	 */
-	private void removeRefFromConnectingAnchors(LinkableTo linkableTo1, LinkableTo linkableTo2) {
-		if (linkableTo1 == null && (linkableTo2 == null)) {
+	private void removeRefFromConnectingAnchors(LineElement lineElement) {
+		LinkableTo startRef = lineElement.getStartElementRef();
+		LinkableTo endRef = lineElement.getEndElementRef();
+
+		// deleted line not linked to anything
+		if (startRef == null && endRef == null) {
 			return;
 		}
 		for (LineElement element : getPathwayModel().getLineElements()) {
 			for (LinePoint point : ((LineElement) element).getLinePoints()) {
 				if (point.getElementRef() == null) {
 					// skip point
-				} else if (linkableTo1 != null && point.getElementRef() == linkableTo1) {
-					linkableTo1 = null;
-				} else if (linkableTo2 != null && point.getElementRef() == linkableTo2) {
-					linkableTo2 = null;
+				} else if (startRef != null && point.getElementRef() == startRef) {
+					lineElement.getStartLinePoint().unlink();
+				} else if (endRef != null && point.getElementRef() == endRef) {
+					lineElement.getEndLinePoint().unlink();
 				}
 			}
 		}
-		if (linkableTo1 == null && (linkableTo2 == null)) {
+		// deleted line no longer linked to anything
+		if (lineElement.getStartElementRef() == null && lineElement.getEndElementRef() == null) {
 			return;
 		}
+		// removes anchor if the only line linked to it has been removed? TODO
 		for (LineElement element : getPathwayModel().getLineElements()) {
 			for (Anchor anchor : ((LineElement) element).getAnchors()) {
-				if (anchor != null && (anchor == linkableTo1 || anchor == linkableTo2)) {
-					anchor.setElementId(null); // TODO why set to null?
+				if (anchor != null && (anchor == startRef || anchor == endRef)) {
+					element.removeAnchor(anchor); // TODO removes anchor...weird
 				}
 			}
 		}
@@ -2186,8 +2195,8 @@ public class VPathwayModel implements PathwayModelListener {
 			if (!(lastAdded instanceof VGroup)) { // avoids "double selecting" grouped objects
 				selection.addToSelection(lastAdded);
 			}
-			//TODO handle LinePoints? Links?
-			//TODO handle Groups??? 
+			// TODO handle LinePoints? Links?
+			// TODO handle Groups???
 		}
 
 		// Refresh connector shapes

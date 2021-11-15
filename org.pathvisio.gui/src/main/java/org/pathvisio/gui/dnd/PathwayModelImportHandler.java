@@ -42,6 +42,7 @@ import org.pathvisio.model.PathwayModel;
 import org.pathvisio.model.PathwayObject;
 import org.pathvisio.model.Groupable;
 import org.pathvisio.model.Pathway;
+import org.pathvisio.model.PathwayElement;
 import org.pathvisio.gui.view.VPathwayModelSwing;
 
 public class PathwayModelImportHandler extends TransferHandler implements ClipboardOwner {
@@ -102,8 +103,9 @@ public class PathwayModelImportHandler extends TransferHandler implements Clipbo
 		PathwayModel pnew = new PathwayModel();
 		GpmlFormat.readFromXml(pnew, new StringReader(xml), true);
 
-		List<PathwayObject> elements = new ArrayList<PathwayObject>();
-		for (PathwayObject elm : pnew.getPathwayObjects()) {
+		// TODO Pathway Object or Element?
+		List<PathwayElement> elements = new ArrayList<PathwayElement>();
+		for (PathwayElement elm : pnew.getPathwayElements()) {
 			if (elm.getClass() != Pathway.class) {
 				elements.add(elm);
 			} else {
@@ -135,7 +137,14 @@ public class PathwayModelImportHandler extends TransferHandler implements Clipbo
 		timesPasted = 0;
 	}
 
-	private Point2D.Double calculateShift(List<PathwayObject> elements, Point cursorPosition) {
+	/**
+	 * TODO Pathway Element or Object?
+	 * 
+	 * @param elements
+	 * @param cursorPosition
+	 * @return
+	 */
+	private Point2D.Double calculateShift(List<PathwayElement> elements, Point cursorPosition) {
 		Point2D.Double topLeftCorner = getTopLeftCorner(elements);
 		double xShift = cursorPosition.x - topLeftCorner.x;
 		double yShift = cursorPosition.y - topLeftCorner.y;
@@ -143,12 +152,14 @@ public class PathwayModelImportHandler extends TransferHandler implements Clipbo
 	}
 
 	/**
+	 * TODO Pathway Element or Object?
+	 * 
 	 * Returns the top left corner of the bounding box around the elements
 	 * 
 	 * @param elements = list of PathwayElement objects
 	 * @return
 	 */
-	private Point2D.Double getTopLeftCorner(List<PathwayObject> elements) {
+	private Point2D.Double getTopLeftCorner(List<PathwayElement> elements) {
 
 		Rectangle2D vr = null;
 		for (PathwayObject o : elements) {

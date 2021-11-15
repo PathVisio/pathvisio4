@@ -44,36 +44,32 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.pathvisio.core.biopax.PublicationXref;
+import org.bridgedb.Xref;
 import org.pathvisio.core.data.PubMedQuery;
 import org.pathvisio.core.data.PubMedResult;
 import org.pathvisio.core.util.ProgressKeeper;
 import org.pathvisio.gui.ProgressDialog;
+import org.pathvisio.model.PathwayElement.CitationRef;
+import org.pathvisio.util.XrefUtils;
 import org.xml.sax.SAXException;
 
 /**
- * Dialog for entering citations. For convenience, you
- * can enter a pubmed id and query the details from pubmed.
+ * Dialog for entering citations. For convenience, you can enter a pubmed id and
+ * query the details from pubmed.
  */
 public class PublicationXRefDialog extends OkCancelDialog {
 
 	final static String ADD = "Add";
 	final static String REMOVE = "Remove";
-	final static String PMID = "Pubmed ID";
-	final static String TITLE = "Title";
-	final static String SOURCE = "Source";
-	final static String YEAR = "Year";
-	final static String AUTHORS = "Authors (separate with " + PublicationXref.AUTHOR_SEP + ")";
+	final static String XREF_IDENTIFIER = "Identifier";
+	final static String XREF_DATASOURCE = "DataSource";
 	final static String QUERY = "Query PubMed";
 
-	PublicationXref input;
-	JTextField pmId;
-	JTextField title;
-	JTextField source;
-	JTextField year;
-	JTextPane authors;
+	CitationRef input;
+	JTextField xrefIdentifier;
+	JTextField xrefDataSource;
 
-	public PublicationXRefDialog(PublicationXref xref, Frame frame, Component locationComp, boolean cancellable) {
+	public PublicationXRefDialog(CitationRef xref, Frame frame, Component locationComp, boolean cancellable) {
 		super(frame, "Literature reference properties", locationComp, true, cancellable);
 		input = xref;
 
@@ -83,41 +79,40 @@ public class PublicationXRefDialog extends OkCancelDialog {
 		setSize(400, 300);
 	}
 
-	public PublicationXRefDialog(PublicationXref xref, Frame frame, Component locationComp) {
+	public PublicationXRefDialog(CitationRef xref, Frame frame, Component locationComp) {
 		this(xref, frame, locationComp, true);
 	}
 
 	private void setText(String text, JTextComponent field) {
-		if(text != null && text.length() > 0) field.setText(text);
+		if (text != null && text.length() > 0)
+			field.setText(text);
 	}
 
+	//TODO 
 	protected void refresh() {
-		setText(input.getPubmedId(), pmId);
-		setText(input.getTitle(), title);
-		setText(input.getSource(), source);
-		setText(input.getYear(), year);
-		setText(input.getAuthorString(), authors);
+		setText(input.getCitation().getXref().getId(), xrefIdentifier);
+		setText(input.getCitation().getXref().getDataSource().getCompactIdentifierPrefix(), xrefDataSource);
 	}
 
 	protected void okPressed() {
-		input.setPubmedId(pmId.getText().trim());
-		input.setTitle(title.getText());
-		input.setSource(source.getText());
-		input.setYear(year.getText());
-		input.setAuthors(authors.getText());
+		String identifier = xrefIdentifier.getText().trim();
+		String dataSource = xrefDataSource.getText();
+		Xref xref = XrefUtils.createXref(identifier, dataSource);
+		//TODO !!!
+		if (xref != null) {
+			input.getCitable().removeCitationRef(input);
+			input.getCitable().addCitation(xref, null);
+		}
 		super.okPressed();
 	}
 
 	protected void queryPressed() {
-		final PubMedQuery pmq = new PubMedQuery(pmId.getText().trim());
+		final PubMedQuery pmq = new PubMedQuery(xrefIdentifier.getText().trim());
 		final ProgressKeeper pk = new ProgressKeeper();
-		ProgressDialog d = new ProgressDialog(
-				JOptionPane.getFrameForComponent(this),
-				"", pk, true, true);
+		ProgressDialog d = new ProgressDialog(JOptionPane.getFrameForComponent(this), "", pk, true, true);
 
 		SwingWorker<Void, Void> sw = new SwingWorker<Void, Void>() {
-			protected Void doInBackground() throws SAXException, IOException, ParserConfigurationException
-			{
+			protected Void doInBackground() throws SAXException, IOException, ParserConfigurationException {
 				pk.setTaskName("Querying PubMed");
 				pmq.execute();
 				pk.finished();
@@ -130,17 +125,14 @@ public class PublicationXRefDialog extends OkCancelDialog {
 		d.setVisible(true);
 
 		PubMedResult pmr = pmq.getResult();
-		if(pmr != null) {
-			pmId.setText(pmr.getId()); // write the trimmed pmid to the dialog
-			title.setText(pmr.getTitle());
-			year.setText(pmr.getYear());
-			source.setText(pmr.getSource());
-			authors.setText(PublicationXref.createAuthorString(pmr.getAuthors()));
+		if (pmr != null) {
+			xrefIdentifier.setText(pmr.getId()); // write the trimmed pmid to the dialog
+			xrefDataSource.setText(pmr.getTitle());
 		}
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		if(QUERY.equals(e.getActionCommand())) {
+		if (QUERY.equals(e.getActionCommand())) {
 			queryPressed();
 		}
 		super.actionPerformed(e);
@@ -150,31 +142,31 @@ public class PublicationXRefDialog extends OkCancelDialog {
 		JPanel contents = new JPanel();
 		contents.setLayout(new GridBagLayout());
 
-		JLabel lblPmId = new JLabel(PMID);
-		JLabel lblTitle = new JLabel(TITLE);
-		JLabel lblSource = new JLabel(SOURCE);
-		JLabel lblYear = new JLabel(YEAR);
-		JLabel lblAuthors = new JLabel(AUTHORS);
+		JLabel lblXrefIdentifier = new JLabel(XREF_IDENTIFIER);
+		JLabel lblXrefDataSource = new JLabel(XREF_DATASOURCE);
 
-		pmId = new JTextField();
-		title = new JTextField();
-		source = new JTextField();
-		year = new JTextField();
+		xrefIdentifier = new JTextField();
+		xrefDataSource = new JTextField();
 		final DefaultStyledDocument doc = new DefaultStyledDocument();
 		doc.setDocumentFilter(new DocumentFilter() {
-			public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+			public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
+					throws BadLocationException {
 				string = replaceSeparators(string);
 				super.insertString(fb, offset, string, attr);
-				highlight((StyledDocument)fb.getDocument());
+				highlight((StyledDocument) fb.getDocument());
 			}
-			public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+
+			public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+					throws BadLocationException {
 				text = replaceSeparators(text);
 				super.replace(fb, offset, length, text, attrs);
-				highlight((StyledDocument)fb.getDocument());
+				highlight((StyledDocument) fb.getDocument());
 			}
+
 			String replaceSeparators(String authors) {
 				return authors.replaceAll(PublicationXref.AUTHOR_SEP, PublicationXref.AUTHOR_SEP + "\n");
 			}
+
 			void highlight(StyledDocument doc) {
 				SimpleAttributeSet clean = new SimpleAttributeSet();
 				doc.setCharacterAttributes(0, doc.getLength(), clean, true);
@@ -184,10 +176,10 @@ public class PublicationXRefDialog extends OkCancelDialog {
 
 				String text = authors.getText();
 				Pattern p = Pattern.compile(PublicationXref.AUTHOR_SEP);
-			    Matcher m = p.matcher(text);
-			    while(m.find()) {
-			    	doc.setCharacterAttributes(m.start(), 1, sep, true);
-			    }
+				Matcher m = p.matcher(text);
+				while (m.find()) {
+					doc.setCharacterAttributes(m.start(), 1, sep, true);
+				}
 			}
 		});
 
@@ -203,22 +195,16 @@ public class PublicationXRefDialog extends OkCancelDialog {
 		c.gridx = 0;
 		c.gridy = GridBagConstraints.RELATIVE;
 		c.weightx = 0;
-		contents.add(lblPmId, c);
-		contents.add(lblTitle, c);
-		contents.add(lblYear, c);
-		contents.add(lblSource, c);
-		contents.add(lblAuthors, c);
+		contents.add(lblXrefIdentifier, c);
+		contents.add(lblXrefDataSource, c);
 
 		c.gridx = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
-		contents.add(pmId, c);
-		contents.add(title, c);
-		contents.add(year, c);
-		contents.add(source, c);
+		contents.add(xrefIdentifier, c);
+		contents.add(xrefDataSource, c);
 		c.fill = GridBagConstraints.BOTH;
 		c.weighty = 1;
-		contents.add(new JScrollPane(authors), c);
 
 		c.gridx = 2;
 		c.fill = GridBagConstraints.NONE;

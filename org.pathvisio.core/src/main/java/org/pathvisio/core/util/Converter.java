@@ -18,13 +18,11 @@ package org.pathvisio.core.util;
 
 import java.io.File;
 
-import org.bridgedb.DataSource;
 import org.bridgedb.bio.DataSourceTxt;
 import org.pathvisio.core.Engine;
 import org.pathvisio.debug.Logger;
 import org.pathvisio.core.model.BatikImageExporter;
 import org.pathvisio.io.ConverterException;
-import org.pathvisio.core.model.DataNodeListExporter;
 import org.pathvisio.core.model.EUGeneExporter;
 import org.pathvisio.io.GpmlFormat;
 import org.pathvisio.core.model.ImageExporter;

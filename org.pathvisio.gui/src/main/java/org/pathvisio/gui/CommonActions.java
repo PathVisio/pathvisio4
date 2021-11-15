@@ -35,7 +35,6 @@ import org.pathvisio.core.Globals;
 import org.pathvisio.core.Engine.ApplicationEventListener;
 import org.pathvisio.core.biopax.BiopaxReferenceManager;
 import org.pathvisio.core.biopax.PublicationXref;
-import org.pathvisio.core.model.CellularComponentType;
 import org.pathvisio.model.type.ConnectorType;
 import org.pathvisio.model.type.DataNodeType;
 import org.pathvisio.model.type.LineStyleType;
@@ -44,6 +43,7 @@ import org.pathvisio.model.PathwayModel;
 import org.pathvisio.model.PathwayModel.StatusFlagEvent;
 import org.pathvisio.model.PathwayModel.StatusFlagListener;
 import org.pathvisio.model.PathwayObject;
+import org.pathvisio.model.Label;
 import org.pathvisio.model.PathwayElement;
 import org.pathvisio.model.type.ShapeType;
 import org.pathvisio.core.util.Resources;
@@ -54,6 +54,7 @@ import org.pathvisio.core.view.model.Handle;
 import org.pathvisio.core.view.model.SelectionBox;
 import org.pathvisio.core.view.model.VElement;
 import org.pathvisio.core.view.model.VLabel;
+import org.pathvisio.core.view.model.VPathwayElement;
 import org.pathvisio.core.view.model.VPathwayModel;
 import org.pathvisio.core.view.model.VPathwayObject;
 import org.pathvisio.core.view.model.ViewActions;
@@ -225,7 +226,7 @@ public class CommonActions implements ApplicationEventListener {
 				new NewElementAction(e, new DefaultTemplates.DataNodeTemplate(DataNodeType.PATHWAY)),
 				new NewElementAction(e, new DefaultTemplates.DataNodeTemplate(DataNodeType.PROTEIN)),
 				new NewElementAction(e, new DefaultTemplates.DataNodeTemplate(DataNodeType.RNA)),
-				new NewElementAction(e, new DefaultTemplates.DataNodeTemplate(DataNodeType.UNKOWN)), };
+				new NewElementAction(e, new DefaultTemplates.DataNodeTemplate(DataNodeType.UNDEFINED)), };
 
 		// actions for "Annotations" section
 		newAnnotationActions = new Action[] { new NewElementAction(e, new DefaultTemplates.LabelTemplate()), };
@@ -293,26 +294,13 @@ public class CommonActions implements ApplicationEventListener {
 
 		// actions for "Cellular Compartment" section
 		newCellularComponentActions = new Action[] {
-				new NewElementAction(e,
-						new DefaultTemplates.CellularComponentTemplate(ShapeType.ROUNDED_RECTANGLE,
-								CellularComponentType.CELL)),
-				new NewElementAction(e,
-						new DefaultTemplates.CellularComponentTemplate(ShapeType.OVAL, CellularComponentType.NUCLEUS)),
-				new NewElementAction(e,
-						new DefaultTemplates.CellularComponentTemplate(ShapeType.ENDOPLASMICRETICULUM,
-								CellularComponentType.ENDOPLASMICRETICULUM)),
-				new NewElementAction(e,
-						new DefaultTemplates.CellularComponentTemplate(ShapeType.GOLGIAPPARATUS,
-								CellularComponentType.GOLGIAPPARATUS)),
-				new NewElementAction(e,
-						new DefaultTemplates.CellularComponentTemplate(ShapeType.MITOCHONDRIA,
-								CellularComponentType.MITOCHONDRIA)),
-				new NewElementAction(e,
-						new DefaultTemplates.CellularComponentTemplate(ShapeType.SARCOPLASMICRETICULUM,
-								CellularComponentType.SARCOPLASMICRETICULUM)),
-				new NewElementAction(e,
-						new DefaultTemplates.CellularComponentTemplate(ShapeType.ROUNDED_RECTANGLE,
-								CellularComponentType.ORGANELLE)),
+				new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.CELL)),
+				new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.NUCLEUS)),
+				new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.ENDOPLASMIC_RETICULUM)),
+				new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.GOLGI_APPARATUS)),
+				new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.MITOCHONDRIA)),
+				new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.SARCOPLASMIC_RETICULUM)),
+				new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.ORGANELLE)),
 				// new NewElementAction(e, new
 				// DefaultTemplates.CellularComponentTemplate(ShapeType.OVAL,
 				// CellularComponentType.LYSOSOME)),
@@ -322,13 +310,11 @@ public class CommonActions implements ApplicationEventListener {
 				// new NewElementAction(e, new
 				// DefaultTemplates.CellularComponentTemplate(ShapeType.OVAL,
 				// CellularComponentType.VACUOLE)),
-				new NewElementAction(e,
-						new DefaultTemplates.CellularComponentTemplate(ShapeType.OVAL, CellularComponentType.VESICLE)),
+				new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.VESICLE)),
 				// new NewElementAction(e, new
 				// DefaultTemplates.CellularComponentTemplate(ShapeType.ROUNDED_RECTANGLE,
 				// CellularComponentType.CYTOSOL)),
-				new NewElementAction(e, new DefaultTemplates.CellularComponentTemplate(ShapeType.ROUNDED_RECTANGLE,
-						CellularComponentType.EXTRACELLULAR)),
+				new NewElementAction(e, new DefaultTemplates.ShapeTemplate(ShapeType.EXTRACELLULAR)),
 				// new NewElementAction(e, new
 				// DefaultTemplates.CellularComponentTemplate(ShapeType.ROUNDED_RECTANGLE,
 				// CellularComponentType.MEMBRANE))
@@ -709,9 +695,9 @@ public class CommonActions implements ApplicationEventListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			if (element instanceof VPathwayObject) {
-				
-				PathwayElement pwElm = ((VPathwayObject) element).getPathwayObject();
+			if (element instanceof VPathwayElement) {
+
+				PathwayElement pwElm = ((VPathwayElement) element).getPathwayObject();
 				BiopaxReferenceManager m = pwElm.getBiopaxReferenceManager();
 				PublicationXref xref = new PublicationXref();
 
@@ -742,7 +728,7 @@ public class CommonActions implements ApplicationEventListener {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			if (vpe instanceof VLabel) {
-				PathwayElement pe = ((VLabel) vpe).getPathwayObject();
+				Label pe = ((VLabel) vpe).getPathwayObject();
 				String currentHref = pe.getHref();
 				String userInput = JOptionPane.showInputDialog(se.getFrame(), "Label hyperlink", currentHref);
 				if (userInput != null) {
