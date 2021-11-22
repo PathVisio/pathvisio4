@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.pathvisio</groupId>
 		<artifactId>pathvisio</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>${revision}</version>
 	</parent>
 
 	<properties>
@@ -17,25 +17,42 @@
 	<name>org.pathvisio.pluginmanager</name>
 	<packaging>bundle</packaging>
 
+	<build>
+		<plugins>
+			<plugin>
+				<inherited>false</inherited>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>${maven-release-plugin.version}</version>
+				<configuration>
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+					<goals>deploy</goals>
+					<!-- so that impl bundles with modules will build correctly -->
+					<preparationGoals>clean install</preparationGoals>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 	<!-- Dependencies needed to compile this project. -->
 	<dependencies>
 		<!-- PathVisio (temporary) -->
 		<dependency>
 			<groupId>org.pathvisio</groupId>
 			<artifactId>org.pathvisio.core</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${revision}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.pathvisio</groupId>
 			<artifactId>org.pathvisio.desktop</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${revision}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.pathvisio</groupId>
 			<artifactId>org.pathvisio.gui</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${revision}</version>
 			<scope>compile</scope>
 		</dependency>
 		<!-- Apache Felix -->

@@ -43,17 +43,18 @@ import org.pathvisio.core.view.model.VPathwayElement;
 import org.pathvisio.gui.SwingEngine;
 
 /**
- * The model for the table in the Properties side panel.
- * Each row corresponds to a Property, the first column is the name of the
- * property and the second column its value.
+ * The model for the table in the Properties side panel. Each row corresponds to
+ * a Property, the first column is the name of the property and the second
+ * column its value.
  *
  * This will pass through the properties for zero, one or many selected
- * PathwayElements. If many are selected, the subset of shared Properties
- * is used as row set.
+ * PathwayElements. If many are selected, the subset of shared Properties is
+ * used as row set.
+ * 
+ * @author unknown
  */
-public class PathwayTableModel extends AbstractTableModel implements SelectionListener,
-									PathwayObjectListener,
-									ApplicationEventListener {
+public class PathwayTableModel extends AbstractTableModel
+		implements SelectionListener, PathwayObjectListener, ApplicationEventListener {
 
 	private JTable table;
 	final private Collection<PathwayElement> input;
@@ -69,7 +70,8 @@ public class PathwayTableModel extends AbstractTableModel implements SelectionLi
 		this.swingEngine = swingEngine;
 		swingEngine.getEngine().addApplicationEventListener(this);
 		VPathwayModel vp = swingEngine.getEngine().getActiveVPathwayModel();
-		if(vp != null) vp.addSelectionListener(this);
+		if (vp != null)
+			vp.addSelectionListener(this);
 	}
 
 	public void setTable(JTable table) {
@@ -78,8 +80,8 @@ public class PathwayTableModel extends AbstractTableModel implements SelectionLi
 
 	private void reset() {
 		stopEditing();
-		for(PathwayElement e : input) {
-			//System.err.println("Removed " + e);
+		for (PathwayElement e : input) {
+			// System.err.println("Removed " + e);
 			e.removeListener(this);
 		}
 		propertyValues.clear();
@@ -90,40 +92,39 @@ public class PathwayTableModel extends AbstractTableModel implements SelectionLi
 
 	private void removeInput(PathwayElement pwElm) {
 		stopEditing();
-		//System.err.println("Input removed");
+		// System.err.println("Input removed");
 		input.remove(pwElm);
-		if (input.size() > 0)
-		{
+		if (input.size() > 0) {
 			updatePropertyCounts(pwElm, true);
 			pwElm.removeListener(this);
 			refresh(true);
-		}
-		else
-		{
+		} else {
 			reset();
 		}
 	}
 
 	private void stopEditing() {
-		if(table != null && table.getCellEditor() != null) {
+		if (table != null && table.getCellEditor() != null) {
 			table.getCellEditor().stopCellEditing();
 		}
 	}
 
-	// TODO PathwayObject or Element? 
+	// TODO PathwayObject or Element?
 	private void addInput(PathwayElement pwElm) {
 		stopEditing();
-		//System.err.println("Input added");
+		// System.err.println("Input added");
 		input.add(pwElm);
 		updatePropertyCounts(pwElm, false);
 		pwElm.addListener(this);
 		refresh(true);
 	}
 
-	protected void refresh() { refresh(false); }
+	protected void refresh() {
+		refresh(false);
+	}
 
 	public void refresh(boolean propertyCount) {
-		if(propertyCount) {
+		if (propertyCount) {
 			updateShownProperties();
 		}
 		refreshPropertyValues();
@@ -133,19 +134,18 @@ public class PathwayTableModel extends AbstractTableModel implements SelectionLi
 	/**
 	 * Add/remove properties to/from the table model.
 	 *
-	 * @param e the PathwayElement with the properties of interest
-	 * @param remove true if the PathwayElement's visible properties should be removed from the table model,
-	 *  false if it should be added to the table model
+	 * @param e      the PathwayElement with the properties of interest
+	 * @param remove true if the PathwayElement's visible properties should be
+	 *               removed from the table model, false if it should be added to
+	 *               the table model
 	 */
-	public void updatePropertyCounts(PathwayElement e, boolean remove)
-	{
-		for(Object o : PropertyDisplayManager.getVisiblePropertyKeys(e))
-		{
+	public void updatePropertyCounts(PathwayElement e, boolean remove) {
+		for (Object o : PropertyDisplayManager.getVisiblePropertyKeys(e)) {
 			PropertyView tp = propertyValues.get(o);
-			if(tp == null) {
+			if (tp == null) {
 				propertyValues.put(o, tp = new PropertyView(swingEngine.getEngine().getActiveVPathwayModel(), o));
 			}
-			if(remove) {
+			if (remove) {
 				tp.removeElement(e);
 			} else {
 				tp.addElement(e);
@@ -154,13 +154,14 @@ public class PathwayTableModel extends AbstractTableModel implements SelectionLi
 	}
 
 	protected void updateShownProperties() {
-		for(PropertyView tp : propertyValues.values()) {
+		for (PropertyView tp : propertyValues.values()) {
 			boolean shown = shownProperties.contains(tp);
-			if(tp.elementCount() == input.size()) {
-				//System.err.println("\tadding " + tp + " from shown");
-				if(!shown) shownProperties.add(tp);
+			if (tp.elementCount() == input.size()) {
+				// System.err.println("\tadding " + tp + " from shown");
+				if (!shown)
+					shownProperties.add(tp);
 			} else {
-				//System.err.println("\tremoveing " + tp + " from shown");
+				// System.err.println("\tremoveing " + tp + " from shown");
 				shownProperties.remove(tp);
 			}
 			Collections.sort(shownProperties);
@@ -168,7 +169,7 @@ public class PathwayTableModel extends AbstractTableModel implements SelectionLi
 	}
 
 	protected void refreshPropertyValues() {
-		for(PropertyView p : shownProperties) {
+		for (PropertyView p : shownProperties) {
 			p.refreshValue();
 		}
 	}
@@ -187,12 +188,14 @@ public class PathwayTableModel extends AbstractTableModel implements SelectionLi
 
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		PropertyView p = getPropertyAt(rowIndex);
-		if(columnIndex == 0) return p.getName();
-		else return p.getValue();
+		if (columnIndex == 0)
+			return p.getName();
+		else
+			return p.getValue();
 	}
 
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-		if(columnIndex != 0) {
+		if (columnIndex != 0) {
 			PropertyView p = getPropertyAt(rowIndex);
 			p.setValue(aValue);
 		}
@@ -200,32 +203,32 @@ public class PathwayTableModel extends AbstractTableModel implements SelectionLi
 	}
 
 	public String getColumnName(int column) {
-		if(column == 0) return "Property";
+		if (column == 0)
+			return "Property";
 		return "Value";
 	}
 
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return columnIndex == 1 &&
-				swingEngine.getEngine().hasVPathwayModel() &&
-				swingEngine.getEngine().getActiveVPathwayModel().isEditMode();
+		return columnIndex == 1 && swingEngine.getEngine().hasVPathwayModel()
+				&& swingEngine.getEngine().getActiveVPathwayModel().isEditMode();
 	}
 
 	public void selectionEvent(SelectionEvent e) {
-		switch(e.type) {
+		switch (e.type) {
 		case SelectionEvent.OBJECT_ADDED:
-			//System.err.println("OBJECT ADDED");
-			//TODO PathwayElement or Object? 
-			if(e.affectedObject instanceof VPathwayElement)
-				addInput(((VPathwayElement)e.affectedObject).getPathwayObject());
+			// System.err.println("OBJECT ADDED");
+			// TODO PathwayElement or Object?
+			if (e.affectedObject instanceof VPathwayElement)
+				addInput(((VPathwayElement) e.affectedObject).getPathwayObject());
 			break;
 		case SelectionEvent.OBJECT_REMOVED:
-			//System.err.println("OBJECT REMOVED");
-			if(e.affectedObject instanceof VPathwayElement)
-				removeInput(((VPathwayElement)e.affectedObject).getPathwayObject());
+			// System.err.println("OBJECT REMOVED");
+			if (e.affectedObject instanceof VPathwayElement)
+				removeInput(((VPathwayElement) e.affectedObject).getPathwayObject());
 			break;
 		case SelectionEvent.SELECTION_CLEARED:
-			//System.err.println("CLEARED");
-			 reset();
+			// System.err.println("CLEARED");
+			reset();
 			break;
 		}
 	}
@@ -243,9 +246,10 @@ public class PathwayTableModel extends AbstractTableModel implements SelectionLi
 	}
 
 	public TableCellEditor getCellEditor(int row, int column) {
-		if(column != 0) {
+		if (column != 0) {
 			PropertyView tp = getPropertyAt(row);
-			if(tp != null) return tp.getCellEditor(swingEngine);
+			if (tp != null)
+				return tp.getCellEditor(swingEngine);
 		}
 		return null;
 	}
@@ -254,15 +258,13 @@ public class PathwayTableModel extends AbstractTableModel implements SelectionLi
 		refresh();
 	}
 
-	public void applicationEvent(ApplicationEvent e)
-	{
-		switch(e.getType())
-		{
+	public void applicationEvent(ApplicationEvent e) {
+		switch (e.getType()) {
 		case VPATHWAY_CREATED:
-			((VPathwayModel)e.getSource()).addSelectionListener(this);
+			((VPathwayModel) e.getSource()).addSelectionListener(this);
 			break;
 		case VPATHWAY_DISPOSED:
-			((VPathwayModel)e.getSource()).removeSelectionListener(this);
+			((VPathwayModel) e.getSource()).removeSelectionListener(this);
 			reset(); // clear selected set
 			break;
 		}

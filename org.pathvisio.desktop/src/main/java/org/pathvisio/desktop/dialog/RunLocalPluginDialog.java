@@ -47,17 +47,14 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 /**
- * dialog that allows the user to specify a directory
- * all OSGi bundles in that directory will be installed 
- * and started
- * status information on each will be shown in the
- * StatusDialog dialog
+ * dialog that allows the user to specify a directory all OSGi bundles in that
+ * directory will be installed and started status information on each will be
+ * shown in the StatusDialog dialog
  * 
  * @author martina
  *
  */
-public class RunLocalPluginDialog extends JDialog 
-{
+public class RunLocalPluginDialog extends JDialog {
 
 	private JDialog dlg;
 	private PvDesktop desktop;
@@ -65,91 +62,83 @@ public class RunLocalPluginDialog extends JDialog
 	private CellConstraints cc = new CellConstraints();
 	private List<File> files;
 	private Map<File, JCheckBox> cbs;
-	
-	public RunLocalPluginDialog(PvDesktop desktop)
-	{
+
+	public RunLocalPluginDialog(PvDesktop desktop) {
 		super();
 		cbs = new HashMap<File, JCheckBox>();
 		files = new ArrayList<File>();
 		dlg = this;
 		this.desktop = desktop;
 	}
-	
-	public void createAndShowGUI() 
-	{
+
+	public void createAndShowGUI() {
 		init();
 		JPanel panel = new JPanel();
 		panel.setBackground(Color.white);
 		FormLayout layout = new FormLayout("4dlu, pref, 4dlu, min, 4dlu, min, 4dlu", "4dlu, pref, 4dlu, pref");
 		panel.setLayout(layout);
-		
+
 		panel.add(new JLabel("Install local plugins. Please select directory."), cc.xy(2, 2));
 		tfDir = new JTextField();
 		JButton browseBtn = new JButton("Browse");
 		browseBtn.addActionListener(new BrowseButtonActionListener(tfDir, dlg, JFileChooser.DIRECTORIES_ONLY));
-		
+
 		panel.add(tfDir, cc.xy(2, 4));
 		panel.add(browseBtn, cc.xy(4, 4));
-	
+
 		dlg.add(createBtnPanel(), BorderLayout.SOUTH);
 		dlg.add(panel, BorderLayout.CENTER);
 
 		dlg.setVisible(true);
 	}
-	
-	private JPanel createBtnPanel() 
-	{
+
+	private JPanel createBtnPanel() {
 		JPanel btnPanel = new JPanel();
 		btnPanel.setBackground(Color.white);
-		
+
 		JButton cancelBtn = new JButton("Cancel");
-		cancelBtn.addActionListener(new ActionListener() 
-		{	
+		cancelBtn.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) 
-			{
+			public void actionPerformed(ActionEvent e) {
 				dlg.dispose();
 			}
 		});
-		
+
 		JButton startBtn = new JButton("Start");
-		startBtn.addActionListener(new ActionListener() 
-		{	
+		startBtn.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) 
-			{
-				if(!tfDir.getText().equals("")) 
-				{
+			public void actionPerformed(ActionEvent e) {
+				if (!tfDir.getText().equals("")) {
 					File file = new File(tfDir.getText());
-					if(file.exists()) 
-					{
-						for(File f : file.listFiles()) {
-							if(f.getName().endsWith(".jar")) {
+					if (file.exists()) {
+						for (File f : file.listFiles()) {
+							if (f.getName().endsWith(".jar")) {
 								files.add(f);
 							}
 						}
 						dlg.dispose();
-						if(files.isEmpty()) {
+						if (files.isEmpty()) {
 							JOptionPane.showMessageDialog(desktop.getFrame(), "No jar files found in this directory");
 						} else {
 							ShowFilesDialog showDlg = new ShowFilesDialog(desktop, desktop.getFrame());
 							showDlg.setDialogComponent(createFileList());
 							showDlg.pack();
 							showDlg.setVisible(true);
-							if(showDlg.getExitCode().equals(ShowFilesDialog.OK)) {
+							if (showDlg.getExitCode().equals(ShowFilesDialog.OK)) {
 								List<File> plugins = new ArrayList<File>();
 								List<File> dependencies = new ArrayList<File>();
-								for(File f : cbs.keySet()) {
-									if(cbs.get(f).isSelected()) {
+								for (File f : cbs.keySet()) {
+									if (cbs.get(f).isSelected()) {
 										plugins.add(f);
 									} else {
 										dependencies.add(f);
 									}
 								}
-								if(!plugins.isEmpty()) {
+								if (!plugins.isEmpty()) {
 									desktop.getPluginManagerExternal().installLocalPlugins(plugins, dependencies);
 								} else {
-									JOptionPane.showMessageDialog(desktop.getFrame(), "No pathvisio plugins specified.");
+									JOptionPane.showMessageDialog(desktop.getFrame(),
+											"No pathvisio plugins specified.");
 								}
 							}
 						}
@@ -157,46 +146,45 @@ public class RunLocalPluginDialog extends JDialog
 				}
 			}
 		});
-	
+
 		btnPanel.add(startBtn);
 		btnPanel.add(cancelBtn);
 		return btnPanel;
 	}
-	
+
 	private Component createFileList() {
 
 		String rowLayout = "4dlu,pref,15dlu,4dlu,";
-		for(int i = 0; i < files.size(); i++) {
+		for (int i = 0; i < files.size(); i++) {
 			rowLayout = rowLayout + "pref,4dlu,";
 		}
 		rowLayout = rowLayout + "4dlu";
-		
+
 		FormLayout layout = new FormLayout("4dlu,pref,4dlu,pref,5dlu", rowLayout);
 		CellConstraints cc = new CellConstraints();
-		
+
 		PanelBuilder panel = new PanelBuilder(layout);
-		panel.background(Color.white); //TODO was setBackground() deprecated? 
+		panel.background(Color.white); // TODO was setBackground() deprecated?
 		panel.addLabel("Please select all files that implement the PathVisio plugin interface.", cc.xy(2, 2));
 		panel.addSeparator("", cc.xyw(2, 3, 3));
-		
+
 		int row = 5;
-		for(File f : files) {
+		for (File f : files) {
 			panel.add(new JLabel(f.getName()), cc.xy(2, row));
 			JCheckBox cb = new JCheckBox();
 			cb.setBackground(Color.white);
 			panel.add(cb, cc.xy(4, row));
-			cbs.put(f,cb);
+			cbs.put(f, cb);
 			row = row + 2;
 		}
-		
+
 		JScrollPane pane = new JScrollPane(panel.getPanel());
 		pane.setBackground(Color.white);
-		
+
 		return pane;
 	}
-	
-	private void init() 
-	{
+
+	private void init() {
 		dlg.setPreferredSize(new Dimension(600, 200));
 		dlg.setTitle("Install local plugin");
 		dlg.setBackground(Color.white);
@@ -206,12 +194,10 @@ public class RunLocalPluginDialog extends JDialog
 		dlg.pack();
 		dlg.setLocationRelativeTo(desktop.getFrame());
 	}
-	
-	private class ShowFilesDialog extends OkCancelDialog 
-	{
-		
-		public ShowFilesDialog(PvDesktop desktop, Component listFiles) 
-		{
+
+	private class ShowFilesDialog extends OkCancelDialog {
+
+		public ShowFilesDialog(PvDesktop desktop, Component listFiles) {
 			super(desktop.getFrame(), "Install local plugins", listFiles, true, true);
 		}
 	}

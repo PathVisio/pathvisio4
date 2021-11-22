@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.pathvisio</groupId>
 		<artifactId>pathvisio</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>${revision}</version>
 	</parent>
 
 	<properties>
@@ -17,14 +17,43 @@
 	<name>org.pathvisio.gui</name>
 	<packaging>bundle</packaging>
 
+
+	<build>
+		<plugins>
+			<plugin>
+				<inherited>false</inherited>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>${maven-release-plugin.version}</version>
+				<configuration>
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+					<goals>deploy</goals>
+					<!-- so that impl bundles with modules will build correctly -->
+					<preparationGoals>clean install</preparationGoals>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 	<!-- Dependencies needed to compile this project. -->
 	<dependencies>
 		<!-- PathVisio (temporary) -->
 		<dependency>
 			<groupId>org.pathvisio</groupId>
 			<artifactId>org.pathvisio.core</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>compile</scope>
+			<version>${revision}</version>
+		</dependency>
+		<!-- BridgeDb -->
+		<dependency>
+			<groupId>org.bridgedb</groupId>
+			<artifactId>org.bridgedb.bio</artifactId>
+			<version>${bridgedb.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bridgedb</groupId>
+			<artifactId>bridgedb-bundle</artifactId>
+			<version>${bridgedb.version}</version>
+			<type>pom</type>
 		</dependency>
 		<!-- JGoodies Forms -->
 		<dependency>
@@ -36,18 +65,6 @@
 			<groupId>com.jgoodies</groupId>
 			<artifactId>jgoodies-forms</artifactId>
 			<version>1.8.0</version> <!-- older version for FontChooser.java -->
-		</dependency>
-		<!-- BridgeDb -->
-		<dependency>
-			<groupId>org.bridgedb</groupId>
-			<artifactId>org.bridgedb.bio</artifactId>
-			<version>3.0.5</version>
-		</dependency>
-		<dependency>
-			<groupId>org.bridgedb</groupId>
-			<artifactId>bridgedb-bundle</artifactId>
-			<version>3.0.5</version>
-			<type>pom</type>
 		</dependency>
 	</dependencies>
 </project>

@@ -35,6 +35,7 @@ import org.pathvisio.gui.SwingEngine;
  * on one or more PathwayElements at the same time.
  */
 public class PropertyView implements Comparable<PropertyView> {
+	
 	private VPathwayModel vPathway;
 	Collection<PathwayElement> elements;
 	private Object value;
