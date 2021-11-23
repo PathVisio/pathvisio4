@@ -23,12 +23,14 @@ import org.pathvisio.core.view.model.VPathwayModel;
 
 /**
  * An event for mouse events that apply to a single VPathwayElement
+ * 
  * @author thomas
  */
 public class VElementMouseEvent extends EventObject {
+	
 	public static final int TYPE_MOUSEENTER = 0;
 	public static final int TYPE_MOUSEEXIT = 1;
-	
+
 	// are used for change of cursor when the mouse is over a label
 	// with href and the ctrl button is pressed
 	public static final int TYPE_MOUSE_SHOWHAND = 2;
@@ -44,7 +46,7 @@ public class VElementMouseEvent extends EventObject {
 		this.element = element;
 		this.mouseEvent = mouseEvent;
 	}
-	
+
 	public VElementMouseEvent(VPathwayModel source, int type, VElement element) {
 		super(source);
 		this.type = type;

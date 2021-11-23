@@ -48,13 +48,15 @@ import org.pathvisio.core.view.model.VPathwayModelEvent.VPathwayEventType;
 
 /**
  * Utility that takes a set of graphId/Color pairs and exports a pathway image
- * after coloring the objects with the specified graphIds. TODO Move to jar file? 
+ * after coloring the objects with the specified graphIds. TODO Move to jar
+ * file?
  * 
  * TODO Color ElementIds or Xrefs...Only DataNodes
  * 
  * @author thomas
  */
 public class ColorExporter implements VPathwayModelListener {
+	
 	Map<PathwayObject, List<Color>> colors;
 	VPathwayModel vPathway;
 
@@ -94,7 +96,7 @@ public class ColorExporter implements VPathwayModelListener {
 	}
 
 	/**
-	 * TODO 
+	 * TODO
 	 * 
 	 * @param g
 	 * @param pwe
@@ -130,7 +132,7 @@ public class ColorExporter implements VPathwayModelListener {
 			Rectangle r = new Rectangle(area.x + w * i, area.y, w + ((i == nr - 1) ? left : 0), area.height);
 			g2d.fill(r);
 		}
-		g2d.setColor(((ShapedElement) vpe.getPathwayObject()).getTextColor()); //TODO 
+		g2d.setColor(((ShapedElement) vpe.getPathwayObject()).getTextColor()); // TODO
 		g2d.drawRect(area.x, area.y, area.width - 1, area.height - 1);
 	}
 
@@ -141,7 +143,7 @@ public class ColorExporter implements VPathwayModelListener {
 	private void doHighlight() {
 		for (VElement vpe : vPathway.getDrawingObjects()) {
 			if (vpe instanceof VPathwayObject) {
-				PathwayObject pwe = ((VPathwayObject) vpe).getPathwayObject(); //TODO object or element? 
+				PathwayObject pwe = ((VPathwayObject) vpe).getPathwayObject(); // TODO object or element?
 				List<Color> elmColors = colors.get(pwe);
 				if (elmColors != null && elmColors.size() > 0) {
 					if (pwe.getClass() != DataNode.class && pwe.getClass() != Group.class) {

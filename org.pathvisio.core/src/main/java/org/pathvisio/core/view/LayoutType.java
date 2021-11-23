@@ -17,10 +17,14 @@
 package org.pathvisio.core.view;
 
 /**
- * Identifiers for layout action types related to neatly laying out pathway elements, a. o.
- * aligning, scaling to the same size and stacking pathway elements.
+ * Identifiers for layout action types related to neatly laying out pathway
+ * elements, a. o. aligning, scaling to the same size and stacking pathway
+ * elements.
  *
- * For each action, a short description, a long description and an icon name is stored.
+ * For each action, a short description, a long description and an icon name is
+ * stored.
+ * 
+ * @author unknown
  */
 public enum LayoutType {
 	ALIGN_CENTERX("Align Center X", "Align horizontal centers", "aligncenterx.gif"),
@@ -36,8 +40,7 @@ public enum LayoutType {
 	STACK_LEFT("Stack Left", "Stack vertical left", "stackverticalleft.gif"),
 	STACK_RIGHT("Stack Right", "Stack veritcal right", "stackverticalright.gif"),
 	STACK_TOP("Stack Top", "Stack horizontal top", "stackhorizontaltop.gif"),
-	STACK_BOTTOM("Stack Bottom", "Stack horizontal bottom", "stackhorizontalbottom.gif"),
-	;
+	STACK_BOTTOM("Stack Bottom", "Stack horizontal bottom", "stackhorizontalbottom.gif"),;
 
 	private String label;
 	private String description;

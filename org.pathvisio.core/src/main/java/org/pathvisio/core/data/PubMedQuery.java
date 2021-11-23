@@ -37,6 +37,8 @@ import org.xml.sax.helpers.XMLReaderFactory;
  * block, so don't call it from the UI thread) The result can then be obtained
  * with getResult() TODO: move DefaultHandler methods to private subclass, they
  * don't need to be exposed.
+ * 
+ * @author unknown
  */
 public class PubMedQuery extends DefaultHandler {
 	static final String URL_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi";

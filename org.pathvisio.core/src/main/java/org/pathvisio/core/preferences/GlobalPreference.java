@@ -23,46 +23,39 @@ import org.pathvisio.core.util.ColorConverter;
 import org.pathvisio.util.Utils;
 
 /**
- * Type-safe set of preferences.
- * The preferences of PathVisio are backed by a standard Properties() object,
- * but that uses String as key, which is not safe.
+ * Type-safe set of preferences. The preferences of PathVisio are backed by a
+ * standard Properties() object, but that uses String as key, which is not safe.
  *
  * This enum is used to access the preferences in a type safe way.
  *
- * The preferences in this enum are used by the
- * core and the GUI application, but not by plug-ins.
+ * The preferences in this enum are used by the core and the GUI application,
+ * but not by plug-ins.
+ * 
+ * @author unknown
  */
-public enum GlobalPreference implements Preference
-{
-	FILE_LOG(new File (getApplicationDir(), "PathVisio.log")),
-	WP_FILE_LOG(new File (getApplicationDir(), "WikiPathways.log")),
+public enum GlobalPreference implements Preference {
+	FILE_LOG(new File(getApplicationDir(), "PathVisio.log")),
+	WP_FILE_LOG(new File(getApplicationDir(), "WikiPathways.log")),
 
-	COLOR_NO_CRIT_MET(new Color(180, 220, 180)),
-	COLOR_NO_GENE_FOUND(new Color(180, 220, 220)),
-	COLOR_NO_DATA_FOUND(new Color(216, 216, 216)),
-	COLOR_SELECTED(Color.RED),
-	COLOR_HIGHLIGHTED(Color.GREEN),
+	COLOR_NO_CRIT_MET(new Color(180, 220, 180)), COLOR_NO_GENE_FOUND(new Color(180, 220, 220)),
+	COLOR_NO_DATA_FOUND(new Color(216, 216, 216)), COLOR_SELECTED(Color.RED), COLOR_HIGHLIGHTED(Color.GREEN),
 	COLOR_LINK(Color.BLUE),
 
 	DATANODES_ROUNDED(Boolean.toString(false)),
 
-	// TODO: this should be changed to org.pathvisio.desktop.data.DBConnDerby, 2 releases after 2.0.11
+	// TODO: this should be changed to org.pathvisio.desktop.data.DBConnDerby, 2
+	// releases after 2.0.11
 	DB_ENGINE_GEX("org.pathvisio.data.DBConnDerby"),
 
 	@Deprecated
-	DB_GDB_CURRENT("none"),
-	@Deprecated
+	DB_GDB_CURRENT("none"), @Deprecated
 	DB_METABDB_CURRENT("none"),
 
-	DB_CONNECTSTRING_GDB("idmapper-pgdb:none"),
-	DB_CONNECTSTRING_METADB("idmapper-pgdb:none"),
+	DB_CONNECTSTRING_GDB("idmapper-pgdb:none"), DB_CONNECTSTRING_METADB("idmapper-pgdb:none"),
 	DB_CONNECTSTRING_IDB("idmapper-pgdb:none"),
 
-	ENABLE_DOUBLE_BUFFERING(Boolean.toString(true)),
-	SHOW_ADVANCED_PROPERTIES(Boolean.toString(false)),
-	MIM_SUPPORT(Boolean.toString(true)),
-	SNAP_TO_ANGLE (Boolean.toString(false)),
-	SNAP_TO_ANGLE_STEP ("15"),
+	ENABLE_DOUBLE_BUFFERING(Boolean.toString(true)), SHOW_ADVANCED_PROPERTIES(Boolean.toString(false)),
+	MIM_SUPPORT(Boolean.toString(true)), SNAP_TO_ANGLE(Boolean.toString(false)), SNAP_TO_ANGLE_STEP("15"),
 
 	SNAP_TO_ANCHOR(Boolean.toString(true)),
 
@@ -91,44 +84,30 @@ public enum GlobalPreference implements Preference
 	DIR_LAST_USED_IMPORT(new File(getDataDir(), "pathways").toString()),
 	DIR_LAST_USED_EXPORT(new File(getDataDir(), "pathways").toString()),
 
-	MOST_RECENT_1 ((File)null),
-	MOST_RECENT_2 ((File)null),
-	MOST_RECENT_3 ((File)null),
-	MOST_RECENT_4 ((File)null),
-	MOST_RECENT_5 ((File)null),
-	MOST_RECENT_6 ((File)null),
-	MOST_RECENT_7 ((File)null),
-	MOST_RECENT_8 ((File)null),
-	MOST_RECENT_9 ((File)null),
-	MOST_RECENT_10 ((File)null),
+	MOST_RECENT_1((File) null), MOST_RECENT_2((File) null), MOST_RECENT_3((File) null), MOST_RECENT_4((File) null),
+	MOST_RECENT_5((File) null), MOST_RECENT_6((File) null), MOST_RECENT_7((File) null), MOST_RECENT_8((File) null),
+	MOST_RECENT_9((File) null), MOST_RECENT_10((File) null),
 
-	WIN_X ("50"),
-	WIN_Y ("50"),
-	WIN_W ("1000"),
-	WIN_H ("600"),
+	WIN_X("50"), WIN_Y("50"), WIN_W("1000"), WIN_H("600"),
 
 	// don't use system look and feel by default on linux.
-	USE_SYSTEM_LOOK_AND_FEEL(
-			Boolean.toString(Utils.getOS() != Utils.OS_LINUX)
-		),
+	USE_SYSTEM_LOOK_AND_FEEL(Boolean.toString(Utils.getOS() != Utils.OS_LINUX)),
 
-	MAX_NR_CITATIONS ("" + 5),
+	MAX_NR_CITATIONS("" + 5),
 
-	//Whether to convert text to paths in SVG export
-	//Default to false, better performance in SVG renderers
-	SVG_TEXT_AS_PATH ("" + false)
-	;
+	// Whether to convert text to paths in SVG export
+	// Default to false, better performance in SVG renderers
+	SVG_TEXT_AS_PATH("" + false);
+
 	GlobalPreference(String defaultValue) {
 		this.defaultValue = defaultValue;
 	}
 
-	GlobalPreference(Color defaultValue)
-	{
+	GlobalPreference(Color defaultValue) {
 		this.defaultValue = ColorConverter.getRgbString(defaultValue);
 	}
 
-	GlobalPreference(File defaultValue)
-	{
+	GlobalPreference(File defaultValue) {
 		this.defaultValue = "" + defaultValue;
 	}
 
@@ -147,45 +126,48 @@ public enum GlobalPreference implements Preference
 	 * Get the working directory of this application
 	 */
 	public static File getApplicationDir() {
-		if(dirApplication == null) {
-			//Windows specific directory configuration
-			if(Utils.getOS() == Utils.OS_WINDOWS) {	
+		if (dirApplication == null) {
+			// Windows specific directory configuration
+			if (Utils.getOS() == Utils.OS_WINDOWS) {
 				dirApplication = new File(System.getenv("APPDATA"), "PathVisio");
-			} else { //All other OS
+			} else { // All other OS
 				dirApplication = new File(System.getProperty("user.home"), ".PathVisio");
 			}
-			if(!dirApplication.exists()) 
+			if (!dirApplication.exists())
 				dirApplication.mkdir();
 		}
 		return dirApplication;
 	}
-	
+
 	public static File getPluginDir() {
-		if(dirApplication == null) {
+		if (dirApplication == null) {
 			getApplicationDir();
 		}
-		if(dirPlugin == null) {
-			dirPlugin = new File(getApplicationDir(),"plugins");
-			if(!dirPlugin.exists()) dirPlugin.mkdir();
+		if (dirPlugin == null) {
+			dirPlugin = new File(getApplicationDir(), "plugins");
+			if (!dirPlugin.exists())
+				dirPlugin.mkdir();
 		}
 		return dirPlugin;
 	}
-	
+
 	public static File getBundleDir() {
-		if(dirApplication == null) {
+		if (dirApplication == null) {
 			getApplicationDir();
 		}
-		if(dirBundle == null) {
-			dirBundle = new File(getApplicationDir(),".bundles");
-			if(!dirBundle.exists()) dirBundle.mkdir();
+		if (dirBundle == null) {
+			dirBundle = new File(getApplicationDir(), ".bundles");
+			if (!dirBundle.exists())
+				dirBundle.mkdir();
 		}
 		return dirBundle;
 	}
 
 	public static File getDataDir() {
-		if(dirData == null) {
+		if (dirData == null) {
 			dirData = new File(System.getProperty("user.home"), "PathVisio-Data");
-			if(!dirData.exists()) dirData.mkdir();
+			if (!dirData.exists())
+				dirData.mkdir();
 		}
 		return dirData;
 	}

@@ -35,6 +35,8 @@ import org.pathvisio.debug.Logger;
 
 /**
  * Collection of static functions to deal with Resources stored in Jar files.
+ * 
+ * @author unknown
  */
 public class JarUtils {
 	static final String PREFIX_TMP = "PVJAR";

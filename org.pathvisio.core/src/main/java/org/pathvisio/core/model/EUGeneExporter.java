@@ -43,6 +43,7 @@ import org.pathvisio.model.PathwayObject;
  * exporter also handles the translation.
  */
 public class EUGeneExporter implements PathwayModelExporter {
+
 	public String[] getExtensions() {
 		return new String[] { "pwf" };
 	}
@@ -51,8 +52,12 @@ public class EUGeneExporter implements PathwayModelExporter {
 		return "Eu.Gene pathway";
 	}
 
-	public void doExport(File file, PathwayModel pathway) throws ConverterException {
-		EUGenePathway eugPathway = new EUGenePathway(pathway);
+	/**
+	 * @param file
+	 * @param pathwayModel
+	 */
+	public void doExport(File file, PathwayModel pathwayModel) throws ConverterException {
+		EUGenePathway eugPathway = new EUGenePathway(pathwayModel);
 		try {
 			eugPathway.writeToEUGene(file);
 		} catch (Exception e) {
@@ -60,16 +65,20 @@ public class EUGeneExporter implements PathwayModelExporter {
 		}
 	}
 
+	/**
+	 * @author unknown
+	 *
+	 */
 	private static class EUGenePathway {
 		Logger log = Logger.log;
-		PathwayModel pathway;
+		PathwayModel pathwayModel;
 
 		DataSource system; // The annotation system
 
 		List<Xref> refs;
 
-		public EUGenePathway(PathwayModel p) {
-			pathway = p;
+		public EUGenePathway(PathwayModel pathwayModel) {
+			this.pathwayModel = pathwayModel;
 			read();
 		}
 
@@ -82,7 +91,7 @@ public class EUGeneExporter implements PathwayModelExporter {
 			for (Xref ref : refs) {
 				DataSource ds = ref.getDataSource();
 				String id = ref.getId();
-				if (ds == system) { // Check if gene is of most occuring system
+				if (ds == system) { // Check if gene is of most occurring system
 					geneString.append(id + "\n");
 				} else {
 					missedGenes.append(id + "|" + ds.getSystemCode() + "; ");
@@ -95,7 +104,7 @@ public class EUGeneExporter implements PathwayModelExporter {
 			out = new PrintStream(file);
 
 			// Print the data
-			out.println("//PATHWAY_NAME = " + pathway.getPathway().getTitle());
+			out.println("//PATHWAY_NAME = " + pathwayModel.getPathway().getTitle());
 			out.println("//PATHWAY_SOURCE = GenMAPP");
 			out.println("//PATHWAY_MARKER = " + euGeneSystem);
 			if (missedGenes.length() > 0)
@@ -109,7 +118,7 @@ public class EUGeneExporter implements PathwayModelExporter {
 			refs = new ArrayList<Xref>();
 			Map<DataSource, Integer> codeCount = new HashMap<DataSource, Integer>();
 
-			for (PathwayObject elm : pathway.getPathwayObjects()) {
+			for (PathwayObject elm : pathwayModel.getPathwayObjects()) {
 				if (elm.getClass() != DataNode.class) {
 					continue; // Skip non-datanodes
 				}
@@ -179,6 +188,9 @@ public class EUGeneExporter implements PathwayModelExporter {
 		return Collections.emptyList();
 	}
 
+	/**
+	 *
+	 */
 	@Override
 	public void doExport(File file, PathwayModel pathway, int zoom) throws ConverterException {
 		// TODO Auto-generated method stub

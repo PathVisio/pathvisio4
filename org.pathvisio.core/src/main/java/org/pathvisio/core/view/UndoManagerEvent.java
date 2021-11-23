@@ -16,16 +16,17 @@
  ******************************************************************************/
 package org.pathvisio.core.view;
 
-/** signals that an action was added or removed from the undo stack. */
-public class UndoManagerEvent
-{
-	public UndoManagerEvent (String msg)
-	{
+/**
+ * Signals that an action was added or removed from the undo stack.
+ * 
+ * @author unknown
+ */
+public class UndoManagerEvent {
+	public UndoManagerEvent(String msg) {
 		undoMessage = msg;
 	}
 
-	public String getMessage()
-	{
+	public String getMessage() {
 		return undoMessage;
 	}
 

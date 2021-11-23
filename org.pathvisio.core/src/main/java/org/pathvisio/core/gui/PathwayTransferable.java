@@ -55,7 +55,9 @@ import org.pathvisio.model.LineElement.LinePoint;
 import org.pathvisio.model.type.DataNodeType;
 
 /**
- * helps transfer Pathways or bits of pathway over the clipboard
+ * This class helps transfer Pathways or bits of pathway over the clipboard.
+ * 
+ * @author unknown
  */
 public class PathwayTransferable implements Transferable {
 	public static final String INFO_DATASOURCE = "COPIED";
@@ -204,7 +206,7 @@ public class PathwayTransferable implements Transferable {
 			if (enew.getClass() == DataNode.class && ((DataNode) enew).getType() == DataNodeType.ALIAS) {
 				if (pnew.hasPathwayObject(((DataNode) enew).getAliasRef())) {
 				}
-				//TODO 
+				// TODO
 			}
 		}
 

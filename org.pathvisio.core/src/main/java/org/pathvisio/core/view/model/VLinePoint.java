@@ -28,13 +28,13 @@ import org.pathvisio.core.view.model.LinAlg.Point;
  * 
  * @author unknown, finterly
  */
-public class VPoint implements VDrawable, Adjustable {
+public class VLinePoint implements VDrawable, Adjustable {
 	// the handle that goes with this VPoint.
 	// This Handle is created, destroyed and generally managed by Line, not by
 	// VPoint
 	Handle handle;
 
-	private VLineElement line;
+	private VLineElement vLineElement;
 	private LinePoint linePoint;
 	private final VPathwayModel canvas;
 
@@ -47,21 +47,21 @@ public class VPoint implements VDrawable, Adjustable {
 	public void highlight() {
 		if (!isHighlighted) {
 			isHighlighted = true;
-			line.markDirty();
+			vLineElement.markDirty();
 		}
 	}
 
 	public void unhighlight() {
 		if (isHighlighted) {
 			isHighlighted = false;
-			line.markDirty();
+			vLineElement.markDirty();
 		}
 	}
 
-	VPoint(VPathwayModel canvas, LinePoint mPoint, VLineElement line) {
+	VLinePoint(VPathwayModel canvas, LinePoint mPoint, VLineElement line) {
 		this.canvas = canvas;
 		this.linePoint = mPoint;
-		this.line = line;
+		this.vLineElement = line;
 	}
 	
 	/**
@@ -98,7 +98,7 @@ public class VPoint implements VDrawable, Adjustable {
 	}
 
 	public VLineElement getLine() {
-		return line;
+		return vLineElement;
 	}
 
 	public void adjustToHandle(Handle h, double vnewx, double vnewy) {
@@ -110,8 +110,8 @@ public class VPoint implements VDrawable, Adjustable {
 			// get global preference and convert to radians.
 			double lineSnapStep = PreferenceManager.getCurrent().getInt(GlobalPreference.SNAP_TO_ANGLE_STEP) * Math.PI
 					/ 180;
-			VPoint p1 = line.getStart();
-			VPoint p2 = line.getEnd();
+			VLinePoint p1 = vLineElement.getStart();
+			VLinePoint p2 = vLineElement.getEnd();
 			double basex, basey;
 			// base is the static point the line rotates about.
 			// it is equal to the OTHER point, the one we're not moving.

@@ -19,9 +19,10 @@ package org.pathvisio.core.view;
 import java.util.EventObject;
 
 /**
- * base class for MouseEvent and KeyEvent: represents an input event
- * independent of toolkit (swing or SWT)
- * TODO: no longer needed. Just use swing event
+ * base class for MouseEvent and KeyEvent: represents an input event independent
+ * of toolkit (swing or SWT) TODO: no longer needed. Just use swing event
+ * 
+ * @author unknown
  */
 public class InputEvent extends EventObject {
 
@@ -38,8 +39,9 @@ public class InputEvent extends EventObject {
 	}
 
 	/**
-	 * returns true if the given key is pressed.
-	 * Nb, this is a mask, so you can use key | key to check multiple keys together */
+	 * returns true if the given key is pressed. Nb, this is a mask, so you can use
+	 * key | key to check multiple keys together
+	 */
 	public boolean isKeyDown(int key) {
 		return (modifier & key) != 0;
 	}

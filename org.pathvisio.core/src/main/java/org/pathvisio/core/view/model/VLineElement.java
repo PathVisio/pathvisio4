@@ -64,7 +64,7 @@ import org.pathvisio.model.shape.ShapeRegistry;
  */
 public class VLineElement extends VPathwayElement implements VGroupable, Adjustable {
 
-	private List<VPoint> points;
+	private List<VLinePoint> points;
 
 	private Map<Anchor, VAnchor> anchors = new HashMap<Anchor, VAnchor>();
 
@@ -79,7 +79,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	 */
 	public VLineElement(VPathwayModel canvas, LineElement o) {
 		super(canvas, o);
-		points = new ArrayList<VPoint>();
+		points = new ArrayList<VLinePoint>();
 		addPoint(o.getStartLinePoint());
 		addPoint(o.getEndLinePoint());
 		setAnchors();
@@ -107,7 +107,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	}
 
 	private void addPoint(LinePoint mp) {
-		VPoint vp = canvas.newPoint(mp, this);
+		VLinePoint vp = canvas.newPoint(mp, this);
 		points.add(vp);
 		setHandleLocation(vp);
 	}
@@ -119,7 +119,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	public void createHandles() {
 		createSegmentHandles();
 
-		for (VPoint vp : points) {
+		for (VLinePoint vp : points) {
 			vp.handle = new Handle(Handle.Freedom.FREE, this, vp);
 			// vp.handle.setCursorHint(Cursor.HAND_CURSOR);
 			vp.handle.setAngle(1);
@@ -273,7 +273,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 		}
 
 		// highlight unlinked points, after pressing Ctrl+L
-		for (VPoint vp : points) {
+		for (VLinePoint vp : points) {
 			if (vp.isHighlighted()) {
 				int size = 8;
 				g.setColor(PreferenceManager.getCurrent().getColor(GlobalPreference.COLOR_HIGHLIGHTED));
@@ -286,7 +286,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	@Override
 	public void unhighlight() {
 		super.unhighlight();
-		for (VPoint vp : points)
+		for (VLinePoint vp : points)
 			vp.unhighlight();
 	}
 
@@ -425,7 +425,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 		getCitation().setRPosition(r);
 	}
 
-	protected void swapPoint(VPoint pOld, VPoint pNew) {
+	protected void swapPoint(VLinePoint pOld, VLinePoint pNew) {
 		int i = points.indexOf(pOld);
 		if (i > -1) {
 			points.remove(pOld);
@@ -511,15 +511,15 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 		setVLine(r.getX(), r.getY(), r.getX() + r.getWidth(), r.getY() + r.getHeight());
 	}
 
-	public List<VPoint> getPoints() {
+	public List<VLinePoint> getPoints() {
 		return points;
 	}
 
-	public VPoint getStart() {
+	public VLinePoint getStart() {
 		return points.get(0);
 	}
 
-	public VPoint getEnd() {
+	public VLinePoint getEnd() {
 		return points.get(points.size() - 1);
 	}
 
@@ -599,7 +599,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 	}
 
 	protected void vRecalculatePoints(double vdx, double vdy) {
-		for (VPoint p : points) {
+		for (VLinePoint p : points) {
 			p.setVLocation(p.getVX() + canvas.mFromV(vdx), p.getVY() + canvas.mFromV(vdy));
 		}
 	}
@@ -614,7 +614,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 		for (Anchor anchor : getPathwayObject().getAnchors()) {
 			for (LinkableFrom ref : anchor.getLinkableFroms()) {
 				if (ref instanceof LinePoint) {
-					VPoint vp = canvas.getPoint((LinePoint) ref);
+					VLinePoint vp = canvas.getPoint((LinePoint) ref);
 					if (vp != null) {
 						vp.getLine().recalculateConnector();
 					}
@@ -631,7 +631,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 //		}
 	}
 
-	private void setHandleLocation(VPoint vp) {
+	private void setHandleLocation(VLinePoint vp) {
 		if (vp.handle == null)
 			return;
 		LinePoint mp = vp.getLinePoint();
@@ -642,7 +642,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 		getConnectorShape().recalculateShape(getMLine());
 		updateAnchorPositions();
 		updateCitationPosition();
-		for (VPoint vp : points)
+		for (VLinePoint vp : points)
 			setHandleLocation(vp);
 		markDirty();
 	}
@@ -660,7 +660,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 
 		updateSegmentHandles();
 		markDirty();
-		for (VPoint p : points) {
+		for (VLinePoint p : points) {
 			setHandleLocation(p);
 		}
 		if (getPathwayObject().getAnchors().size() != anchors.size()) {
@@ -677,7 +677,7 @@ public class VLineElement extends VPathwayElement implements VGroupable, Adjusta
 		for (Handle h : getSegmentHandles()) {
 			h.destroy();
 		}
-		for (VPoint p : points) {
+		for (VLinePoint p : points) {
 			if (p.handle != null)
 				p.handle.destroy();
 		}

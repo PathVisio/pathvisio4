@@ -19,24 +19,27 @@ package org.pathvisio.core.gui;
 import java.awt.event.MouseEvent;
 
 /**
- * Swing implementation of org.pathvisio.view.MouseEvent: handles
- * converting a MouseEvent from swing (awt) to the more generic
- * MouseEvent type understood by VPathway
+ * Swing implementation of org.pathvisio.view.MouseEvent: handles converting a
+ * MouseEvent from swing (awt) to the more generic MouseEvent type understood by
+ * VPathway
+ * 
+ * @author unknown
  */
 public class SwingMouseEvent extends org.pathvisio.core.view.MouseEvent {
 
 	MouseEvent awtEvent;
 
 	public SwingMouseEvent(MouseEvent e) {
-		super(e.getSource(), convertType(e), e.getButton(),
-				e.getX(), e.getY(), e.getClickCount(), e.getModifiersEx(), e.isPopupTrigger());
+		super(e.getSource(), convertType(e), e.getButton(), e.getX(), e.getY(), e.getClickCount(), e.getModifiersEx(),
+				e.isPopupTrigger());
 		awtEvent = e;
 	}
 
 	protected static int convertType(MouseEvent e) {
-		if(e.isPopupTrigger()) return MOUSE_HOVER;
+		if (e.isPopupTrigger())
+			return MOUSE_HOVER;
 
-		switch(e.getID()) {
+		switch (e.getID()) {
 		case MouseEvent.MOUSE_ENTERED:
 			return org.pathvisio.core.view.MouseEvent.MOUSE_ENTER;
 		case MouseEvent.MOUSE_EXITED:

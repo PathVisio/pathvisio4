@@ -23,6 +23,9 @@ import javax.swing.JComponent;
 
 import org.pathvisio.core.view.model.VElement;
 
+/**
+ * @author unknown
+ */
 public interface ToolTipProvider {
 	public Component createToolTipComponent(JComponent parent, Collection<VElement> elements);
 }

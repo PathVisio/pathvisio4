@@ -35,8 +35,11 @@ import org.pathvisio.util.Utils;
 
 /**
  * Loads & saves application preferences
+ * 
+ * @author unknown
  */
 public class PreferenceManager {
+
 	private Properties properties;
 	private File propFile = null;
 	private Set<PreferenceListener> listeners = new HashSet<PreferenceListener>();
@@ -70,7 +73,7 @@ public class PreferenceManager {
 	}
 
 	/**
-	 * Load preferences from file
+	 * Load preferences from file.
 	 */
 	public void load() {
 		properties = new Properties();
@@ -103,7 +106,9 @@ public class PreferenceManager {
 	}
 
 	/**
-	 * Get a preference as String
+	 * Get a preference as String.
+	 * 
+	 * @param p the preference.
 	 */
 	public String get(Preference p) {
 		String key = p.name();
@@ -114,6 +119,12 @@ public class PreferenceManager {
 		}
 	}
 
+	/**
+	 * Sets ...
+	 * 
+	 * @param p      the preference.
+	 * @param newVal the string value.
+	 */
 	public void set(Preference p, String newVal) {
 		String oldVal = get(p);
 
@@ -163,6 +174,8 @@ public class PreferenceManager {
 
 	/**
 	 * Returns true if the current value of Preference p equals the default value.
+	 * 
+	 * @param p
 	 */
 	public boolean isDefault(Preference p) {
 		return !properties.containsKey(p.name());

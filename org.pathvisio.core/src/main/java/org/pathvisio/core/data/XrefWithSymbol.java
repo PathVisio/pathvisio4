@@ -20,70 +20,65 @@ import org.bridgedb.DataSource;
 import org.bridgedb.Xref;
 
 /**
- * Stores a combination of {@link DataSource}, id and symbol. See also {@link Xref},
- * which only stores DataSource and id. A symbol is a name or biological shorthand
- * that is not guaranteed to be unique or unambiguous
+ * Stores a combination of {@link DataSource}, id and symbol. See also
+ * {@link Xref}, which only stores DataSource and id. A symbol is a name or
+ * biological shorthand that is not guaranteed to be unique or unambiguous
  * <p>
  * Immutable class, thread-safe
+ * 
+ * @author unknown
  */
-public final class XrefWithSymbol implements Comparable<XrefWithSymbol>
-{
+public final class XrefWithSymbol implements Comparable<XrefWithSymbol> {
+	
 	final private String symbol;
 	final private Xref xref;
 
 	// String representation
 	final private String rep;
 
-	public XrefWithSymbol(Xref xref, String symbol)
-	{
+	public XrefWithSymbol(Xref xref, String symbol) {
 		this.symbol = symbol;
 		this.xref = xref;
 		rep = xref + "[" + symbol + "]";
 	}
 
-	public Xref asXref()
-	{
+	public Xref asXref() {
 		return xref;
 	}
 
 	/**
 	 * null values for all three params are allowed,
 	 */
-	public XrefWithSymbol(String id, DataSource ds, String symbol)
-	{
-		this (new Xref (id, ds), symbol);
+	public XrefWithSymbol(String id, DataSource ds, String symbol) {
+		this(new Xref(id, ds), symbol);
 	}
 
 	/**
-	 * @return symbol part, a name or biological shorthand
-	 * that is not guaranteed to be unique or unambiguous
+	 * @return symbol part, a name or biological shorthand that is not guaranteed to
+	 *         be unique or unambiguous
 	 */
-	public String getSymbol()
-	{
+	public String getSymbol() {
 		return symbol;
 	}
 
 	/**
 	 * @return DataSource part, such as
 	 */
-	public DataSource getDataSource()
-	{
+	public DataSource getDataSource() {
 		return xref.getDataSource();
 	}
 
 	/**
 	 * @return identifier part, such as "3643" or "ENSG00000001"
 	 */
-	public String getId()
-	{
+	public String getId() {
 		return xref.getId();
 	}
 
 	/**
 	 * compares on the string representation
 	 */
-	public int compareTo (XrefWithSymbol o2)
-	{
+	public int compareTo(XrefWithSymbol o2) {
 		return rep.compareTo(o2.rep);
 	}
 
@@ -91,8 +86,7 @@ public final class XrefWithSymbol implements Comparable<XrefWithSymbol>
 	 * hashCode depends on symbol + id + datasource
 	 */
 	@Override
-	public int hashCode()
-	{
+	public int hashCode() {
 		return rep.hashCode();
 	}
 
@@ -100,19 +94,18 @@ public final class XrefWithSymbol implements Comparable<XrefWithSymbol>
 	 * returns true if id, DataSource and symbol are all three the same.
 	 */
 	@Override
-	public boolean equals(Object o)
-	{
-		if (o == null) return false;
-		if (!(o instanceof XrefWithSymbol)) return false;
-		XrefWithSymbol ref = (XrefWithSymbol)o;
-		return
-			(xref == null ? ref.xref == null : xref.equals(ref.xref)) &&
-			(symbol == null ? ref.symbol == null : symbol.equals(ref.symbol));
+	public boolean equals(Object o) {
+		if (o == null)
+			return false;
+		if (!(o instanceof XrefWithSymbol))
+			return false;
+		XrefWithSymbol ref = (XrefWithSymbol) o;
+		return (xref == null ? ref.xref == null : xref.equals(ref.xref))
+				&& (symbol == null ? ref.symbol == null : symbol.equals(ref.symbol));
 	}
 
 	@Override
-	public String toString()
-	{
+	public String toString() {
 		return rep;
 	}
 }

@@ -22,12 +22,14 @@ import java.util.EventObject;
 import java.util.List;
 
 /**
- * A method to keep track of progress of a background task.
- * Can handle cancellation, task names and progress reports.
+ * A method to keep track of progress of a background task. Can handle
+ * cancellation, task names and progress reports.
  *
- * This class is UI independent and should be used by long-running methods
- * that can be run either from the command line, or from the GUI, in the latter
- * case a ProgressDialog may be used to let the user monitor and cancel the task.
+ * This class is UI independent and should be used by long-running methods that
+ * can be run either from the command line, or from the GUI, in the latter case
+ * a ProgressDialog may be used to let the user monitor and cancel the task.
+ * 
+ * @author unknown
  */
 public class ProgressKeeper {
 	private static final int PROGRESS_UNKNOWN = -1;
@@ -55,31 +57,28 @@ public class ProgressKeeper {
 	}
 
 	/** returns true if work is of indeterminate length */
-	public boolean isIndeterminate()
-	{
+	public boolean isIndeterminate() {
 		return (total == PROGRESS_UNKNOWN);
 	}
 
-	//TODO use setProgress instead?
+	// TODO use setProgress instead?
 	public void worked(int w) {
-		if(!isFinished()) {
+		if (!isFinished()) {
 			progress += w;
 			fireProgressEvent(ProgressEvent.PROGRESS_CHANGED);
-			if(progress >= total) {
-				progress = total; //to trigger event
+			if (progress >= total) {
+				progress = total; // to trigger event
 				finished();
 			}
 		}
 	}
 
-	public void setProgress(int val)
-	{
-		if(!isFinished())
-		{
+	public void setProgress(int val) {
+		if (!isFinished()) {
 			progress = val;
 			fireProgressEvent(ProgressEvent.PROGRESS_CHANGED);
-			if(progress >= total) {
-				progress = total; //to trigger event
+			if (progress >= total) {
+				progress = total; // to trigger event
 				finished();
 			}
 		}
@@ -90,10 +89,12 @@ public class ProgressKeeper {
 		fireProgressEvent(ProgressEvent.TASK_NAME_CHANGED);
 	}
 
-	public String getTaskName() { return taskName; }
+	public String getTaskName() {
+		return taskName;
+	}
 
 	public void finished() {
-		if(!isFinished()) { //Only fire event once
+		if (!isFinished()) { // Only fire event once
 			progress = PROGRESS_FINISHED;
 			fireProgressEvent(ProgressEvent.FINISHED);
 		}
@@ -119,21 +120,19 @@ public class ProgressKeeper {
 		return progress;
 	}
 
-	public void report(String message)
-	{
+	public void report(String message) {
 		report = message;
 		fireProgressEvent(ProgressEvent.REPORT);
 	}
 
-	public String getReport() { return report; }
+	public String getReport() {
+		return report;
+	}
 
-	void fireProgressEvent(final int type)
-	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				for(ProgressListener l : listeners)
+	void fireProgressEvent(final int type) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				for (ProgressListener l : listeners)
 					l.progressEvent(new ProgressEvent(ProgressKeeper.this, type));
 			}
 		});
@@ -142,7 +141,8 @@ public class ProgressKeeper {
 	List<ProgressListener> listeners = new ArrayList<ProgressListener>();
 
 	public void addListener(ProgressListener l) {
-		if(!listeners.contains(l)) listeners.add(l);
+		if (!listeners.contains(l))
+			listeners.add(l);
 	}
 
 	public List<ProgressListener> getListeners() {
@@ -150,13 +150,10 @@ public class ProgressKeeper {
 	}
 
 	/**
-	 * notifies of changes to this ProgressKeeper,
-	 * when
+	 * notifies of changes to this ProgressKeeper, when
 	 *
-	 * - report message has changed
-	 * - progress percentage has changed
-	 * - task has finished
-	 * - task name has changed
+	 * - report message has changed - progress percentage has changed - task has
+	 * finished - task name has changed
 	 */
 	public class ProgressEvent extends EventObject {
 
@@ -166,15 +163,22 @@ public class ProgressKeeper {
 		public static final int PROGRESS_CHANGED = 3;
 
 		private int type;
+
 		public ProgressEvent(ProgressKeeper source, int type) {
 			super(source);
 			this.type = type;
 		}
-		public int getType() { return type; }
-		public ProgressKeeper getProgressKeeper() { return (ProgressKeeper)getSource(); }
+
+		public int getType() {
+			return type;
+		}
+
+		public ProgressKeeper getProgressKeeper() {
+			return (ProgressKeeper) getSource();
+		}
 	}
 
-	/** Implement this if you wish to receive ProgressEvents.*/
+	/** Implement this if you wish to receive ProgressEvents. */
 	public interface ProgressListener {
 		public void progressEvent(ProgressEvent e);
 	}

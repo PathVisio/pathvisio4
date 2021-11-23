@@ -16,14 +16,18 @@
  ******************************************************************************/
 package org.pathvisio.core.view;
 
-/** generic keyboard input event for VPathway, toolkit (swing / SWT) independent */
+/**
+ * generic keyboard input event for VPathway, toolkit (swing / SWT) independent
+ * 
+ * @author unknown
+ */
 public class KeyEvent extends InputEvent {
 
-	//Types
+	// Types
 	public static final int KEY_PRESSED = 0;
 	public static final int KEY_RELEASED = 1;
 
-	//Keys
+	// Keys
 	public static final int MIN_VALUE = Character.MAX_VALUE;
 	public static final int NONE = 0;
 	public static final int CTRL = MIN_VALUE + 1;
@@ -54,9 +58,9 @@ public class KeyEvent extends InputEvent {
 	}
 
 	public boolean isKey(char c) {
-		System.out.println("ask: " + (int)c);
+		System.out.println("ask: " + (int) c);
 		System.out.println("have: " + keyCode);
-		return (int)c == keyCode;
+		return (int) c == keyCode;
 	}
 
 	public boolean isKey(int i) {

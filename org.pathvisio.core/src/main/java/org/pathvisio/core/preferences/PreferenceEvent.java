@@ -17,13 +17,13 @@
 package org.pathvisio.core.preferences;
 
 /**
- * This event notifies listeners of changes to preferences set via the PreferenceManager.
+ * This event notifies listeners of changes to preferences set via the
+ * PreferenceManager.
  *
  * @author Mark Woon
  */
 public class PreferenceEvent {
 	private Preference preference;
-
 
 	public PreferenceEvent(Preference pref) {
 		if (pref == null) {
@@ -31,7 +31,6 @@ public class PreferenceEvent {
 		}
 		preference = pref;
 	}
-
 
 	public boolean isModified(Preference pref) {
 		return preference == pref;

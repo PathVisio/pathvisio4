@@ -31,6 +31,8 @@ import org.pathvisio.model.PathwayModel;
 
 /**
  * A Pathway exporter for Bitmap formats, based on the javax.imageio library
+ * 
+ * @author unknown 
  */
 public class RasterImageExporter extends ImageExporter {
 

@@ -99,8 +99,8 @@ public class Handle extends VElement
 	 * @param parent	 The {@link VElement} this handle belongs to, and which
 	 *                   will be selected when this handle is clicked
 	 * @param adjustable The object that is being adjusted by this handle. This is usually,
-	 *                   but not always, the same as parent. For example, a Handle on a {@link VPoint}
-	 *                   has a {@link VLineElement} as parent but the {@link VPoint} as adjustable
+	 *                   but not always, the same as parent. For example, a Handle on a {@link VLinePoint}
+	 *                   has a {@link VLineElement} as parent but the {@link VLinePoint} as adjustable
 	 */
 	public Handle(Freedom aFreedom, VElement parent, Adjustable adjustable)
 	{

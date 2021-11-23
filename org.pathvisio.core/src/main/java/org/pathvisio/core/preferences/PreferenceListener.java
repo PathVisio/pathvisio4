@@ -17,7 +17,8 @@
 package org.pathvisio.core.preferences;
 
 /**
- * Implement this if you want to be notified of changes to preferences set via the PreferenceManager.
+ * Implement this if you want to be notified of changes to preferences set via
+ * the PreferenceManager.
  *
  * @author Mark Woon
  */

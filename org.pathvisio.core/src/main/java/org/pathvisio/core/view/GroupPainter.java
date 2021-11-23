@@ -21,17 +21,19 @@ import java.awt.Graphics2D;
 import org.pathvisio.core.view.model.VGroup;
 
 /**
- * Interface to implement group style specific
- * appearances.
+ * Interface to implement group style specific appearances.
+ * 
  * @author thomas
  */
 public interface GroupPainter {
+	
 	/**
 	 * Draw the appearance of the given group.
-	 * @param g The {@link Graphics2D} object to draw on
+	 * 
+	 * @param g     The {@link Graphics2D} object to draw on
 	 * @param group The group to draw
-	 * @param flags Several flags that provide information about the
-	 * group state. These include the {@link VGroup}.FLAG_* constants.
+	 * @param flags Several flags that provide information about the group state.
+	 *              These include the {@link VGroup}.FLAG_* constants.
 	 */
 	public void drawGroup(Graphics2D g, VGroup group, int flags);
 }

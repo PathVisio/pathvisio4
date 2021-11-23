@@ -49,7 +49,6 @@ import org.pathvisio.util.ColorUtils;
 import org.pathvisio.core.preferences.GlobalPreference;
 import org.pathvisio.core.preferences.PreferenceManager;
 import org.pathvisio.core.util.Resources;
-import org.pathvisio.core.view.Template;
 
 /**
  * Contains a set of templates, patterns of PathwayElements that can be added to

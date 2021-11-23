@@ -53,7 +53,7 @@
 
 	<!-- Dependencies needed to compile this project. -->
 	<dependencies>
-		<!-- PathVisio (temporary) -->
+		<!-- PathVisio -->
 		<dependency>
 			<groupId>org.pathvisio</groupId>
 			<artifactId>org.pathvisio.core</artifactId>
@@ -67,35 +67,13 @@
 		<!-- BridgeDb -->
 		<dependency>
 			<groupId>org.bridgedb</groupId>
-			<artifactId>org.bridgedb.bio</artifactId>
-			<version>${bridgedb.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.bridgedb</groupId>
 			<artifactId>org.bridgedb.gui</artifactId>
-			<version>${bridgedb.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.bridgedb</groupId>
-			<artifactId>org.bridgedb.rdb</artifactId>
 			<version>${bridgedb.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bridgedb</groupId>
 			<artifactId>org.bridgedb.rdb.construct</artifactId>
 			<version>${bridgedb.version}</version>
-		</dependency>
-		<!-- Apache FOP -->
-		<dependency>
-			<groupId>org.apache.xmlgraphics</groupId>
-			<artifactId>fop</artifactId>
-			<version>2.6</version>
-			<exclusions>
-				<exclusion>
-					<groupId>xml-apis</groupId>
-					<artifactId>xml-apis</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 	</dependencies>
 </project>

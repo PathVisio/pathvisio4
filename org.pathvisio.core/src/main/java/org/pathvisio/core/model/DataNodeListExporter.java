@@ -55,7 +55,7 @@ public class DataNodeListExporter implements PathwayModelExporter {
 	 * Set the separator used to separate multiple references for a single DataNode
 	 * on the pathway. Default is ", ".
 	 * 
-	 * @param sep
+	 * @param sep the String seperator to set.
 	 */
 	public void setMultiRefSep(String sep) {
 		multiRefSep = sep;
@@ -64,6 +64,8 @@ public class DataNodeListExporter implements PathwayModelExporter {
 	/**
 	 * Get the separator used to separate multiple references for a single DataNode
 	 * on the pathway. Default is ", ".
+	 * 
+	 * @return multiRefSep the separator used to separate multiple references.
 	 */
 	public String getMultiRefSep() {
 		return multiRefSep;
@@ -76,7 +78,7 @@ public class DataNodeListExporter implements PathwayModelExporter {
 	 * NB: replace the deprecated setResultCode(). TODO
 	 * 
 	 * @see #DB_ORIGINAL
-	 * @param code
+	 * @param value the data source.
 	 */
 	public void setResultDataSource(DataSource value) {
 		resultDs = value;
@@ -116,8 +118,10 @@ public class DataNodeListExporter implements PathwayModelExporter {
 
 	/**
 	 *
+	 * @param file
+	 * @param pathwayModel
 	 */
-	public void doExport(File file, PathwayModel pathway) throws ConverterException {
+	public void doExport(File file, PathwayModel pathwayModel) throws ConverterException {
 		if (!DB_ORIGINAL.equals(getResultCode())) { // TODO
 			// Check gene database connection
 			if (gdbManager == null || !gdbManager.isConnected()) {
@@ -131,7 +135,7 @@ public class DataNodeListExporter implements PathwayModelExporter {
 			throw new ConverterException(e);
 		}
 		printHeaders(out);
-		for (DataNode elm : pathway.getDataNodes()) { // TODO datanodes instead of elm
+		for (DataNode elm : pathwayModel.getDataNodes()) { // TODO datanodes instead of elm
 			String line = "";
 			String id = elm.getXref().getId();
 			DataSource ds = ((DataNode) elm).getXref().getDataSource();
@@ -170,6 +174,12 @@ public class DataNodeListExporter implements PathwayModelExporter {
 		out.println("Identifier\tDatabase");
 	}
 
+	/**
+	 * Returns true if given string is valid.
+	 * 
+	 * @param string the string to check.
+	 * @return true is string is valid, not null with length greater than 0.
+	 */
 	private boolean checkString(String string) {
 		return string != null && string.length() > 0;
 	}
@@ -178,6 +188,9 @@ public class DataNodeListExporter implements PathwayModelExporter {
 		return new String[] { "txt" };
 	}
 
+	/**
+	 *
+	 */
 	public String getName() {
 		return "DataNode list";
 	}
@@ -185,8 +198,10 @@ public class DataNodeListExporter implements PathwayModelExporter {
 	private GdbManager gdbManager = null;
 
 	/**
-	 * Create an exporter that uses the given GdbManager to lookup cross references
+	 * Creates an exporter that uses the given GdbManager to lookup cross references
 	 * for each datanode
+	 * 
+	 * @param gdbManager
 	 */
 	public DataNodeListExporter(GdbManager gdbManager) {
 		this.gdbManager = gdbManager;
@@ -200,6 +215,9 @@ public class DataNodeListExporter implements PathwayModelExporter {
 		return Collections.emptyList();
 	}
 
+	/**
+	 *
+	 */
 	@Override
 	public void doExport(File file, PathwayModel pathway, int zoom) throws ConverterException {
 		// TODO Auto-generated method stub

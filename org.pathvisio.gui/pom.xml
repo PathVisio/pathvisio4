@@ -37,30 +37,13 @@
 
 	<!-- Dependencies needed to compile this project. -->
 	<dependencies>
-		<!-- PathVisio (temporary) -->
+		<!-- PathVisio -->
 		<dependency>
 			<groupId>org.pathvisio</groupId>
 			<artifactId>org.pathvisio.core</artifactId>
 			<version>${revision}</version>
 		</dependency>
-		<!-- BridgeDb -->
-		<dependency>
-			<groupId>org.bridgedb</groupId>
-			<artifactId>org.bridgedb.bio</artifactId>
-			<version>${bridgedb.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.bridgedb</groupId>
-			<artifactId>bridgedb-bundle</artifactId>
-			<version>${bridgedb.version}</version>
-			<type>pom</type>
-		</dependency>
 		<!-- JGoodies Forms -->
-		<dependency>
-			<groupId>com.jgoodies</groupId>
-			<artifactId>jgoodies-forms</artifactId>
-			<version>1.9.0</version>
-		</dependency>
 		<dependency>
 			<groupId>com.jgoodies</groupId>
 			<artifactId>jgoodies-forms</artifactId>

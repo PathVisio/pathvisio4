@@ -66,7 +66,6 @@ import org.pathvisio.model.Shape;
 import org.pathvisio.model.ShapedElement;
 import org.pathvisio.model.PathwayElement;
 import org.pathvisio.model.LineElement.Anchor;
-import org.pathvisio.model.LineElement.GenericPoint;
 import org.pathvisio.model.LineElement.LinePoint;
 import org.pathvisio.model.Pathway;
 import org.pathvisio.event.PathwayModelEvent;
@@ -77,7 +76,6 @@ import org.pathvisio.util.Utils;
 import org.pathvisio.core.view.KeyEvent;
 import org.pathvisio.core.view.LayoutType;
 import org.pathvisio.core.view.MouseEvent;
-import org.pathvisio.core.view.Template;
 import org.pathvisio.core.view.VElementMouseEvent;
 import org.pathvisio.core.view.VElementMouseListener;
 import org.pathvisio.core.view.model.Handle.Freedom;
@@ -97,96 +95,30 @@ import org.pathvisio.core.view.model.ViewActions.TextFormattingAction;
  * @author unknown, finterly
  */
 public class VPathwayModel implements PathwayModelListener {
+
 	private static final double FUZZY_SIZE = 8; // fuzz-factor around mouse cursor
 	static final int ZORDER_SELECTIONBOX = Integer.MAX_VALUE;
 	static final int ZORDER_HANDLE = Integer.MAX_VALUE - 1;
 
-	// flags for cursor change if mouse is over a
-	// label with href and ctrl button is pressed
-	private boolean stateCtrl = false;
-	private boolean stateEntered = false;
-	private VElement lastEnteredElement = null;
-
-	private boolean selectionEnabled = true;
-
+	private PathwayModel data; // the associated {@link PathwayModel}.
 	private PathwayModel temporaryCopy = null;
-
-	/**
-	 * Returns true if snap to anchors is enabled
-	 * 
-	 * @return
-	 */
-	public boolean isSnapToAnchors() {
-		return PreferenceManager.getCurrent().getBoolean(GlobalPreference.SNAP_TO_ANCHOR);
-	}
-
-	/**
-	 * Returns true if the selection capability of this VPathway is enabled
-	 */
-	public boolean getSelectionEnabled() {
-		return selectionEnabled;
-	}
-
-	/**
-	 * You can disable the selection capability of this VPathway by passing false.
-	 * This is not used within Pathvisio, but it is meant for embedding VPathway in
-	 * other applications, where selections may not be needed.
-	 */
-	public void setSelectionEnabled(boolean value) {
-		selectionEnabled = value;
-	}
-
-	private VPathwayWrapper parent; // may be null
-
-	/**
-	 * All objects that are visible on this mapp, including the handles but
-	 * excluding the legend, mappInfo and selectionBox objects
-	 */
-	private List<VElement> drawingObjects;
-	private List<VElement> toAdd = new ArrayList<VElement>();
-
-	/**
-	 * Obtain all VPathwayElements on this VPathway
-	 */
-	public List<VElement> getDrawingObjects() {
-		return drawingObjects;
-	}
-
-	/**
-	 * The {@link VElement} that is pressed last mouseDown event}
-	 */
-	private VElement pressedObject = null;
-
-	/**
-	 * {@link VInfoBox} object that contains information about this pathway,
-	 * currently only used for information in PropertyPanel (TODO: has to be
-	 * implemented to behave the same as any Graphics object when displayed on the
-	 * drawing)
-	 */
-	private VInfoBox infoBox;
-
-	private PathwayModel data;
-
-	/**
-	 * Returns the associated org.pathvisio.model.Pathway object
-	 */
-	public PathwayModel getPathwayModel() {
-		return data;
-	}
-
+	private VPathwayWrapper parent; // may be null, optional gui-specific wrapper for this VPathwayModel.
+	private VInfoBox vInfoBox;
+	private List<VElement> drawingObjects;// All visible objects (incl. handles; excl. selectionBox objects)
 	SelectionBox selection;
+	private List<VElement> toAdd = new ArrayList<VElement>();
+	private VElement lastEnteredElement = null;
+	private VElement pressedObject = null; // VElement that is pressed last mouseDown event
+	Template newTemplate = null;
 
 	private boolean editMode = true;
+	private boolean selectionEnabled = true;
+	private boolean stateCtrl = false; // flags for cursor change if mouse is over a label with href
+	private boolean stateEntered = false;// and ctrl button is pressed
 
-	/**
-	 * Checks if this drawing is in edit mode
-	 *
-	 * @return false if in edit mode, true if not
-	 */
-	public boolean isEditMode() {
-		return editMode;
-	}
-
+	// ================================================================================
+	// Constructors
+	// ===============================================================================
 	/**
 	 * Constructor for this class.
 	 *
@@ -211,20 +143,166 @@ public class VPathwayModel implements PathwayModelListener {
 		// registerKeyboardActions();
 	}
 
+	// ================================================================================
+	// Accessors
+	// ===============================================================================
 	/**
-	 * This will cause a complete redraw of the pathway to be scheduled. The redraw
-	 * will happen as soon as all other swing events are processed.
-	 * <p>
-	 * Use this only after large changes (e.g. loading a new pathway, applying a new
-	 * visualization method) as it is quite slow.
+	 * Returns the associated {@link PathwayModel}.
+	 * 
+	 * @return data
 	 */
-	public void redraw() {
-		if (parent != null)
-			parent.redraw();
+	public PathwayModel getPathwayModel() {
+		return data;
 	}
 
+	/**
+	 * Returns the optional gui-specific wrapper for this VPathwayModel.
+	 * 
+	 * @return parent the optional gui-specific wrapper.
+	 */
 	public VPathwayWrapper getWrapper() {
 		return parent;
+	}
+
+	/**
+	 * Returns the MappInfo containing information on the pathway
+	 * 
+	 * @return vInfoBox the view of infobox.
+	 */
+	public VInfoBox getMappInfo() {
+		return vInfoBox;
+	}
+
+	/**
+	 * Sets the MappInfo containing information on the pathway
+	 *
+	 * @param v the view infobox to set.
+	 */
+	public void setMappInfo(VInfoBox v) {
+		this.vInfoBox = v;
+	}
+
+	/**
+	 * Returns all VElement on this VPathwayModel.
+	 * 
+	 * @return drawingObjects
+	 */
+	public List<VElement> getDrawingObjects() {
+		return drawingObjects;
+	}
+
+	public void setPressedObject(VElement o) {
+		pressedObject = o;
+	}
+
+	/**
+	 * Method to set the template that provides the new graphics type that has to be
+	 * added next time the user clicks on the drawing.
+	 *
+	 * @param t A template that provides the elements to be added
+	 */
+	public void setNewTemplate(Template t) {
+		newTemplate = t;
+	}
+
+	/**
+	 * Checks if this drawing is in edit mode.
+	 *
+	 * @return true if in edit mode, false otherwise. //TODO
+	 */
+	public boolean isEditMode() {
+		return editMode;
+	}
+
+	/**
+	 * Set this drawing to edit mode.
+	 *
+	 * @param editMode true if edit mode has to be enabled, false if disabled (view
+	 *                 mode).
+	 */
+	public void setEditMode(boolean editMode) {
+		this.editMode = editMode;
+		if (!editMode) {
+			clearSelection();
+		}
+
+		redraw();
+		VPathwayEventType type = editMode ? VPathwayEventType.EDIT_MODE_ON : VPathwayEventType.EDIT_MODE_OFF;
+		fireVPathwayEvent(new VPathwayModelEvent(this, type));
+	}
+
+	/**
+	 * Returns true if the selection capability of this VPathway is enabled
+	 * 
+	 * @return true if selection capability is enabled.
+	 */
+	public boolean getSelectionEnabled() {
+		return selectionEnabled;
+	}
+
+	/**
+	 * You can disable the selection capability of this VPathway by passing false.
+	 * This is not used within Pathvisio, but it is meant for embedding VPathway in
+	 * other applications, where selections may not be needed.
+	 */
+	public void setSelectionEnabled(boolean value) {
+		selectionEnabled = value;
+	}
+
+	// ================================================================================
+	// Miscellaneous Methods
+	// ===============================================================================
+	/**
+	 * Calculate the board size. Calls {@link VElement#getVBounds()} for every
+	 * element and adds all results together to obtain the board size
+	 */
+	public Dimension calculateVSize() {
+		Rectangle2D bounds = new Rectangle2D.Double();
+		for (VElement e : drawingObjects) {
+			bounds.add(e.getVBounds());
+		}
+		return new Dimension((int) bounds.getWidth() + 10, (int) bounds.getHeight() + 10);
+	}
+
+	/**
+	 * Returns true if snap to anchors is enabled.
+	 * 
+	 * @return true if snap to anchors is enabled.
+	 */
+	public boolean isSnapToAnchors() {
+		return PreferenceManager.getCurrent().getBoolean(GlobalPreference.SNAP_TO_ANCHOR);
+	}
+
+	// ================================================================================
+	// Map Model to View Methods
+	// ================================================================================
+	Map<LinePoint, VLinePoint> pointsMtoV = new HashMap<LinePoint, VLinePoint>();
+
+	/**
+	 * Returns corresponding {@link VLinePoint} for given model {@link LinePoint}.
+	 * 
+	 * @param linePoint the model line point.
+	 * @return the view line point for the given model line point.
+	 */
+	protected VLinePoint getPoint(LinePoint linePoint) {
+		return pointsMtoV.get(linePoint);
+	}
+
+	/**
+	 * Creates a new {@link VLinePoint} from given model {@link LinePoint} for given
+	 * {@link VLineElement}.
+	 * 
+	 * @param linePoint    the model line point.
+	 * @param vLineElement the view line element.
+	 * @return
+	 */
+	public VLinePoint newPoint(LinePoint linePoint, VLineElement vLineElement) {
+		VLinePoint p = pointsMtoV.get(linePoint);
+		if (p == null) {
+			p = new VLinePoint(this, linePoint, vLineElement);
+			pointsMtoV.put(linePoint, p);
+		}
+		return p;
 	}
 
 	/**
@@ -233,8 +311,6 @@ public class VPathwayModel implements PathwayModelListener {
 	 * @param o the model pathway element.
 	 */
 	private VPathwayObject fromModelElement(PathwayObject o) {
-		VPathwayObject result = null;
-
 		if (o.getClass() == DataNode.class) {
 			return fromModelDataNode((DataNode) o);
 		} else if (o.getClass() == State.class) {
@@ -346,7 +422,7 @@ public class VPathwayModel implements PathwayModelListener {
 		pressedObject = null;
 		data.transferStatusFlagListeners(originalState);
 		data = null;
-		pointsMtoV = new HashMap<LinePoint, VPoint>();
+		pointsMtoV = new HashMap<LinePoint, VLinePoint>();
 		fromModel(originalState);
 
 		if (changed != originalState.hasChanged()) {
@@ -374,53 +450,6 @@ public class VPathwayModel implements PathwayModelListener {
 		Logger.log.trace("Done creating view structure");
 	}
 
-	Template newTemplate = null;
-
-	/**
-	 * Method to set the template that provides the new graphics type that has to be
-	 * added next time the user clicks on the drawing.
-	 *
-	 * @param t A template that provides the elements to be added
-	 */
-	public void setNewTemplate(Template t) {
-		newTemplate = t;
-	}
-
-	/**
-	 * Adds object boundaries to the "dirty" area, the area which needs to be
-	 * redrawn. The redraw will not happen immediately, but will be scheduled on the
-	 * event dispatch thread.
-	 */
-	void addDirtyRect(Rectangle2D ar) {
-		if (parent != null)
-			parent.redraw(ar.getBounds());
-	}
-
-	/**
-	 * Sets the MappInfo containing information on the pathway
-	 *
-	 * @param mappInfo
-	 */
-	public void setMappInfo(VInfoBox mappInfo) {
-		this.infoBox = mappInfo;
-	}
-
-	/**
-	 * Gets the MappInfo containing information on the pathway
-	 */
-	public VInfoBox getMappInfo() {
-		return infoBox;
-	}
-
-	/**
-	 * Adds an element to the drawing
-	 *
-	 * @param o the element to add
-	 */
-	public void addObject(VElement o) {
-		toAdd.add(o);
-	}
-
 	/**
 	 * Gets the view representation {@link VPathwayObject} of the given model
 	 * element {@link PathwayElement}
@@ -441,38 +470,106 @@ public class VPathwayModel implements PathwayModelListener {
 		return null;
 	}
 
-	Map<LinePoint, VPoint> pointsMtoV = new HashMap<LinePoint, VPoint>();
-
-	protected VPoint getPoint(LinePoint mPoint) {
-		return pointsMtoV.get(mPoint);
-	}
-
-	public VPoint newPoint(LinePoint mPoint, VLineElement line) {
-		VPoint p = pointsMtoV.get(mPoint);
-		if (p == null) {
-			p = new VPoint(this, mPoint, line);
-			pointsMtoV.put(mPoint, p);
-		}
-		return p;
+	// ================================================================================
+	// Drawing Methods
+	// ===============================================================================
+	
+	/**
+	 * @param o
+	 * @return
+	 */
+	boolean checkDrawAllowed(VElement o) {
+		if (isEditMode())
+			return true;
+		else
+			return !(o instanceof Handle || (o == selection && !isDragging));
 	}
 
 	/**
-	 * Set this drawing to editmode
-	 *
-	 * @param editMode true if editmode has to be enabled, false if disabled (view
-	 *                 mode)
+	 * Paints all components in the drawing. This method is called automatically in
+	 * the painting process. This method will draw opaquely, meaning it will erase
+	 * the background.
+	 * 
+	 * @param g2d the graphics device to draw on. The method will not draw outside
+	 *            the clipping area.
 	 */
-	public void setEditMode(boolean editMode) {
-		this.editMode = editMode;
-		if (!editMode) {
-			clearSelection();
-		}
+	public void draw(Graphics2D g2d) {
+		addScheduled();
+		cleanUp();
 
-		redraw();
-		VPathwayEventType type = editMode ? VPathwayEventType.EDIT_MODE_ON : VPathwayEventType.EDIT_MODE_OFF;
-		fireVPathwayEvent(new VPathwayModelEvent(this, type));
+		try {
+			// save original, non-clipped, to pass on to VPathwayEvent
+			Graphics2D g2dFull = (Graphics2D) g2d.create();
+
+			// we only redraw the part within the clipping area.
+			Rectangle area = g2d.getClipBounds();
+			if (area == null) {
+				Dimension size = parent == null ? new Dimension(getVWidth(), getVHeight())
+						: parent.getViewRect().getSize(); // Draw the visible area
+				area = new Rectangle(0, 0, size.width, size.height);
+			}
+
+			// erase the background
+			g2d.setColor(java.awt.Color.WHITE);
+			g2d.fillRect(area.x, area.y, area.width, area.height);
+
+			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+
+			g2d.clip(area);
+			g2d.setColor(java.awt.Color.BLACK);
+			Collections.sort(drawingObjects);
+			cleanUp();
+			for (VElement o : drawingObjects) {
+				if (o.vIntersects(area)) {
+					if (checkDrawAllowed(o)) {
+						o.draw((Graphics2D) g2d.create());
+						fireVPathwayEvent(new VPathwayModelEvent(this, o, (Graphics2D) g2dFull.create(),
+								VPathwayEventType.ELEMENT_DRAWN));
+					}
+				}
+			}
+		} catch (ConcurrentModificationException ex) {
+			// guard against messing up repaint event completely
+			Logger.log.error("Concurrent modification", ex);
+		}
 	}
 
+	/**
+	 * This will cause a complete redraw of the pathway to be scheduled. The redraw
+	 * will happen as soon as all other swing events are processed.
+	 * <p>
+	 * Use this only after large changes (e.g. loading a new pathway, applying a new
+	 * visualization method) as it is quite slow.
+	 */
+	public void redraw() {
+		if (parent != null)
+			parent.redraw();
+	}
+
+	/**
+	 * Adds object boundaries to the "dirty" area, the area which needs to be
+	 * redrawn. The redraw will not happen immediately, but will be scheduled on the
+	 * event dispatch thread.
+	 */
+	void addDirtyRect(Rectangle2D ar) {
+		if (parent != null)
+			parent.redraw(ar.getBounds());
+	}
+
+	/**
+	 * Adds an element to the drawing
+	 *
+	 * @param o the element to add
+	 */
+	public void addObject(VElement o) {
+		toAdd.add(o);
+	}
+
+	// ================================================================================
+	// Zoom Methods
+	// ================================================================================
 	private double zoomFactor = 1.0;
 
 	/**
@@ -565,10 +662,6 @@ public class VPathwayModel implements PathwayModelListener {
 		return result;
 	}
 
-	public void setPressedObject(VElement o) {
-		pressedObject = o;
-	}
-
 	private LinkAnchor currentLinkAnchor;
 
 	/**
@@ -582,7 +675,7 @@ public class VPathwayModel implements PathwayModelListener {
 			dragUndoState = DRAG_UNDO_CHANGED;
 		}
 		hideLinkAnchors();
-		VPoint vPoint = (VPoint) g.getAdjustable();
+		VLinePoint vPoint = (VLinePoint) g.getAdjustable();
 		VLineElement vLine = vPoint.getLine();
 		LineElement line = vLine.getPathwayObject();
 		// get linkproviders for given location
@@ -592,7 +685,7 @@ public class VPathwayModel implements PathwayModelListener {
 		 * from the list of linkproviders. Also remove the line anchors to prevent
 		 * linking a line to it's own anchors.
 		 */
-		if (g.getAdjustable() instanceof VPoint) {
+		if (g.getAdjustable() instanceof VLinePoint) {
 			Group group = line.getGroupRef();
 			if (group != null) {
 				linkProviders.remove(getPathwayElementView(group));
@@ -717,7 +810,7 @@ public class VPathwayModel implements PathwayModelListener {
 			vPreviousY = ve.getY();
 
 			if (pressedObject instanceof Handle && newTemplate == null
-					&& ((Handle) pressedObject).getAdjustable() instanceof VPoint) {
+					&& ((Handle) pressedObject).getAdjustable() instanceof VLinePoint) {
 				linkPointToObject(new Point2D.Double(ve.getX(), ve.getY()), (Handle) pressedObject);
 			}
 		} else {
@@ -940,64 +1033,6 @@ public class VPathwayModel implements PathwayModelListener {
 			}
 			fireVPathwayEvent(new VPathwayModelEvent(this, o, VPathwayEventType.ELEMENT_DOUBLE_CLICKED));
 		}
-	}
-
-	/**
-	 * Paints all components in the drawing. This method is called automatically in
-	 * the painting process. This method will draw opaquely, meaning it will erase
-	 * the background.
-	 * 
-	 * @param g2d the graphics device to draw on. The method will not draw outside
-	 *            the clipping area.
-	 */
-	public void draw(Graphics2D g2d) {
-		addScheduled();
-		cleanUp();
-
-		try {
-			// save original, non-clipped, to pass on to VPathwayEvent
-			Graphics2D g2dFull = (Graphics2D) g2d.create();
-
-			// we only redraw the part within the clipping area.
-			Rectangle area = g2d.getClipBounds();
-			if (area == null) {
-				Dimension size = parent == null ? new Dimension(getVWidth(), getVHeight())
-						: parent.getViewRect().getSize(); // Draw the visible area
-				area = new Rectangle(0, 0, size.width, size.height);
-			}
-
-			// erase the background
-			g2d.setColor(java.awt.Color.WHITE);
-			g2d.fillRect(area.x, area.y, area.width, area.height);
-
-			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-
-			g2d.clip(area);
-			g2d.setColor(java.awt.Color.BLACK);
-			Collections.sort(drawingObjects);
-			cleanUp();
-			for (VElement o : drawingObjects) {
-				if (o.vIntersects(area)) {
-					if (checkDrawAllowed(o)) {
-						o.draw((Graphics2D) g2d.create());
-						fireVPathwayEvent(new VPathwayModelEvent(this, o, (Graphics2D) g2dFull.create(),
-								VPathwayEventType.ELEMENT_DRAWN));
-					}
-				}
-			}
-		} catch (ConcurrentModificationException ex) {
-			// guard against messing up repaint event completely
-			Logger.log.error("Concurrent modification", ex);
-		}
-	}
-
-	boolean checkDrawAllowed(VElement o) {
-		if (isEditMode())
-			return true;
-		else
-			return !(o instanceof Handle || (o == selection && !isDragging));
 	}
 
 	/**
@@ -1681,18 +1716,9 @@ public class VPathwayModel implements PathwayModelListener {
 		}
 	}
 
-	/**
-	 * Calculate the board size. Calls {@link VElement#getVBounds()} for every
-	 * element and adds all results together to obtain the board size
-	 */
-	public Dimension calculateVSize() {
-		Rectangle2D bounds = new Rectangle2D.Double();
-		for (VElement e : drawingObjects) {
-			bounds.add(e.getVBounds());
-		}
-		return new Dimension((int) bounds.getWidth() + 10, (int) bounds.getHeight() + 10);
-	}
-
+	// ================================================================================
+	// Alignment Methods
+	// ================================================================================
 	/**
 	 * Handles aligning layoutTypes ALIGN_*
 	 * 
@@ -1916,8 +1942,13 @@ public class VPathwayModel implements PathwayModelListener {
 		}
 	}
 
+	// ================================================================================
+	// Z-Order Methods
+	// ================================================================================
 	/**
-	 * Move a set of graphics to the top in the z-order stack
+	 * Moves a set of graphics to the top in the z-order stack.
+	 *
+	 * @param gs the set of graphics to move.
 	 */
 	public void moveGraphicsTop(List<VDrawable> gs) {
 		Collections.sort(gs, new ZComparator());
@@ -1928,7 +1959,9 @@ public class VPathwayModel implements PathwayModelListener {
 	}
 
 	/**
-	 * Move a set of graphics to the bottom in the z-order stack
+	 * Moves a set of graphics to the bottom in the z-order stack.
+	 *
+	 * @param gs the set of graphics to move.
 	 */
 	public void moveGraphicsBottom(List<VDrawable> gs) {
 		Collections.sort(gs, new ZComparator());
@@ -1938,9 +1971,6 @@ public class VPathwayModel implements PathwayModelListener {
 		}
 	}
 
-	// ================================================================================
-	// Z-Order Methods
-	// ================================================================================
 	/**
 	 * Returns the highest z-order of all pathway model objects with z-order.
 	 * 
@@ -2229,6 +2259,9 @@ public class VPathwayModel implements PathwayModelListener {
 		}
 	}
 
+	// ================================================================================
+	// Listening and Firing Methods
+	// ================================================================================
 	private List<VPathwayModelListener> listeners = new ArrayList<VPathwayModelListener>();
 
 	public void addVPathwayListener(VPathwayModelListener l) {
@@ -2283,21 +2316,30 @@ public class VPathwayModel implements PathwayModelListener {
 		}
 	}
 
+	// ================================================================================
+	// Transformation Methods
+	// ================================================================================
+	private AffineTransform vFromM = new AffineTransform();
+
 	/**
-	 * helper method to convert view coordinates to model coordinates
+	 * Helper method to convert view {@link VCoordinate} to model {@link Coordinate}
+	 * accounting for canvas zoomFactor.
+	 * 
+	 * @param v the view coordinate.
 	 */
 	public double mFromV(double v) {
 		return v / zoomFactor;
 	}
 
 	/**
-	 * helper method to convert model coordinates to view coordinates
+	 * Helper method to convert model {@link Coordinate} to view {@link VCoordinate}
+	 * accounting for canvas zoomFactor.
+	 * 
+	 * @param m the model coordinate.
 	 */
 	public double vFromM(double m) {
 		return m * zoomFactor;
 	}
-
-	private AffineTransform vFromM = new AffineTransform();
 
 	public java.awt.Shape vFromM(java.awt.Shape s) {
 		vFromM.setToScale(zoomFactor, zoomFactor);
@@ -2305,20 +2347,24 @@ public class VPathwayModel implements PathwayModelListener {
 	}
 
 	/**
-	 * Returns width of entire Pathway view (taking into account zoom).
+	 * Returns of entire PathwayModel view (taking into account zoom)
 	 */
 	public int getVWidth() {
 		return data == null ? 0 : (int) vFromM(data.getPathway().getBoardWidth());
 	}
 
 	/**
-	 * Returns height of entire Pathway view (taking into account zoom).
+	 * Returns height of entire PathwayModel view (taking into account zoom).
 	 */
 	public int getVHeight() {
 		return data == null ? 0 : (int) vFromM(data.getPathway().getBoardHeight());
 	}
 
-	/** sorts graphics by VCenterY */
+	/**
+	 * This class sorts graphics by VCenterY.
+	 * 
+	 * @author unknown
+	 */
 	public static class YComparator implements Comparator<VGroupable> {
 		public int compare(VGroupable g1, VGroupable g2) {
 			if (g1.getVCenterY() == g2.getVCenterY())
@@ -2330,7 +2376,11 @@ public class VPathwayModel implements PathwayModelListener {
 		}
 	}
 
-	/** sorts graphics by VCenterX */
+	/**
+	 * This class sorts graphics by VCenterX.
+	 * 
+	 * @author unknown
+	 */
 	public static class XComparator implements Comparator<VGroupable> {
 		public int compare(VGroupable g1, VGroupable g2) {
 			if (g1.getVCenterX() == g2.getVCenterX())
@@ -2342,13 +2392,20 @@ public class VPathwayModel implements PathwayModelListener {
 		}
 	}
 
-	/** sorts Graphics by ZOrder */
+	/**
+	 * This class sorts VPathwayObject by ZOrder.
+	 * 
+	 * @author unknown
+	 */
 	public static class ZComparator implements Comparator<VDrawable> {
 		public int compare(VDrawable g1, VDrawable g2) {
 			return g1.getPathwayObject().getZOrder() - g2.getPathwayObject().getZOrder();
 		}
 	}
 
+	// ================================================================================
+	// Undo Methods
+	// ================================================================================
 	private UndoManager undoManager = new UndoManager();
 
 	/**
@@ -2361,7 +2418,7 @@ public class VPathwayModel implements PathwayModelListener {
 	}
 
 	/**
-	 * returns undoManager owned by this instance of VPathway.
+	 * Returns undoManager owned by this instance of VPathway.
 	 */
 	public UndoManager getUndoManager() {
 		return undoManager;
@@ -2377,6 +2434,9 @@ public class VPathwayModel implements PathwayModelListener {
 		undoManager.undo();
 	}
 
+	// ================================================================================
+	// Clean-Up and Dispose Methods
+	// ================================================================================
 	private boolean disposed = false;
 
 	/**
@@ -2426,6 +2486,9 @@ public class VPathwayModel implements PathwayModelListener {
 		}
 	}
 
+	// ================================================================================
+	// Move Methods
+	// ================================================================================
 	/**
 	 * Move multiple elements together (either a group or a selection).
 	 * <p>

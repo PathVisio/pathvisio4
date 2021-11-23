@@ -19,18 +19,20 @@ package org.pathvisio.core.view;
 import java.awt.Point;
 
 /**
- * Represents a mouse event in a way that is independent of toolkit (swing or SWT)
- * TODO: no longer needed. Just use swing event
+ * Represents a mouse event in a way that is independent of toolkit (swing or
+ * SWT) TODO: no longer needed. Just use swing event
+ * 
+ * @author unknown
  */
 public abstract class MouseEvent extends InputEvent {
 
-	//Buttons
+	// Buttons
 	public static final int BUTTON_NONE = -1;
 	public static final int BUTTON1 = 1;
 	public static final int BUTTON2 = 2;
 	public static final int BUTTON3 = 3;
 
-	//Types
+	// Types
 	public static final int MOUSE_DOWN = 10;
 	public static final int MOUSE_UP = 11;
 	public static final int MOUSE_MOVE = 12;
@@ -42,11 +44,12 @@ public abstract class MouseEvent extends InputEvent {
 	private int type;
 	private int button;
 	private int clickCount;
-	private int x; //x relative to source
-	private int y; //y relative to source
+	private int x; // x relative to source
+	private int y; // y relative to source
 	private boolean isPopupTrigger;
 
-	public MouseEvent(Object source, int type, int button, int x, int y, int clickCount, int modifier, boolean isPopupTrigger) {
+	public MouseEvent(Object source, int type, int button, int x, int y, int clickCount, int modifier,
+			boolean isPopupTrigger) {
 		super(source, modifier);
 		this.x = x;
 		this.y = y;
@@ -56,7 +59,7 @@ public abstract class MouseEvent extends InputEvent {
 		this.isPopupTrigger = isPopupTrigger;
 	}
 
-	//public abstract Point getLocationOnScreen();
+	// public abstract Point getLocationOnScreen();
 
 	public int getButton() {
 		return button;
@@ -87,12 +90,8 @@ public abstract class MouseEvent extends InputEvent {
 	}
 
 	/*
-	public int getXOnScreen() {
-		return getLocationOnScreen().x;
-	}
-
-	public int getYOnScreen() {
-		return getLocationOnScreen().y;
-	}
-	*/
+	 * public int getXOnScreen() { return getLocationOnScreen().x; }
+	 * 
+	 * public int getYOnScreen() { return getLocationOnScreen().y; }
+	 */
 }

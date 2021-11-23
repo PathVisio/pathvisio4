@@ -21,34 +21,6 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>${maven-enforcer-plugin.version}</version>
-				<executions>
-					<execution>
-						<id>enforce-banned-dependencies</id>
-						<goals>
-							<goal>enforce</goal>
-						</goals>
-						<configuration>
-							<rules>
-								<bannedDependencies>
-									<excludes>
-										<!--this is to check we do not have the xml-apis included since 
-											JRE provides it already -->
-										<exclude>xml-apis:xml-apis</exclude>
-										<exclude>*:xml-apis</exclude>
-										<exclude>*:javax.xml</exclude>
-										<exclude>*:xercesImpl</exclude>
-									</excludes>
-								</bannedDependencies>
-							</rules>
-							<fail>true</fail>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<inherited>false</inherited>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
@@ -72,8 +44,7 @@
 						<Export-Package>!${bundle.namespace}.*</Export-Package>
 						<Private-Package>${bundle.namespace}.*</Private-Package>
 						<Bundle-Activator>${bundle.namespace}.Activator</Bundle-Activator>
-						<Embed-Dependency>batik-transcoder,batik-svggen,batik-dom;scope=compile;
-							type=!pom; inline=false</Embed-Dependency>
+						<Embed-Dependency>batik-transcoder,batik-svggen,batik-dom</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<Import-Package>*;resolution:=optional</Import-Package>
 					</instructions>

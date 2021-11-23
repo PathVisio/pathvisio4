@@ -20,13 +20,15 @@ import org.pathvisio.core.view.model.Handle;
 
 /**
  * Any object that has handles and can be adjusted by them
+ * 
+ * @author unknown
  */
-public interface Adjustable
-{
+public interface Adjustable {
 	/**
-	 * Transforms this object to fit to the coordinates
-	 * passed on by the given handle
-	 * @param h	The Handle to adjust to
+	 * Transforms this object to fit to the coordinates passed on by the given
+	 * handle
+	 * 
+	 * @param h The Handle to adjust to
 	 */
 	public void adjustToHandle(Handle h, double vx, double vy);
 }

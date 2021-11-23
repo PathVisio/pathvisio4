@@ -29,12 +29,15 @@ import org.pathvisio.model.Pathway;
 /**
  * Infobox contains the meta-information (e.g. title, organism) for a pathway
  * model. The infobox is always displayed in the top left corner at coordinate
- * (0,0).
+ * (0,0). Contains information about this pathway, currently only used for
+ * information in PropertyPanel (). TODO
  * 
  * view.InfoBox corresponds in some ways to
  * model.PathwayElement(ObjectType.MAPPINFO) and in some ways to
  * model.PathwayElement(ObjectType.INFOBOX). This confusion is rooted in
- * inconsistencies in GPML. This should be cleaned up one day.
+ * inconsistencies in GPML. This should be cleaned up one day. TODO: has to be
+ * implemented to behave the same as any Graphics object when displayed on the
+ * drawing
  * 
  * @author unknown, finterly
  */

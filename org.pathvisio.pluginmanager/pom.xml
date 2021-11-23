@@ -36,13 +36,7 @@
 
 	<!-- Dependencies needed to compile this project. -->
 	<dependencies>
-		<!-- PathVisio (temporary) -->
-		<dependency>
-			<groupId>org.pathvisio</groupId>
-			<artifactId>org.pathvisio.core</artifactId>
-			<version>${revision}</version>
-			<scope>compile</scope>
-		</dependency>
+		<!-- PathVisio -->
 		<dependency>
 			<groupId>org.pathvisio</groupId>
 			<artifactId>org.pathvisio.desktop</artifactId>
@@ -60,12 +54,6 @@
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.bundlerepository</artifactId>
 			<version>2.0.10</version>
-		</dependency>
-		<!-- JGoodies Forms -->
-		<dependency>
-			<groupId>com.jgoodies</groupId>
-			<artifactId>jgoodies-forms</artifactId>
-			<version>1.9.0</version>
 		</dependency>
 	</dependencies>
 </project>

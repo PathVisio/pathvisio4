@@ -31,6 +31,8 @@ import org.pathvisio.model.PathwayModel;
  * right exporter depending on the chosen extension.
  *
  * Subclass this to implement specific image types.
+ * 
+ * @author unknown
  */
 public abstract class ImageExporter implements PathwayModelExporter {
 	public static final String TYPE_PNG = "png";

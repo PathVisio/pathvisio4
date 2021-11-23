@@ -19,43 +19,44 @@ package org.pathvisio.core.data;
 import java.util.EventObject;
 
 /**
- * Event produced by the GdbManager. This event is generated when a new Gdb is loaded
+ * Event produced by the GdbManager. This event is generated when a new Gdb is
+ * loaded.
+ * 
+ * @author unknown
  */
-public class GdbEvent  extends EventObject
-{
+public class GdbEvent extends EventObject {
 
 	/**
-	   Called from GdbManager, when a GDB is loaded, either
-	   when it was selected from the data -> select gdb menu
-	   or during data import.
+	 * Called from GdbManager, when a GDB is loaded, either when it was selected
+	 * from the data -> select gdb menu or during data import.
 	 */
 	public enum Type {
-		ADDED,
-		REMOVED
+		ADDED, REMOVED
 	};
 
 	private Type type;
 
 	/**
 	 * @param source the source of this event, should be a GdbManager
-	 * @param type Currently the only implemented type is GDB_CONNECTED
-	 * @param name the name of the database that was connected (if type == GDB_CONNECTED)
+	 * @param type   Currently the only implemented type is GDB_CONNECTED
+	 * @param name   the name of the database that was connected (if type ==
+	 *               GDB_CONNECTED)
 	 */
-	public GdbEvent(Object source, Type type, String name)
-	{
+	public GdbEvent(Object source, Type type, String name) {
 		super(source);
 		this.type = type;
 		this.dbName = name;
 	}
 
-	public Type getType() { return type; }
+	public Type getType() {
+		return type;
+	}
 
 	/**
-	 * The name of the database that was connected.
-	 * May be null depending on the event type.
+	 * The name of the database that was connected. May be null depending on the
+	 * event type.
 	 */
-	public String getName()
-	{
+	public String getName() {
 		return dbName;
 	}
 

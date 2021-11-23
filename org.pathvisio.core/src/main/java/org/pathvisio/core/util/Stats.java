@@ -18,31 +18,28 @@ package org.pathvisio.core.util;
 
 /**
  * Utility functions for statistics calculations.
+ * 
+ * @author unknown
  */
-public class Stats
-{
+public class Stats {
 	/**
-	 * Calculate z-score based on the hypergeometric distribution,
-	 * where
-	 * 	n = total beads sampled
-	 *  r = red beads sampled
-	 *  N = total beads
-	 *  R = total red beads
+	 * Calculate z-score based on the hypergeometric distribution, where n = total
+	 * beads sampled r = red beads sampled N = total beads R = total red beads
 	 *
-	 * resulting score == 0 if the sampled beads are in the same ratio as the total beads
+	 * resulting score == 0 if the sampled beads are in the same ratio as the total
+	 * beads
 	 */
-	public static double zscore (int an, double ar, int aBigN, int aBigR)
-	{
-		double n = (double)an;
-		double r = (double)ar;
-		double bigN = (double)aBigN;
-		double bigR = (double)aBigR;
+	public static double zscore(int an, double ar, int aBigN, int aBigR) {
+		double n = (double) an;
+		double r = (double) ar;
+		double bigN = (double) aBigN;
+		double bigR = (double) aBigR;
 
 		double f1 = r - (n * (bigR / bigN));
 		double f2 = bigR / bigN;
 		double f3 = 1.0 - (bigR / bigN);
 		double f4 = 1.0 - ((n - 1) / (bigN - 1));
 
-		return f1 / Math.sqrt (an * f2 * f3 * f4);
+		return f1 / Math.sqrt(an * f2 * f3 * f4);
 	}
 }

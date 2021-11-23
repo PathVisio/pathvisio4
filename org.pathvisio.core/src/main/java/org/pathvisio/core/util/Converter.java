@@ -36,7 +36,8 @@ import org.pathvisio.core.preferences.PreferenceManager;
 /**
  * Converter.java
  * 
- * Command Line GenMAPP to GPML Converter. Converts to images. Move to separate Converter Jar File. 
+ * Command Line GenMAPP to GPML Converter. Converts to images. Move to separate
+ * Converter Jar File.
  * 
  * Created on 15 augustus 2005, 20:28
  * 

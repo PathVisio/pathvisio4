@@ -46,17 +46,33 @@ import org.w3c.dom.Document;
 /**
  * Export Pathway image through Batik, which can handle a number of file formats
  * including SVG, PNG, PDF and TIFF
+ * 
+ * @author unknown
  */
 public class BatikImageExporter extends ImageExporter {
 
+	/**
+	 * @param type
+	 */
 	public BatikImageExporter(String type) {
 		super(type);
 	}
 
+	/**
+	 * @param file
+	 * @param vPathway
+	 * @throws ConverterException
+	 */
 	public void doExport(File file, VPathwayModel vPathway) throws ConverterException {
 		doExport(file, vPathway, null);
 	}
 
+	/**
+	 * @param file
+	 * @param vPathway
+	 * @param hints
+	 * @throws ConverterException
+	 */
 	public void doExport(File file, VPathwayModel vPathway, TranscodingHints hints) throws ConverterException {
 		DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
 		Document svg = domImpl.createDocument("http://www.w3.org/2000/svg", "svg", null);
@@ -125,9 +141,13 @@ public class BatikImageExporter extends ImageExporter {
 		}
 	}
 
-	public void doExport(File file, PathwayModel pathway) throws ConverterException {
+	/**
+	 * @param file
+	 * @param pathwayModel
+	 */
+	public void doExport(File file, PathwayModel pathwayModel) throws ConverterException {
 		VPathwayModel vPathway = new VPathwayModel(null);
-		vPathway.fromModel(pathway);
+		vPathway.fromModel(pathwayModel);
 
 		doExport(file, vPathway);
 		vPathway.dispose();

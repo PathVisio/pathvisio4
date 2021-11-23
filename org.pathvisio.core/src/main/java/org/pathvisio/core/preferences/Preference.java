@@ -22,19 +22,23 @@ package org.pathvisio.core.preferences;
  * <li>a key in the hash maintained by PreferenceMgr
  * <li>a default value
  * </ol>
- * Anything that implements this interface can be stored as a preference.
- * We recommend defining mulitple Preferences in an enum, but that is not absolutely
- * required.
+ * Anything that implements this interface can be stored as a preference. We
+ * recommend defining mulitple Preferences in an enum, but that is not
+ * absolutely required.
+ * 
+ * @author unknown
  */
-public interface Preference
-{
-	/** name will be the "key" in the properties file.
-	 * If you use an enum that implements this interface, name will be automatically defined  */
+public interface Preference {
+	/**
+	 * name will be the "key" in the properties file. If you use an enum that
+	 * implements this interface, name will be automatically defined
+	 */
 	public String name();
 
 	/**
 	 * The default value for this property. Used to initialize when the key is not
-	 * present in the properties file, or if the user wants to reset to default values.
+	 * present in the properties file, or if the user wants to reset to default
+	 * values.
 	 */
 	public String getDefault();
 }

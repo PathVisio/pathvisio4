@@ -38,6 +38,7 @@ import org.pathvisio.core.preferences.PreferenceManager;
  * @author unknown, finterly
  */
 public abstract class VElement implements Comparable<VElement> {
+	
 	protected static final BasicStroke DEFAULT_STROKE = new BasicStroke();
 
 	protected VPathwayModel canvas;

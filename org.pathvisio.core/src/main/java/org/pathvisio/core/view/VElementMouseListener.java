@@ -16,7 +16,14 @@
  ******************************************************************************/
 package org.pathvisio.core.view;
 
-/** implement this if you need to respond to mouse entering / exiting a VPathwayElement */
+/**
+ * Implement this if you need to respond to mouse entering / exiting a
+ * VPathwayElement
+ * 
+ * @author unknown
+ */
 public interface VElementMouseListener {
+
 	public void vElementMouseEvent(VElementMouseEvent e);
+	
 }
