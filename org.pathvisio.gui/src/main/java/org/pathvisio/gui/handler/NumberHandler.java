@@ -34,10 +34,9 @@ import javax.swing.table.TableCellRenderer;
 import org.pathvisio.debug.Logger;
 import org.pathvisio.prop.PropertyType;
 
-
 /**
- * This class knows how to handle numbers.  It renders and edits numbers and validates input based on the current
- * {@link java.util.Locale}.
+ * This class knows how to handle numbers. It renders and edits numbers and
+ * validates input based on the current {@link java.util.Locale}.
  *
  * @author Mark Woon
  */
@@ -48,12 +47,12 @@ public class NumberHandler extends DefaultCellEditor implements TableCellRendere
 	private Class<?> valueClass;
 	private PropertyType propertyType;
 
-
 	/**
 	 * Factory method for getting a NumberHandler.
 	 *
 	 * @param valueCls the subclass of {@link Number} expected
-	 * @throws IllegalArgumentException if valueCls is not a subclass of {@link Number}.
+	 * @throws IllegalArgumentException if valueCls is not a subclass of
+	 *                                  {@link Number}.
 	 */
 	public static NumberHandler buildHandler(PropertyType type, Class<?> valueCls) {
 
@@ -69,22 +68,20 @@ public class NumberHandler extends DefaultCellEditor implements TableCellRendere
 		return new NumberHandler(type, valueCls, numFormat);
 	}
 
-
 	/**
 	 * Constructor.
 	 *
 	 * @param numFormat the number formatter to use to parse/validate the input
-	 * @param valueCls the Class of the value to get back
+	 * @param valueCls  the Class of the value to get back
 	 */
 	NumberHandler(PropertyType type, Class<?> valueCls, NumberFormat numFormat) {
 		super(new JTextField());
-		textField = (JTextField)getComponent();
+		textField = (JTextField) getComponent();
 		textField.setBorder(BorderFactory.createEmptyBorder());
 		numberFormat = numFormat;
 		valueClass = valueCls;
 		propertyType = type;
 	}
-
 
 	NumberFormat getNumberFormat() {
 		return numberFormat;
@@ -94,17 +91,15 @@ public class NumberHandler extends DefaultCellEditor implements TableCellRendere
 		return textField;
 	}
 
-
 	/**
-	 * Formats the value for display.  Subclasses should override this to modify how the number should be displayed.
+	 * Formats the value for display. Subclasses should override this to modify how
+	 * the number should be displayed.
 	 */
 	Object formatValue(Object value) {
 		return numberFormat.format(value);
 	}
 
-
-
-	//-- TypeHandler methods --//
+	// -- TypeHandler methods --//
 
 	public PropertyType getType() {
 		return propertyType;
@@ -122,9 +117,7 @@ public class NumberHandler extends DefaultCellEditor implements TableCellRendere
 		return this;
 	}
 
-
-
-	//-- TableCellRenderer methods --//
+	// -- TableCellRenderer methods --//
 
 	/**
 	 * Overriden to format value.
@@ -135,10 +128,7 @@ public class NumberHandler extends DefaultCellEditor implements TableCellRendere
 		return cellRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 	}
 
-
-
-	//-- TableCellEditor methods --//
-
+	// -- TableCellEditor methods --//
 
 	@Override
 	public Object getCellEditorValue() {
@@ -174,7 +164,6 @@ public class NumberHandler extends DefaultCellEditor implements TableCellRendere
 		}
 	}
 
-
 	/**
 	 * Overriden to format the value of the text field.
 	 */
@@ -183,7 +172,6 @@ public class NumberHandler extends DefaultCellEditor implements TableCellRendere
 		value = formatValue(value);
 		return super.getTableCellEditorComponent(table, value, isSelected, row, column);
 	}
-
 
 	/**
 	 * Overriden to only stop editing if value is valid.
@@ -194,15 +182,11 @@ public class NumberHandler extends DefaultCellEditor implements TableCellRendere
 		if (isValidNumber(textField.getText())) {
 			return super.stopCellEditing();
 		}
-		JOptionPane.showMessageDialog(
-				SwingUtilities.getWindowAncestor(textField),
-				"The value is not a valid " + valueClass.getSimpleName().toLowerCase() +".",
-				"Invalid " + valueClass.getSimpleName(),
-				JOptionPane.ERROR_MESSAGE
-		);
+		JOptionPane.showMessageDialog(SwingUtilities.getWindowAncestor(textField),
+				"The value is not a valid " + valueClass.getSimpleName().toLowerCase() + ".",
+				"Invalid " + valueClass.getSimpleName(), JOptionPane.ERROR_MESSAGE);
 		return false;
 	}
-
 
 	/**
 	 * Overriden to only cancel editing if value is valid.
@@ -215,10 +199,10 @@ public class NumberHandler extends DefaultCellEditor implements TableCellRendere
 		}
 	}
 
-
 	/**
-	 * Checks that value is a valid number.
-	 * See http://www.ibm.com/developerworks/java/library/j-numberformat/index.html for issues with NumberFormat.
+	 * Checks that value is a valid number. See
+	 * http://www.ibm.com/developerworks/java/library/j-numberformat/index.html for
+	 * issues with NumberFormat.
 	 */
 	private boolean isValidNumber(String value) {
 

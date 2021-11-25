@@ -144,9 +144,6 @@ public class MainPanelStandalone extends MainPanel {
 		dataPane.addHyperlinkListener(swingEngine);
 		sidebarTabbedPane.addTab("Data", new JScrollPane(dataPane));
 
-		SearchPane searchPane = new SearchPane(swingEngine);
-		sidebarTabbedPane.addTab("Search", searchPane);
-
 		String osName = System.getProperty("os.name").toLowerCase();
 		if (osName.startsWith("mac os x")) {
 			initMacListeners();

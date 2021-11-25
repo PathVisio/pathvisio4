@@ -31,11 +31,13 @@ import javax.swing.table.TableCellRenderer;
 import org.pathvisio.prop.PropertyType;
 
 /**
- * This class knows how to handle an enumeration.  It renders and edits enumerated values using a combobox.
+ * This class knows how to handle an enumeration. It renders and edits
+ * enumerated values using a combobox.
  *
  * @author Mark Woon
  */
 public class ComboHandler extends DefaultCellEditor implements TableCellRenderer, TypeHandler {
+
 	private PropertyType type;
 	private JComboBox renderer;
 	private JComboBox editor;
@@ -43,20 +45,31 @@ public class ComboHandler extends DefaultCellEditor implements TableCellRenderer
 	private Map<Object, Object> label2value;
 	private Map<Object, Object> value2label;
 
-
 	public ComboHandler(PropertyType aType, List labels, boolean aUseIndex) {
 		this(aType, labels.toArray(), aUseIndex);
 	}
 
 	public ComboHandler(PropertyType aType, Object[] labels, boolean aUseIndex) {
 		super(new JComboBox(labels));
-		editor = (JComboBox)getComponent();
+		editor = (JComboBox) getComponent();
 		editor.setBorder(BorderFactory.createEmptyBorder());
 		renderer = new JComboBox(labels);
 		type = aType;
 		useIndex = aUseIndex;
 	}
 
+	public ComboHandler(PropertyType aType, List<Object> labels, List<Object> values) {
+		this(aType, labels, false);
+		if (labels.size() != values.size()) {
+			throw new IllegalArgumentException("Number of labels doesn't equal number of values");
+		}
+		label2value = new HashMap<Object, Object>();
+		value2label = new HashMap<Object, Object>();
+		for (int i = 0; i < labels.size(); i++) {
+			label2value.put(labels.get(i), values.get(i));
+			value2label.put(values.get(i), labels.get(i));
+		}
+	}
 
 	public ComboHandler(PropertyType aType, Object[] labels, Object[] values) {
 		this(aType, labels, false);
@@ -71,13 +84,11 @@ public class ComboHandler extends DefaultCellEditor implements TableCellRenderer
 		}
 	}
 
-
 	public void setEditable(boolean isEditable) {
 		editor.setEditable(isEditable);
 	}
 
-
-	//-- TypeHandler methods --//
+	// -- TypeHandler methods --//
 
 	public PropertyType getType() {
 		return type;
@@ -95,8 +106,7 @@ public class ComboHandler extends DefaultCellEditor implements TableCellRenderer
 		return this;
 	}
 
-
-	//-- TableCellRenderer methods --//
+	// -- TableCellRenderer methods --//
 
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
@@ -113,15 +123,14 @@ public class ComboHandler extends DefaultCellEditor implements TableCellRenderer
 			value = value2label.get(value);
 		}
 		if (useIndex) {
-			renderer.setSelectedIndex((Integer)value);
+			renderer.setSelectedIndex((Integer) value);
 		} else {
 			renderer.setSelectedItem(value);
 		}
 		return renderer;
 	}
 
-
-	//-- TableCellEditor methods --//
+	// -- TableCellEditor methods --//
 
 	public Object getCellEditorValue() {
 
@@ -138,7 +147,7 @@ public class ComboHandler extends DefaultCellEditor implements TableCellRenderer
 			value = value2label.get(value);
 		}
 		if (useIndex) {
-			editor.setSelectedIndex((Integer)value);
+			editor.setSelectedIndex((Integer) value);
 		} else {
 			editor.setSelectedItem(value);
 		}
