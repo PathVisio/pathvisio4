@@ -54,9 +54,12 @@ import org.pathvisio.core.view.model.SelectionBox.SelectionListener;
  * <p>
  * It is the responsibility of the instantiator to also call the dispose()
  * method, otherwise the background thread is not killed.
+ * 
+ * @author unknown
  */
 public class BackpagePane extends JEditorPane
 		implements ApplicationEventListener, SelectionListener, PathwayObjectListener {
+	
 	private final BackpageTextProvider bpt;
 	private Engine engine;
 	private ExecutorService executor;
@@ -177,7 +180,7 @@ public class BackpagePane extends JEditorPane
 	public void gmmlObjectModified(PathwayObjectEvent e) {
 		PathwayObject pe = e.getModifiedPathwayObject();
 		if (input != null
-				//TODO  static property Xref,  separate datasource and ID? 
+				// TODO static property Xref, separate datasource and ID?
 				&& (e.affectsProperty(StaticProperty.XREF))) {
 			Xref nref = new Xref(((Xrefable) pe).getXref().getId(), ((Xrefable) input).getXref().getDataSource());
 			if (!nref.equals(currRef)) {

@@ -57,6 +57,8 @@ import org.xml.sax.SAXException;
 /**
  * Dialog for entering citations. For convenience, you can enter a pubmed id and
  * query the details from pubmed.
+ * 
+ * @author unknown
  */
 public class PublicationXRefDialog extends OkCancelDialog {
 

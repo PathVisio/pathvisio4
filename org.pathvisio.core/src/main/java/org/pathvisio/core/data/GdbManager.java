@@ -39,11 +39,12 @@ import org.pathvisio.core.preferences.PreferenceManager;
  * This gene database could be a SimpleGdb, DoubleGdb or aggregateGdb or
  * otherwise.
  *
- * This class is not needed in headless mode. 
+ * This class is not needed in headless mode.
  * 
  * @author unknown
  */
 public class GdbManager extends AbstractListModel {
+
 	private final IDMapperStack currentGdb = new IDMapperStack();
 	private IDMapper metabolites;
 	private IDMapper genes;

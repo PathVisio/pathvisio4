@@ -54,6 +54,8 @@ import org.pathvisio.gui.DataPaneTextProvider.DataHook;
  * Two basic BackpageHooks are defined here: @link{BackpageAttributes} and
  * {@link BackpageXrefs}. However, these are not automatically registered, that
  * is the responsibility of the instantiator.
+ * 
+ * @author unknown
  */
 public class BackpageTextProvider {
 	/**

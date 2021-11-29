@@ -29,7 +29,7 @@ import java.util.Map;
 
 import org.pathvisio.debug.Logger;
 import org.pathvisio.core.model.BatikImageExporter;
-import org.pathvisio.io.ConverterException;
+import org.pathvisio.model.ConverterException;
 import org.pathvisio.core.model.ImageExporter;
 import org.pathvisio.model.PathwayModel;
 import org.pathvisio.model.PathwayObject;

@@ -41,7 +41,6 @@ import org.pathvisio.gui.panels.PathwayElementPanel;
  * Dialog that allows you to display and edit properties of a PathwayElement
  * 
  * @author thomas
- *
  */
 public class PathwayObjectDialog extends OkCancelDialog {
 

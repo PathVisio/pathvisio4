@@ -35,6 +35,7 @@ import org.pathvisio.model.GraphicalLine;
 import org.pathvisio.model.Interaction;
 import org.pathvisio.model.DataNode;
 import org.pathvisio.model.Shape;
+import org.pathvisio.model.shape.IShape;
 import org.pathvisio.model.LineElement;
 import org.pathvisio.model.LineElement.LinePoint;
 import org.pathvisio.model.LineElement.Anchor;
@@ -102,7 +103,7 @@ public abstract class DefaultTemplates {
 	public static void setInitialSize(PathwayObject o) {
 		// set size for Shape (depends on shape type)
 		if (o.getClass() == Shape.class) {
-			ShapeType type = ((Shape) o).getShapeType();
+			IShape type = ((Shape) o).getShapeType();
 			if (type.equals(ShapeType.BRACE)) {
 				((Shape) o).setWidth(BRACE_WIDTH);
 				((Shape) o).setHeight(BRACE_HEIGHT);
@@ -322,7 +323,7 @@ public abstract class DefaultTemplates {
 		}
 
 		public void setInitialBorderStyle(Shape shape) {
-			ShapeType type = shape.getShapeType();
+			IShape type = shape.getShapeType();
 			// set borderStyle depending on shape type
 			if (type.equals(ShapeType.CELL) || type.equals(ShapeType.NUCLEUS) || type.equals(ShapeType.ORGANELLE)) {
 				shape.setBorderStyle(LineStyleType.DOUBLE);

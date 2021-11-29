@@ -118,7 +118,7 @@ public class VPathwayModel implements PathwayModelListener {
 
 	// ================================================================================
 	// Constructors
-	// ===============================================================================
+	// ================================================================================
 	/**
 	 * Constructor for this class.
 	 *
@@ -145,7 +145,7 @@ public class VPathwayModel implements PathwayModelListener {
 
 	// ================================================================================
 	// Accessors
-	// ===============================================================================
+	// ================================================================================
 	/**
 	 * Returns the associated {@link PathwayModel}.
 	 * 
@@ -251,7 +251,7 @@ public class VPathwayModel implements PathwayModelListener {
 
 	// ================================================================================
 	// Miscellaneous Methods
-	// ===============================================================================
+	// ================================================================================
 	/**
 	 * Calculate the board size. Calls {@link VElement#getVBounds()} for every
 	 * element and adds all results together to obtain the board size
@@ -474,7 +474,7 @@ public class VPathwayModel implements PathwayModelListener {
 
 	// ================================================================================
 	// Draw Methods
-	// ===============================================================================
+	// ================================================================================
 	/**
 	 * Checks if draw is allowed for the given VElement.
 	 * 
@@ -563,7 +563,7 @@ public class VPathwayModel implements PathwayModelListener {
 
 	// ================================================================================
 	// Selection Methods
-	// ===============================================================================
+	// ================================================================================
 
 	/**
 	 * Selects the given object.
@@ -580,6 +580,26 @@ public class VPathwayModel implements PathwayModelListener {
 	 */
 	void selectAll() {
 		selectObjects(null);
+	}
+
+	/**
+	 * Deselects all elements on the drawing and resets the selectionbox.
+	 */
+	public void clearSelection() {
+		clearSelection(0, 0);
+	}
+
+	/**
+	 * Deselects all elements on the drawing and resets the selectionbox to the
+	 * given coordinates Equivalent to {@link SelectionBox#reset(double, double))}
+	 * 
+	 * @param x the x coordinate.
+	 * @param y the y coordinate.
+	 */
+	private void clearSelection(double x, double y) {
+		for (VElement e : drawingObjects)
+			e.deselect();
+		selection.reset(x, y);
 	}
 
 	/**
@@ -776,9 +796,6 @@ public class VPathwayModel implements PathwayModelListener {
 		case PathwayModelEvent.DELETED:
 			VPathwayObject deleted = getPathwayElementView(e.getAffectedData());
 			if (deleted != null) {
-				if (deleted.getPathwayObject() instanceof LineElement) {
-					removeRefFromConnectingAnchors((LineElement) deleted.getPathwayObject());
-				}
 				deleted.markDirty();
 				removeDrawingObject(deleted, false);
 			}
@@ -802,6 +819,9 @@ public class VPathwayModel implements PathwayModelListener {
 	// ================================================================================
 	// Add Methods
 	// ================================================================================
+	/** newly placed object, is set to null again when mouse button is released */
+	private PathwayElement newObject = null;
+
 	/**
 	 * Adds an element to the drawing.
 	 *
@@ -1037,7 +1057,7 @@ public class VPathwayModel implements PathwayModelListener {
 		if (g.getAdjustable() instanceof VLinePoint) {
 			Group group = line.getGroupRef();
 			if (group != null) {
-				linkProviders.remove(getPathwayElementView(group));
+				linkProviders.remove((LinkProvider) getPathwayElementView(group));
 			}
 			for (VAnchor va : vLine.getVAnchors()) {
 				linkProviders.remove(va);
@@ -1052,8 +1072,9 @@ public class VPathwayModel implements PathwayModelListener {
 			}
 			linkProvider.showLinkAnchors();
 			LinkAnchor linkAnchor = linkProvider.getLinkAnchorAt(p2d);
+			// if link anchor valid
 			if (linkAnchor != null) {
-				// set elementRef to link
+				// link point to the linkAnchor of linkableTo
 				linkAnchor.link(vPoint.getLinePoint());
 				linkableTo = linkAnchor.getLinkableTo();
 				if (currentLinkAnchor != null) {
@@ -1064,46 +1085,29 @@ public class VPathwayModel implements PathwayModelListener {
 				break;
 			}
 		}
-		// TODO make sure links update from model to view to model...?
+		// no link anchor found, nothing to link to, unlink point if applicable
 		if (linkableTo == null && vPoint.getLinePoint().getElementRef() != null) {
-			LinkableTo elementRef = vPoint.getLinePoint().getElementRef();
 			vPoint.getLinePoint().unlink();
 			if (currentLinkAnchor != null) {
-				if (isAnotherLineLinked(elementRef, (LineElement) line)) {
-					// do nothing if another line linked to object
-				} else if (currentLinkAnchor.getLinkableTo() instanceof Anchor
-						&& currentLinkAnchor.getLinkableTo() == elementRef) {
-					((Anchor) currentLinkAnchor.getLinkableTo()).getLineElement()
-							.removeAnchor(((Anchor) currentLinkAnchor.getLinkableTo()));// TODO removes anchor...
-				}
 				currentLinkAnchor.unhighlight();
 			}
 		}
 	}
 
 	/**
-	 * Checks if another line is linked? TODO
+	 * Returns link providers at a particular location on the drawing.
 	 * 
-	 * @param elementRef
-	 * @param currLine
-	 * @return
+	 * @param p2d the point2d of a particular location.
+	 * @return the list of link providers at the particular location.
 	 */
-	private boolean isAnotherLineLinked(LinkableTo elementRef, LineElement currLine) {
-		for (PathwayElement element : getPathwayModel().getPathwayElements()) {
-			if (element instanceof LineElement) {
-				if (element.equals(currLine)) {
-					continue;
-				}
-				for (LinePoint point : ((LineElement) element).getLinePoints()) {
-					if (point.getElementRef() == null) {
-						// skip point
-					} else if (elementRef != null && point.getElementRef() == elementRef) {
-						return true;
-					}
-				}
+	private List<LinkProvider> getLinkProvidersAt(Point2D p2d) {
+		List<LinkProvider> result = new ArrayList<LinkProvider>();
+		for (VElement o : drawingObjects) {
+			if (o instanceof LinkProvider && o.getVBounds().contains(p2d)) {
+				result.add((LinkProvider) o);
 			}
 		}
-		return false;
+		return result;
 	}
 
 	/**
@@ -1113,51 +1117,6 @@ public class VPathwayModel implements PathwayModelListener {
 		for (VElement pe : getDrawingObjects()) {
 			if (pe instanceof LinkProvider) {
 				((LinkProvider) pe).hideLinkAnchors();
-			}
-		}
-	}
-
-	/**
-	 * When line deleted need to: see if other lines connected to the same
-	 * {@link LinkableTo}. (this means that 2 different lines are attached to the
-	 * same anchor) if so - ignore graphId otherwise - loop through pathway and find
-	 * any lines with anchors that contain GraphIds for the deleted line and remove.
-	 * 
-	 * TODO What I think this method does it that it deletes an anchor if nothing is
-	 * pointing to it anymore...
-	 * 
-	 * @param linkableTo1
-	 * @param linkableTo2
-	 */
-	private void removeRefFromConnectingAnchors(LineElement lineElement) {
-		LinkableTo startRef = lineElement.getStartElementRef();
-		LinkableTo endRef = lineElement.getEndElementRef();
-
-		// deleted line not linked to anything
-		if (startRef == null && endRef == null) {
-			return;
-		}
-		for (LineElement element : getPathwayModel().getLineElements()) {
-			for (LinePoint point : ((LineElement) element).getLinePoints()) {
-				if (point.getElementRef() == null) {
-					// skip point
-				} else if (startRef != null && point.getElementRef() == startRef) {
-					lineElement.getStartLinePoint().unlink();
-				} else if (endRef != null && point.getElementRef() == endRef) {
-					lineElement.getEndLinePoint().unlink();
-				}
-			}
-		}
-		// deleted line no longer linked to anything
-		if (lineElement.getStartElementRef() == null && lineElement.getEndElementRef() == null) {
-			return;
-		}
-		// removes anchor if the only line linked to it has been removed? TODO
-		for (LineElement element : getPathwayModel().getLineElements()) {
-			for (Anchor anchor : ((LineElement) element).getAnchors()) {
-				if (anchor != null && (anchor == startRef || anchor == endRef)) {
-					element.removeAnchor(anchor); // TODO removes anchor...weird
-				}
 			}
 		}
 	}
@@ -1428,26 +1387,6 @@ public class VPathwayModel implements PathwayModelListener {
 		}
 	}
 
-	/**
-	 * Deselects all elements on the drawing and resets the selectionbox.
-	 */
-	public void clearSelection() {
-		clearSelection(0, 0);
-	}
-
-	/**
-	 * Deselects all elements on the drawing and resets the selectionbox to the
-	 * given coordinates Equivalent to {@link SelectionBox#reset(double, double))}
-	 * 
-	 * @param x the x coordinate.
-	 * @param y the y coordinate.
-	 */
-	private void clearSelection(double x, double y) {
-		for (VElement e : drawingObjects)
-			e.deselect();
-		selection.reset(x, y);
-	}
-
 	static final int MULTI_SELECT_MASK = MouseEvent.M_SHIFT
 			| (Utils.getOS() == Utils.OS_MAC ? MouseEvent.M_META : MouseEvent.M_CTRL);
 
@@ -1535,7 +1474,7 @@ public class VPathwayModel implements PathwayModelListener {
 	}
 
 	/**
-	 * Find the object at a particular location on the drawing
+	 * Finds the object at a particular location on the drawing
 	 *
 	 * NB: If you want to get more than one, use {@link #getObjectsAt(Point2D)}
 	 * 
@@ -1580,22 +1519,6 @@ public class VPathwayModel implements PathwayModelListener {
 		for (VElement o : drawingObjects) {
 			if (o.vContains(p2d)) {
 				result.add(o);
-			}
-		}
-		return result;
-	}
-
-	/**
-	 * Returns link providers at a particular location on the drawing.
-	 * 
-	 * @param p2d the point2d of a particular location.
-	 * @return the list of link providers at the particular location.
-	 */
-	private List<LinkProvider> getLinkProvidersAt(Point2D p2d) {
-		List<LinkProvider> result = new ArrayList<LinkProvider>();
-		for (VElement o : drawingObjects) {
-			if (o instanceof LinkProvider && o.getVBounds().contains(p2d)) {
-				result.add((LinkProvider) o);
 			}
 		}
 		return result;
@@ -1676,9 +1599,6 @@ public class VPathwayModel implements PathwayModelListener {
 	private static final int DRAG_UNDO_CHANGED = 2;
 
 	private int dragUndoState = DRAG_UNDO_NOT_RECORDING;
-
-	/** newly placed object, is set to null again when mouse button is released */
-	private PathwayElement newObject = null;
 
 	/** minimum drag length for it to be considered a drag and not a click */
 	private static final int MIN_DRAG_LENGTH = 3;
@@ -2506,7 +2426,7 @@ public class VPathwayModel implements PathwayModelListener {
 	 * @author unknown
 	 */
 	public static class XComparator implements Comparator<VGroupable> {
-		
+
 		/**
 		 *
 		 */

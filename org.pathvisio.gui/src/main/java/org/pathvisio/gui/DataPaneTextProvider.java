@@ -42,8 +42,11 @@ import org.pathvisio.core.util.Resources;
  * Two basic BackpageHooks are defined here: @link{BackpageAttributes} and
  * {@link DataXrefs}. However, these are not automatically registered, that is
  * the responsibility of the instantiator.
+ * 
+ * @author unknown
  */
 public class DataPaneTextProvider {
+	
 	/**
 	 * Hook into the backpage text provider, use this to generate a fragment of text
 	 * for the backpage

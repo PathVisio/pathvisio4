@@ -73,11 +73,13 @@ import org.pathvisio.gui.handler.PathwayTableModel;
 import com.mammothsoftware.frwk.ddb.DropDownButton;
 
 /**
- * this is the contents of the main window in the WikiPathways applet, and
+ * This is the contents of the main window in the WikiPathways applet, and
  * contains the editor window, side panels, toolbar and menu.
  *
  * For the standalone application, the derived class MainPanelStandalone is
  * used.
+ * 
+ * @author unknown
  */
 public class MainPanel extends JPanel implements VPathwayModelListener, ApplicationEventListener {
 

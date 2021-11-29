@@ -36,8 +36,8 @@ import javax.swing.TransferHandler;
 
 import org.pathvisio.debug.Logger;
 import org.pathvisio.core.gui.PathwayTransferable;
-import org.pathvisio.io.ConverterException;
-import org.pathvisio.io.GpmlFormat;
+import org.pathvisio.model.ConverterException;
+import org.pathvisio.model.GpmlFormat;
 import org.pathvisio.model.PathwayModel;
 import org.pathvisio.model.PathwayObject;
 import org.pathvisio.model.Groupable;

@@ -71,6 +71,7 @@ import org.pathvisio.gui.dialogs.PublicationXRefDialog;
  * @see {@link ViewActions}
  */
 public class CommonActions implements ApplicationEventListener {
+
 	private static final URL IMG_SAVE = Resources.getResourceURL("save.gif");
 	private static final URL IMG_SAVEAS = Resources.getResourceURL("saveas.gif");
 	private static final URL IMG_IMPORT = Resources.getResourceURL("import.gif");
@@ -364,7 +365,7 @@ public class CommonActions implements ApplicationEventListener {
 //				 */ new NewElementAction(e,
 //						new DefaultTemplates.InteractionTemplate("Translocation", LineStyleType.SOLID,
 //								ArrowHeadType.UNDIRECTED, MIMShapes.MIM_TRANSLOCATION, ConnectorType.STRAIGHT)), 
-				 };
+		};
 
 		saveAction = new SaveAction(se, true, false);
 		saveAsAction = new SaveAction(se, true, true);

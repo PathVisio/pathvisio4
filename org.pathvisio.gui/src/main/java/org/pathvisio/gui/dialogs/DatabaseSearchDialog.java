@@ -39,6 +39,10 @@ import javax.swing.table.AbstractTableModel;
 
 import org.pathvisio.core.data.XrefWithSymbol;
 
+/**
+ * 
+ * @author unknown
+ */
 public class DatabaseSearchDialog extends OkCancelDialog {
 	List<XrefWithSymbol> xrefs = new ArrayList<XrefWithSymbol>();
 

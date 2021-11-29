@@ -47,7 +47,7 @@ import org.pathvisio.debug.Logger;
 import org.pathvisio.core.model.BatikImageExporter;
 import org.pathvisio.core.model.DataNodeListExporter;
 import org.pathvisio.core.model.EUGeneExporter;
-import org.pathvisio.io.GpmlFormat;
+import org.pathvisio.model.GpmlFormat;
 import org.pathvisio.core.model.ImageExporter;
 import org.pathvisio.core.model.RasterImageExporter;
 import org.pathvisio.core.preferences.GlobalPreference;
@@ -59,6 +59,7 @@ import org.pathvisio.gui.SwingEngine.Browser;
 
 /**
  * Main class for the Swing GUI. This class creates and shows the GUI.
+ * 
  * Subclasses may override
  * {@link #createAndShowGUI(MainPanelStandalone, SwingEngine)} to perform custom
  * actions before showing the GUI.
@@ -67,16 +68,50 @@ import org.pathvisio.gui.SwingEngine.Browser;
  * @author anwesha
  */
 public class GuiMain implements GdbEventListener {
-	GuiMain() {
 
-	}
+	// this is only a workaround to hand over the pathway and pgex file
+	// from the command line when using the launcher
+	// TODO: find better solution
+	public static final String ARG_PROPERTY_PATHWAYFILE = "pathvisio.pathwayfile";
 
 	private MainPanelStandalone mainPanel;
-
 	private PvDesktop pvDesktop;
 	private SwingEngine swingEngine;
 	public AutoSave auto; // needs to be here for the same timer to be available always
 
+	private JLabel allLabel;
+	// private JLabel gdbLabel; private JLabel mdbLabel; private JLabel
+	// idbLabel;private JLabel gexLabel
+
+	// ================================================================================
+	// Constructors
+	// ================================================================================
+	/**
+	 * Constructor for GuiMain
+	 */
+	GuiMain() {
+	}
+
+	// ================================================================================
+	// Accessors
+	// ================================================================================
+	/**
+	 * Returns the main panel.
+	 * 
+	 * @return mainPanel the main panel.
+	 */
+	public MainPanel getMainPanel() {
+		return mainPanel;
+	}
+
+	// ================================================================================
+	// Initialization Methods
+	// ================================================================================
+	/**
+	 * Initializes logger.
+	 * 
+	 * @param engine the engine.
+	 */
 	private static void initLog(Engine engine) {
 		String logDest = PreferenceManager.getCurrent().get(GlobalPreference.FILE_LOG);
 		Logger.log.setDest(logDest);
@@ -87,123 +122,61 @@ public class GuiMain implements GdbEventListener {
 		Logger.log.info("Locale: " + Locale.getDefault().getDisplayName());
 	}
 
-	private void openPathwayFile(String pathwayFile) {
-		File f = new File(pathwayFile);
-		URL url;
-		// Assume the argument is a file
-		if (f.exists()) {
-			swingEngine.openPathwayModel(f);
-		} else {
-			// If it doesn't exist, assume it's an url
+	public void init(PvDesktop pvDesktop) {
+		this.pvDesktop = pvDesktop;
+
+		Engine engine = pvDesktop.getSwingEngine().getEngine();
+		initLog(engine);
+		engine.setApplicationName("PathVisio " + Engine.getVersion());
+		if (PreferenceManager.getCurrent().getBoolean(GlobalPreference.USE_SYSTEM_LOOK_AND_FEEL)) {
 			try {
-				url = new URL(pathwayFile);
-				swingEngine.openPathwayModel(url);
-			} catch (MalformedURLException e) {
-				Logger.log.error("Couldn't open pathway url " + pathwayFile);
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			} catch (Exception ex) {
+				Logger.log.error("Unable to load native look and feel", ex);
 			}
 		}
-	}
 
-	// this is only a workaround to hand over the pathway and pgex file
-	// from the command line when using the launcher
-	// TODO: find better solution
-	public static final String ARG_PROPERTY_PGEX = "pathvisio.pgex";
-	public static final String ARG_PROPERTY_PATHWAYFILE = "pathvisio.pathwayfile";
+		swingEngine = pvDesktop.getSwingEngine();
+		swingEngine.setUrlBrowser(new Browser() {
+			public void openUrl(URL url) {
+				try {
+					if (Desktop.isDesktopSupported()) {
+						Desktop.getDesktop().browse(url.toURI());
+					} else {
+						new JOptionPane("Could not open default browser.\n Please go to\n" + url + "\nin your browser.",
+								JOptionPane.WARNING_MESSAGE);
+					}
+				} catch (Exception ex) {
+					Logger.log.error("Couldn't open url '" + url + "'", ex);
+				}
+			}
+		});
+
+		swingEngine.getGdbManager().initPreferred();
+
+		mainPanel = new MainPanelStandalone(pvDesktop);
+		mainPanel.createAndShowGUI();
+
+		JFrame frame = createAndShowGUI(mainPanel, swingEngine);
+		initImporters(engine);
+		initExporters(engine, swingEngine.getGdbManager());
+		swingEngine.setFrame(frame);
+		swingEngine.setApplicationPanel(mainPanel);
+
+		// start the autosave timer
+		auto = new AutoSave(swingEngine);
+		auto.startTimer(300);
+
+		processOptions();
+	}
 
 	/**
-	 * Act upon the command line arguments
-	 */
-	public void processOptions() {
-		// Create a plugin manager that loads the plugins
-		pvDesktop.loadPluginManager();
-//		pvDesktop.initPlugins();
-
-		String str = System.getProperty(ARG_PROPERTY_PATHWAYFILE);
-		if (str != null) {
-			openPathwayFile(str);
-		}
-
-	}
-
-	private String shortenString(String s) {
-		return shortenString(s, 20);
-	}
-
-	private String shortenString(String s, int maxLength) {
-		String prefix = "...";
-		if (s.length() > maxLength + prefix.length()) {
-			s = s.substring(s.length() - maxLength - prefix.length());
-			s = prefix + s;
-		}
-		return s;
-	}
-
-	/**
-	 * The statements below check for local identifier mapping databases, and change
-	 * the output line in the bottom of PV to the correct name(s). In the future,
-	 * this could be extended with different mapping database. Please check which
-	 * combination can occur for correct output (when adding more mapping
-	 * databases).
-	 */
-
-	private void setGdbStatus(JLabel allLabel) {
-		String gdb = "" + swingEngine.getGdbManager().getGeneDb();
-		String mdb = "" + swingEngine.getGdbManager().getMetaboliteDb();
-		String idb = "" + swingEngine.getGdbManager().getInteractionDb();
-
-		if (swingEngine.getGdbManager().getGeneDb() == null && swingEngine.getGdbManager().getMetaboliteDb() == null
-				&& swingEngine.getGdbManager().getInteractionDb() == null) {
-			allLabel.setText(" | Local mapping databases loaded: " + "None.");
-		} else if (swingEngine.getGdbManager().getGeneDb() != null
-				&& swingEngine.getGdbManager().getMetaboliteDb() == null
-				&& swingEngine.getGdbManager().getInteractionDb() == null) {
-			allLabel.setText(" | Local mapping databases loaded: " + "GeneProtein: " + shortenString(gdb));
-		} else if (swingEngine.getGdbManager().getGeneDb() == null
-				&& swingEngine.getGdbManager().getMetaboliteDb() != null
-				&& swingEngine.getGdbManager().getInteractionDb() == null) {
-			allLabel.setText(" | Local mapping databases loaded: " + "Metabolite: " + shortenString(mdb));
-		} else if (swingEngine.getGdbManager().getGeneDb() == null
-				&& swingEngine.getGdbManager().getMetaboliteDb() == null
-				&& swingEngine.getGdbManager().getInteractionDb() != null) {
-			allLabel.setText(" | Local mapping databases loaded: " + "Interactions: " + shortenString(idb));
-		} else if (swingEngine.getGdbManager().getGeneDb() != null
-				&& swingEngine.getGdbManager().getMetaboliteDb() != null
-				&& swingEngine.getGdbManager().getInteractionDb() == null) {
-			allLabel.setText(" | Local mapping databases loaded: " + "GeneProtein: " + shortenString(gdb) + " | "
-					+ "Metabolite: " + shortenString(mdb));
-		} else if (swingEngine.getGdbManager().getGeneDb() == null
-				&& swingEngine.getGdbManager().getMetaboliteDb() != null
-				&& swingEngine.getGdbManager().getInteractionDb() != null) {
-			allLabel.setText(" | Local mapping databases loaded: " + "Metabolite: " + shortenString(mdb) + " | "
-					+ "Interactions: " + shortenString(idb));
-		} else if (swingEngine.getGdbManager().getGeneDb() != null
-				&& swingEngine.getGdbManager().getMetaboliteDb() == null
-				&& swingEngine.getGdbManager().getInteractionDb() != null) {
-			allLabel.setText(" | Local mapping databases loaded: " + "GeneProtein: " + shortenString(gdb) + " | "
-					+ "Interactions: " + shortenString(idb));
-		} else {
-			allLabel.setText(" | Local mapping databases loaded: " + "GeneProtein: " + shortenString(gdb) + " | "
-					+ "Metabolite: " + shortenString(mdb) + " | " + "Interactions: " + shortenString(idb));
-		}
-
-		allLabel.setToolTipText("Local BridgeDb mapping databases to support identifier mapping");
-	}
-
-	public void gdbEvent(GdbEvent e) {
-		setGdbStatus(allLabel);
-	}
-
-	private JLabel allLabel;
-	/*
-	 * private JLabel gdbLabel; private JLabel mdbLabel; private JLabel idbLabel;
-	 */
-	private JLabel gexLabel;
-
-	/**
-	 * Creates and shows the GUI. Creates and shows the Frame, sets the size, title
-	 * and menubar.
+	 * Creates and displays the GUI. Creates and displays the Frame, sets the size,
+	 * title and menubar.
 	 * 
-	 * @param mainPanel The main panel to show in the frame
+	 * @param mainPanel   the main panel to display in the frame.
+	 * @param swingEngine the swing engine.
+	 * @return the JFrame.
 	 */
 	protected JFrame createAndShowGUI(final MainPanelStandalone mainPanel, final SwingEngine swingEngine) {
 		// Create and set up the window.
@@ -221,16 +194,10 @@ public class GuiMain implements GdbEventListener {
 		frame.add(statusBar, BorderLayout.SOUTH);
 
 		allLabel = new JLabel();
-		/*
-		 * gdbLabel = new JLabel(); mdbLabel = new JLabel(); idbLabel = new JLabel();
-		 */
-		gexLabel = new JLabel();
-
+		// gdbLabel=new JLabel();mdbLabel=new JLabel();idbLabel=new
+		// JLabel();gexLabel=new JLabel();
 		statusBar.add(allLabel);
-		/*
-		 * statusBar.add(gdbLabel); statusBar.add(mdbLabel); statusBar.add(idbLabel);
-		 */
-		statusBar.add(gexLabel);
+		// statusBar.add(gdbLabel);statusBar.add(mdbLabel);statusBar.add(idbLabel);statusBar.add(gexLabel);
 		// setGdbStatus(gdbLabel, mdbLabel, idbLabel);
 		setGdbStatus(allLabel);
 
@@ -292,6 +259,150 @@ public class GuiMain implements GdbEventListener {
 		return frame;
 	}
 
+	/**
+	 *
+	 */
+	public void gdbEvent(GdbEvent e) {
+		setGdbStatus(allLabel);
+	}
+
+	/**
+	 * The statements below check for local identifier mapping databases, and change
+	 * the output line in the bottom of PV to the correct name(s). In the future,
+	 * this could be extended with different mapping database. Please check which
+	 * combination can occur for correct output (when adding more mapping
+	 * databases). TODO Is this comment for this method?
+	 * 
+	 * @param allLabel the JLabel.
+	 */
+	private void setGdbStatus(JLabel allLabel) {
+		String gdb = "" + swingEngine.getGdbManager().getGeneDb();
+		String mdb = "" + swingEngine.getGdbManager().getMetaboliteDb();
+		String idb = "" + swingEngine.getGdbManager().getInteractionDb();
+
+		if (swingEngine.getGdbManager().getGeneDb() == null && swingEngine.getGdbManager().getMetaboliteDb() == null
+				&& swingEngine.getGdbManager().getInteractionDb() == null) {
+			allLabel.setText(" | Local mapping databases loaded: " + "None.");
+		} else if (swingEngine.getGdbManager().getGeneDb() != null
+				&& swingEngine.getGdbManager().getMetaboliteDb() == null
+				&& swingEngine.getGdbManager().getInteractionDb() == null) {
+			allLabel.setText(" | Local mapping databases loaded: " + "GeneProtein: " + shortenString(gdb));
+		} else if (swingEngine.getGdbManager().getGeneDb() == null
+				&& swingEngine.getGdbManager().getMetaboliteDb() != null
+				&& swingEngine.getGdbManager().getInteractionDb() == null) {
+			allLabel.setText(" | Local mapping databases loaded: " + "Metabolite: " + shortenString(mdb));
+		} else if (swingEngine.getGdbManager().getGeneDb() == null
+				&& swingEngine.getGdbManager().getMetaboliteDb() == null
+				&& swingEngine.getGdbManager().getInteractionDb() != null) {
+			allLabel.setText(" | Local mapping databases loaded: " + "Interactions: " + shortenString(idb));
+		} else if (swingEngine.getGdbManager().getGeneDb() != null
+				&& swingEngine.getGdbManager().getMetaboliteDb() != null
+				&& swingEngine.getGdbManager().getInteractionDb() == null) {
+			allLabel.setText(" | Local mapping databases loaded: " + "GeneProtein: " + shortenString(gdb) + " | "
+					+ "Metabolite: " + shortenString(mdb));
+		} else if (swingEngine.getGdbManager().getGeneDb() == null
+				&& swingEngine.getGdbManager().getMetaboliteDb() != null
+				&& swingEngine.getGdbManager().getInteractionDb() != null) {
+			allLabel.setText(" | Local mapping databases loaded: " + "Metabolite: " + shortenString(mdb) + " | "
+					+ "Interactions: " + shortenString(idb));
+		} else if (swingEngine.getGdbManager().getGeneDb() != null
+				&& swingEngine.getGdbManager().getMetaboliteDb() == null
+				&& swingEngine.getGdbManager().getInteractionDb() != null) {
+			allLabel.setText(" | Local mapping databases loaded: " + "GeneProtein: " + shortenString(gdb) + " | "
+					+ "Interactions: " + shortenString(idb));
+		} else {
+			allLabel.setText(" | Local mapping databases loaded: " + "GeneProtein: " + shortenString(gdb) + " | "
+					+ "Metabolite: " + shortenString(mdb) + " | " + "Interactions: " + shortenString(idb));
+		}
+
+		allLabel.setToolTipText("Local BridgeDb mapping databases to support identifier mapping");
+	}
+
+	private void initImporters(Engine engine) {
+		// engine.addPathwayModelImporter(new MappFormat()); TODO
+		engine.addPathwayModelImporter(new GpmlFormat());
+	}
+
+	private void initExporters(Engine engine, GdbManager gdbManager) {
+		// engine.addPathwayModelExporter(new MappFormat()); TODO
+		engine.addPathwayModelExporter(new GpmlFormat());
+
+		engine.addPathwayModelExporter(new RasterImageExporter(ImageExporter.TYPE_PNG));
+		engine.addPathwayModelExporter(new BatikImageExporter(ImageExporter.TYPE_SVG));
+		engine.addPathwayModelExporter(new BatikImageExporter(ImageExporter.TYPE_TIFF));
+		engine.addPathwayModelExporter(new BatikImageExporter(ImageExporter.TYPE_PDF));
+		engine.addPathwayModelExporter(new DataNodeListExporter(gdbManager));
+		engine.addPathwayModelExporter(new EUGeneExporter());
+	}
+
+	/**
+	 * Acts upon the command line arguments
+	 */
+	public void processOptions() {
+		// Create a plugin manager that loads the plugins
+		pvDesktop.loadPluginManager();
+		// pvDesktop.initPlugins();
+
+		String str = System.getProperty(ARG_PROPERTY_PATHWAYFILE);
+		if (str != null) {
+			openPathwayFile(str);
+		}
+	}
+
+	/**
+	 * Opens pathway model from file.
+	 * 
+	 * @param pathwayFile the file string.
+	 */
+	private void openPathwayFile(String pathwayFile) {
+		File f = new File(pathwayFile);
+		URL url;
+		// Assume the argument is a file
+		if (f.exists()) {
+			swingEngine.openPathwayModel(f);
+		} else {
+			// If it doesn't exist, assume it's an url
+			try {
+				url = new URL(pathwayFile);
+				swingEngine.openPathwayModel(url);
+			} catch (MalformedURLException e) {
+				Logger.log.error("Couldn't open pathway url " + pathwayFile);
+			}
+		}
+	}
+
+	// ================================================================================
+	// Helper Methods
+	// ================================================================================
+	/**
+	 * Shortens the given string to max length of 20 characters.
+	 * 
+	 * @param s the string to shorten.
+	 * @return the shortened string.
+	 */
+	private String shortenString(String s) {
+		return shortenString(s, 20);
+	}
+
+	/**
+	 * Shortens the given string to the given max length.
+	 * 
+	 * @param s         the string to shorten.
+	 * @param maxLength the max length to shorten to.
+	 * @return the shortened string.
+	 */
+	private String shortenString(String s, int maxLength) {
+		String prefix = "...";
+		if (s.length() > maxLength + prefix.length()) {
+			s = s.substring(s.length() - maxLength - prefix.length());
+			s = prefix + s;
+		}
+		return s;
+	}
+
+	// ================================================================================
+	// Shutdown Methods
+	// ================================================================================
 	private void shutdown(SwingEngine swingEngine) {
 		PreferenceManager prefs = PreferenceManager.getCurrent();
 		prefs.store();
@@ -313,75 +424,6 @@ public class GuiMain implements GdbEventListener {
 
 		// stop the timer and clean out the files on a successful shutdown
 		auto.stopTimer();
-	}
-
-	public MainPanel getMainPanel() {
-		return mainPanel;
-	}
-
-	public void init(PvDesktop pvDesktop) {
-		this.pvDesktop = pvDesktop;
-
-		Engine engine = pvDesktop.getSwingEngine().getEngine();
-		initLog(engine);
-		engine.setApplicationName("PathVisio " + Engine.getVersion());
-		if (PreferenceManager.getCurrent().getBoolean(GlobalPreference.USE_SYSTEM_LOOK_AND_FEEL)) {
-			try {
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			} catch (Exception ex) {
-				Logger.log.error("Unable to load native look and feel", ex);
-			}
-		}
-
-		swingEngine = pvDesktop.getSwingEngine();
-		swingEngine.setUrlBrowser(new Browser() {
-			public void openUrl(URL url) {
-				try {
-					if (Desktop.isDesktopSupported()) {
-						Desktop.getDesktop().browse(url.toURI());
-					} else {
-						new JOptionPane("Could not open default browser.\n Please go to\n" + url + "\nin your browser.",
-								JOptionPane.WARNING_MESSAGE);
-					}
-				} catch (Exception ex) {
-					Logger.log.error("Couldn't open url '" + url + "'", ex);
-				}
-			}
-		});
-
-		swingEngine.getGdbManager().initPreferred();
-
-		mainPanel = new MainPanelStandalone(pvDesktop);
-		mainPanel.createAndShowGUI();
-
-		JFrame frame = createAndShowGUI(mainPanel, swingEngine);
-		initImporters(engine);
-		initExporters(engine, swingEngine.getGdbManager());
-		swingEngine.setFrame(frame);
-		swingEngine.setApplicationPanel(mainPanel);
-
-		// start the autosave timer
-		auto = new AutoSave(swingEngine);
-		auto.startTimer(300);
-
-		processOptions();
-	}
-
-	private void initImporters(Engine engine) {
-//		engine.addPathwayModelImporter(new MappFormat()); TODO 
-		engine.addPathwayModelImporter(new GpmlFormat());
-	}
-
-	private void initExporters(Engine engine, GdbManager gdbManager) {
-//		engine.addPathwayModelExporter(new MappFormat()); TODO 
-		engine.addPathwayModelExporter(new GpmlFormat());
-
-		engine.addPathwayModelExporter(new RasterImageExporter(ImageExporter.TYPE_PNG));
-		engine.addPathwayModelExporter(new BatikImageExporter(ImageExporter.TYPE_SVG));
-		engine.addPathwayModelExporter(new BatikImageExporter(ImageExporter.TYPE_TIFF));
-		engine.addPathwayModelExporter(new BatikImageExporter(ImageExporter.TYPE_PDF));
-		engine.addPathwayModelExporter(new DataNodeListExporter(gdbManager));
-		engine.addPathwayModelExporter(new EUGeneExporter());
 	}
 
 }

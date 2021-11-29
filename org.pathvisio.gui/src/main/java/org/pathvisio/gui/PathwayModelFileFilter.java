@@ -22,8 +22,10 @@ import javax.swing.filechooser.FileFilter;
 import org.pathvisio.event.PathwayModelIO;
 
 /**
- * A filefilter that filters files for a given {@link PathwayImporter} or {@link PathwayExporter}.
- * Can be used to create a {@link FileDialog} for importers or exporters.
+ * A filefilter that filters files for a given {@link PathwayImporter} or
+ * {@link PathwayExporter}. Can be used to create a {@link FileDialog} for
+ * importers or exporters.
+ * 
  * @author thomas
  */
 public class PathwayModelFileFilter extends FileFilter {
@@ -40,26 +42,27 @@ public class PathwayModelFileFilter extends FileFilter {
 	}
 
 	public boolean accept(File f) {
-		if(f.isDirectory()) return true;
+		if (f.isDirectory())
+			return true;
 
 		String fn = f.toString();
 		if (fn != null) {
-            int i = fn.lastIndexOf('.');
-            if (i > 0) {
-                String ext = fn.substring(i + 1);
-                for (String impExt : exts) {
-                    if (impExt.equalsIgnoreCase(ext)) {
-                        return true;
-                    }
-                }
-            }
-        }
+			int i = fn.lastIndexOf('.');
+			if (i > 0) {
+				String ext = fn.substring(i + 1);
+				for (String impExt : exts) {
+					if (impExt.equalsIgnoreCase(ext)) {
+						return true;
+					}
+				}
+			}
+		}
 		return false;
 	}
 
 	public String getDescription() {
 		StringBuilder extstr = new StringBuilder();
-		for(String e : exts) {
+		for (String e : exts) {
 			extstr.append(".");
 			extstr.append(e);
 			extstr.append(", ");

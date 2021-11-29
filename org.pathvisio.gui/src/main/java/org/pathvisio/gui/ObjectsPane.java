@@ -32,26 +32,26 @@ import javax.swing.border.Border;
 
 /**
  * A side panel which displays all objects.
+ * 
+ * @author unknown
  */
-public class ObjectsPane extends JPanel
-{
+public class ObjectsPane extends JPanel {
+	
 	private JPanel currentPane;
 
-	public ObjectsPane(SwingEngine swingEngine)
-	{
-		currentPane=this;
+	public ObjectsPane(SwingEngine swingEngine) {
+		currentPane = this;
 	}
 
 	/**
 	 * add item buttons to a pane, multiple items per row
 	 */
-	public void addButtons(Action [] aa, String label, int numItemPerRow)
-	{
+	public void addButtons(Action[] aa, String label, int numItemPerRow) {
 		JPanel pane = new JPanel();
 
 		Border etch = BorderFactory.createEtchedBorder();
-		pane.setBorder (BorderFactory.createTitledBorder (etch, label));
-		
+		pane.setBorder(BorderFactory.createTitledBorder(etch, label));
+
 		pane.setBackground(Color.white);
 		pane.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
@@ -61,34 +61,34 @@ public class ObjectsPane extends JPanel
 		c.weightx = 1.0;
 		c.weighty = 1.0;
 
-		int i=0;
-		for(Action a : aa) {
-			c.gridx = i%numItemPerRow;
-			c.gridy = i/numItemPerRow;		
+		int i = 0;
+		for (Action a : aa) {
+			c.gridx = i % numItemPerRow;
+			c.gridy = i / numItemPerRow;
 
-			final ImageButton button= new ImageButton(a);
-			button.addActionListener(new ActionListener() { 
-				  public void actionPerformed(ActionEvent e) {
-					  button.setContentAreaFilled(false);
-				  } 
+			final ImageButton button = new ImageButton(a);
+			button.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					button.setContentAreaFilled(false);
+				}
 			});
-			pane.add(button,c);
+			pane.add(button, c);
 			i++;
 		}
 
-		for(;i < numItemPerRow;i++){
+		for (; i < numItemPerRow; i++) {
 			c.gridx = i;
 			JButton dummy = new JButton();
-			Dimension dim = new Dimension(25,0);
+			Dimension dim = new Dimension(25, 0);
 			dummy.setPreferredSize(dim);
 			dummy.setContentAreaFilled(false);
-			pane.add(dummy,c);
+			pane.add(dummy, c);
 		}
-		//add (pane);
-		currentPane.setLayout (new BorderLayout());
-		currentPane.add(pane,BorderLayout.NORTH);
+		// add (pane);
+		currentPane.setLayout(new BorderLayout());
+		currentPane.add(pane, BorderLayout.NORTH);
 		JPanel paneNext = new JPanel();
-		currentPane.add(paneNext,BorderLayout.CENTER);
-		currentPane = paneNext;		
+		currentPane.add(paneNext, BorderLayout.CENTER);
+		currentPane = paneNext;
 	}
 }

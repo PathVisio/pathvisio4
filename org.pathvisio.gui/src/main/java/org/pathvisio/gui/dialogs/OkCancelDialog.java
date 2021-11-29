@@ -38,6 +38,8 @@ import javax.swing.UIManager;
  * The basis for a dialog with ok / cancel buttons at the bottom
  *
  * The central panel can have arbitrarily complex contents
+ * 
+ * @author unknown
  */
 public class OkCancelDialog extends JDialog implements ActionListener {
 	public static final String OK = "Ok";

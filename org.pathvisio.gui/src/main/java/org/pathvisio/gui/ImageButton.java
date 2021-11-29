@@ -30,35 +30,35 @@ import javax.swing.JButton;
  *
  * @author bing
  */
-public class ImageButton extends JButton{
-	
-	public ImageButton(Action a){
+public class ImageButton extends JButton {
+
+	public ImageButton(Action a) {
 		super();
 		this.setRolloverEnabled(true);
 		initRolloverListener();
-		Dimension dim = new Dimension(25,25);
+		Dimension dim = new Dimension(25, 25);
 		this.setAction(a);
 		this.setSize(dim);
 		this.setPreferredSize(dim);
 		this.setMinimumSize(dim);
 		this.setMaximumSize(dim);
 		this.setText(null);
-		this.setMargin(new Insets(0,0,0,0));
+		this.setMargin(new Insets(0, 0, 0, 0));
 		this.setContentAreaFilled(false);
 	}
 
-	
 	protected void initRolloverListener() {
-		MouseListener l = new MouseAdapter(){
+		MouseListener l = new MouseAdapter() {
 			public void mouseEntered(MouseEvent e) {
 				setContentAreaFilled(true);
 				getModel().setRollover(true);
 			}
+
 			public void mouseExited(MouseEvent e) {
 				setContentAreaFilled(false);
 			}
 		};
 		addMouseListener(l);
 	}
-	
+
 }

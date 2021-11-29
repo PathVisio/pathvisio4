@@ -37,6 +37,8 @@ import org.pathvisio.gui.SwingEngine;
  * <p>
  * It is possible to add hooks to this handler, so that plugins can register new
  * panels to be added to PathwayElement Popup dialogs.
+ * 
+ * @author unknown
  */
 public class PopupDialogHandler {
 	final private SwingEngine swingEngine;

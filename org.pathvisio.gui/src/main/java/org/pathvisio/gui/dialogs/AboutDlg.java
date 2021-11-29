@@ -36,11 +36,12 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 /**
- * Creates and displays the About dialog,
- * showing some general information about the application.
+ * Creates and displays the About dialog, showing some general information about
+ * the application.
+ * 
+ * @author unknown 
  */
-public class AboutDlg
-{
+public class AboutDlg {
 	private static final URL IMG_ABOUT_LOGO = Resources.getResourceURL("new-logo-small.png");
 
 	private SwingEngine swingEngine;
@@ -48,72 +49,60 @@ public class AboutDlg
 	/**
 	 * call this to open the dialog
 	 */
-	public void createAndShowGUI()
-	{
+	public void createAndShowGUI() {
 		final JFrame aboutDlg = new JFrame();
 		aboutDlg.setBackground(Color.white);
-		FormLayout layout = new FormLayout(
-				" 4dlu, left:230dlu:grow, 4dlu",
+		FormLayout layout = new FormLayout(" 4dlu, left:230dlu:grow, 4dlu",
 				"4dlu, pref, 4dlu, 240dlu:grow, 4dlu, pref, 4dlu");
 
 		JEditorPane label = new JEditorPane();
 		label.setBackground(Color.white);
 		label.setContentType("text/html");
 		label.setEditable(false);
-		label.setText(
-				swingEngine.getEngine().getApplicationName() +
-				"<br><br><hr><br>" + 
-				"<html><b>Core developers</b><br>" +
-				"Martina Kutmon, Nuno Nunes, Alexander Pico, Egon Willighagen, Denise Slenter, Kristina Hanspers<br><br><hr><br>" +
-				"<b>Former developers</b><br>" +
-				"Andra Waagmeester, Anwesha Bohler, Jonathan Melius, Martijn van Iersel, Thomas Kelder" + 
-				"<b>Contributors</b><br>" +
-				"Adem Bilicna, Augustin Luna, Bing Lui, " + 
-				"Christ Leemans, Eric Creussen, Erik Pelgrin, " + 
-				"Esterh Neuteboom, Ferry Jagers, Hakim Achterberg, " + 
-				"Harm Nijveen, Irene Kaashoek, Justin Elser, " + 
-				"Kumar Chanden, Lars Willighagen, Margot Sunshine, Mark Woon, " + 
-				"Margiet Palm, Pim Moeskops, Praveen Kumar, " +
-				"Rene Besseling, Rianne Fijten, Sjoerd Crijns, " + 
-				"Sravanthi Sinha, Stefan van Helden<br><br><hr><br>" +
-				"<b>Visit our website</b><br>" +
-				"<a href=\"http://www.pathvisio.org\">http://www.pathvisio.org</a>" + 
-				"</html>");
+		label.setText(swingEngine.getEngine().getApplicationName() + "<br><br><hr><br>"
+				+ "<html><b>Core developers</b><br>"
+				+ "Martina Kutmon, Nuno Nunes, Alexander Pico, Egon Willighagen, Denise Slenter, Kristina Hanspers<br><br><hr><br>"
+				+ "<b>Former developers</b><br>"
+				+ "Andra Waagmeester, Anwesha Bohler, Jonathan Melius, Martijn van Iersel, Thomas Kelder"
+				+ "<b>Contributors</b><br>" + "Adem Bilicna, Augustin Luna, Bing Lui, "
+				+ "Christ Leemans, Eric Creussen, Erik Pelgrin, " + "Esterh Neuteboom, Ferry Jagers, Hakim Achterberg, "
+				+ "Harm Nijveen, Irene Kaashoek, Justin Elser, "
+				+ "Kumar Chanden, Lars Willighagen, Margot Sunshine, Mark Woon, "
+				+ "Margiet Palm, Pim Moeskops, Praveen Kumar, " + "Rene Besseling, Rianne Fijten, Sjoerd Crijns, "
+				+ "Sravanthi Sinha, Stefan van Helden<br><br><hr><br>" + "<b>Visit our website</b><br>"
+				+ "<a href=\"http://www.pathvisio.org\">http://www.pathvisio.org</a>" + "</html>");
 		label.addHyperlinkListener(swingEngine);
-		JLabel iconLbl = new JLabel(new ImageIcon (IMG_ABOUT_LOGO));
+		JLabel iconLbl = new JLabel(new ImageIcon(IMG_ABOUT_LOGO));
 
 		CellConstraints cc = new CellConstraints();
 
 		JPanel dialogBox = new JPanel();
 		dialogBox.setBackground(Color.white);
-		dialogBox.setLayout (layout);
-		dialogBox.add (iconLbl, cc.xy(2,2));
-		dialogBox.add (label, cc.xy(2,4));
+		dialogBox.setLayout(layout);
+		dialogBox.add(iconLbl, cc.xy(2, 2));
+		dialogBox.add(label, cc.xy(2, 4));
 
 		JButton btnOk = new JButton();
 		btnOk.setText("OK");
 		btnOk.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
-			{
-				aboutDlg.setVisible (false);
+			public void actionPerformed(ActionEvent e) {
+				aboutDlg.setVisible(false);
 				aboutDlg.dispose();
 			}
 		});
 
-		dialogBox.add (btnOk, cc.xyw (2, 6, 1, "center, top"));
+		dialogBox.add(btnOk, cc.xyw(2, 6, 1, "center, top"));
 
 		aboutDlg.setResizable(false);
 		aboutDlg.setTitle("About " + Globals.APPLICATION_NAME);
-		aboutDlg.add (dialogBox);
+		aboutDlg.add(dialogBox);
 		aboutDlg.pack();
 		aboutDlg.setLocationRelativeTo(swingEngine.getFrame());
 		aboutDlg.setVisible(true);
 	}
 
-	public AboutDlg(SwingEngine swingEngine)
-	{
+	public AboutDlg(SwingEngine swingEngine) {
 		this.swingEngine = swingEngine;
-
 
 	}
 }

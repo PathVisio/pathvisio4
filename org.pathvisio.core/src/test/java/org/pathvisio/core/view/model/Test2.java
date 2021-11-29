@@ -30,7 +30,7 @@ import org.pathvisio.event.PathwayModelEvent;
 import org.pathvisio.event.PathwayModelListener;
 import org.pathvisio.event.PathwayObjectEvent;
 import org.pathvisio.event.PathwayObjectListener;
-import org.pathvisio.io.ConverterException;
+import org.pathvisio.model.ConverterException;
 import org.pathvisio.model.DataNode;
 import org.pathvisio.model.Interaction;
 import org.pathvisio.model.Label;
@@ -182,7 +182,8 @@ public class Test2 extends TestCase implements PathwayModelListener, PathwayObje
 		o.setCenterX(50.0);
 		o.setCenterY(50.0);
 		DefaultTemplates.setInitialSize(o);
-		o.setElementId(data.getUniqueElementId());
+		data.add(o);
+//		o.setElementId(data.getUniqueElementId());
 		Interaction o2 = new Interaction();
 		o2.setStartLinePointX(10.0);
 		o2.setStartLinePointY(10.0);
@@ -191,7 +192,6 @@ public class Test2 extends TestCase implements PathwayModelListener, PathwayObje
 		Label o3 = new Label("");
 		o3.setCenterX(100.0);
 		o3.setCenterY(50);
-		o3.setElementId(data.getUniqueElementId());
 		data.add(o3);
 		PathwayElement mi;
 

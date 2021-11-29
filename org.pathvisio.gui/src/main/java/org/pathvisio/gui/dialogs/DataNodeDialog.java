@@ -74,6 +74,8 @@ import org.pathvisio.gui.util.PermissiveComboBox;
  * Dialog for editing DataNodes. In addition to the standard comments and
  * literature tabs, this has a tab for looking up accession numbers for genes
  * and metabolites.
+ * 
+ * @author unknown
  */
 public class DataNodeDialog extends PathwayObjectDialog {
 

@@ -43,6 +43,7 @@ import org.pathvisio.core.preferences.PreferenceManager;
 import org.pathvisio.core.view.Adjustable;
 import org.pathvisio.core.view.model.Handle.Freedom;
 import org.pathvisio.core.view.model.LinAlg.Point;
+import org.pathvisio.model.shape.IShape;
 import org.pathvisio.model.shape.ShapeRegistry;
 
 /**
@@ -99,7 +100,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	}
 
 	protected void createHandles() {
-		ShapeType shapeType = getPathwayObject().getShapeType();
+		IShape shapeType = getPathwayObject().getShapeType();
 		boolean isResizeable = shapeType.isResizeable();
 		boolean isRotatable = shapeType.isRotatable();
 		if (shapeType != null && !isResizeable && !isRotatable) {
@@ -375,7 +376,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	protected void setHandleLocation() {
 		Point p;
 		ShapedElement gdata = getPathwayObject();
-		ShapeType shapeType = gdata.getShapeType();
+		IShape shapeType = gdata.getShapeType();
 		if (shapeType == null || shapeType.isResizeable()) {
 			if (handleN != null) {
 				p = mToExternal(0, -gdata.getHeight() / 2);
@@ -642,7 +643,7 @@ public abstract class VShapedElement extends VPathwayElement implements VLinkabl
 	 * @return
 	 */
 	private boolean hasOutline() {
-		ShapeType shapeType = getPathwayObject().getShapeType();
+		IShape shapeType = getPathwayObject().getShapeType();
 		return (!(shapeType == null || shapeType == ShapeType.NONE));
 	}
 

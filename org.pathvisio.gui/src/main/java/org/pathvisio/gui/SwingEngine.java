@@ -44,8 +44,8 @@ import org.pathvisio.core.Globals;
 import org.pathvisio.core.Engine.ApplicationEventListener;
 import org.pathvisio.core.data.GdbManager;
 import org.pathvisio.debug.Logger;
-import org.pathvisio.io.ConverterException;
-import org.pathvisio.io.GpmlFormat;
+import org.pathvisio.model.ConverterException;
+import org.pathvisio.model.GpmlFormat;
 import org.pathvisio.model.PathwayModel;
 import org.pathvisio.model.PathwayModel.StatusFlagEvent;
 import org.pathvisio.event.PathwayModelIO;
@@ -66,21 +66,23 @@ import org.pathvisio.gui.view.VPathwayModelSwing;
  *
  * It keeps the main panel, the main frame and has helper functions for opening,
  * closing, importing and exporting Pathways.
+ * 
+ * @author unknown
  */
 public class SwingEngine implements ApplicationEventListener, PathwayModel.StatusFlagListener, HyperlinkListener {
-	private MainPanel mainPanel;
-
-	private CommonActions actions;
-	private JFrame frame; // may be null (for applet...)
 
 	private Engine engine;
 	private GdbManager gdbManager = null;
 	// private final Compat compat;
+	private CommonActions actions;
+	private MainPanel mainPanel;
+	private JFrame frame; // may be null (for applet...) TODO
 
-	public Engine getEngine() {
-		return engine;
-	}
-
+	/**
+	 * Constructor for swing engine.
+	 * 
+	 * @param engine the engine.
+	 */
 	public SwingEngine(Engine engine) {
 		this.engine = engine;
 		gdbManager = new GdbManager();
@@ -90,18 +92,48 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 		// engine.addApplicationEventListener(compat);
 	}
 
+	/**
+	 * Returns the {@link Engine}.
+	 * 
+	 * @return engine the engine.
+	 */
+	public Engine getEngine() {
+		return engine;
+	}
+
+	/**
+	 * Returns the {@link GdbManager}.
+	 * 
+	 * @return gdbManager
+	 */
 	public GdbManager getGdbManager() {
 		return gdbManager;
 	}
 
+	/**
+	 * Returns the {@link CommonActions}.
+	 * 
+	 * @return actions the common actions
+	 */
 	public CommonActions getActions() {
 		return actions;
 	}
 
+	/**
+	 * Returns the MainPanel.
+	 * 
+	 * @return mainPanel the main panel.
+	 */
 	public MainPanel getApplicationPanel() {
 		return getApplicationPanel(false);
 	}
 
+	/**
+	 * Returns the MainPanel given boolean forceNew.
+	 * 
+	 * @param forceNew the boolean.
+	 * @return mainPanel the main panel.
+	 */
 	public MainPanel getApplicationPanel(boolean forceNew) {
 		if (forceNew || !hasApplicationPanel()) {
 			mainPanel = new MainPanel(this);
@@ -109,6 +141,11 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 		return mainPanel;
 	}
 
+	/**
+	 * Sets the MainPanel.
+	 * 
+	 * @param mp the main panel.
+	 */
 	public void setApplicationPanel(MainPanel mp) {
 		if (mainPanel != null) {
 			Container parent = mainPanel.getParent();
@@ -118,10 +155,20 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 		mainPanel = mp;
 	}
 
+	/**
+	 * Returns true if main panel not null.
+	 * 
+	 * @return true if main panel not null, false otherwise.
+	 */
 	public boolean hasApplicationPanel() {
 		return mainPanel != null;
 	}
 
+	/**
+	 * @param message
+	 * @param c
+	 * @param e
+	 */
 	public void handleConverterException(String message, Component c, Throwable e) {
 		if (e.getMessage() != null && e.getMessage().contains("Cannot find the declaration of element 'Pathway'")) {
 			JOptionPane.showMessageDialog(c, Utils.formatExceptionMsg(message) + "\n\n"
@@ -139,6 +186,11 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 		}
 	}
 
+	/**
+	 * @param message
+	 * @param c
+	 * @param e
+	 */
 	public void handleMalformedURLException(String message, Component c, Throwable e) {
 		if (e.getMessage() != null && e.getMessage().contains("no protocol:")) {
 			JOptionPane.showMessageDialog(c, Utils.formatExceptionMsg(message) + "\n\n"
@@ -154,6 +206,9 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 		}
 	}
 
+	/**
+	 * @return
+	 */
 	public VPathwayWrapper createWrapper() {
 		return new VPathwayModelSwing(getApplicationPanel().getScrollPane());
 	}
@@ -173,6 +228,10 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 		}
 	}
 
+	/**
+	 * @param url
+	 * @return
+	 */
 	public boolean openPathwayModel(final URL url) {
 		final ProgressKeeper pk = new ProgressKeeper();
 		final ProgressDialog d = new ProgressDialog(JOptionPane.getFrameForComponent(getApplicationPanel()), "", pk,
@@ -197,6 +256,10 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 		return processTask(pk, d, sw);
 	}
 
+	/**
+	 * @param f
+	 * @return
+	 */
 	public boolean openPathwayModel(final File f) {
 		final ProgressKeeper pk = new ProgressKeeper();
 		final ProgressDialog d = new ProgressDialog(JOptionPane.getFrameForComponent(getApplicationPanel()), "", pk,
@@ -221,6 +284,10 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 		return processTask(pk, d, sw);
 	}
 
+	/**
+	 * @param f
+	 * @return
+	 */
 	public boolean importPathwayModel(final File f) {
 		final ProgressKeeper pk = new ProgressKeeper();
 		final ProgressDialog d = new ProgressDialog(JOptionPane.getFrameForComponent(getApplicationPanel()), "", pk,
@@ -248,6 +315,9 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 
 	}
 
+	/**
+	 * 
+	 */
 	public void newPathwayModel() {
 		engine.setWrapper(createWrapper());
 		engine.newPathwayModel();
@@ -255,6 +325,9 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 		dlg.setVisible(true);
 	}
 
+	/**
+	 * @return
+	 */
 	public boolean exportPathwayModel() {
 		PathwayModelChooser pc = new PathwayModelChooser("Export", JFileChooser.SAVE_DIALOG,
 				GlobalPreference.DIR_LAST_USED_EXPORT, engine.getPathwayModelExporters());
@@ -276,13 +349,16 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 
 	/**
 	 * A wrapper around JFileChooser that has the right defaults and File Filters.
+	 * 
+	 * @author unknown
 	 */
 	private class PathwayModelChooser {
 		private final JFileChooser jfc;
 		private final String taskName;
 		private final Preference dirPreference;
 
-		public PathwayModelChooser(String taskName, int dialogType, Preference dirPreference, Set<? extends PathwayModelIO> set) {
+		public PathwayModelChooser(String taskName, int dialogType, Preference dirPreference,
+				Set<? extends PathwayModelIO> set) {
 			jfc = new JFileChooser();
 			this.taskName = taskName;
 			this.dirPreference = dirPreference;
@@ -293,8 +369,10 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 		}
 
 		/**
-		 * create a file chooser populated with file filters for the given pathway
+		 * Creates a file chooser populated with file filters for the given pathway
 		 * importers / exporters
+		 * 
+		 * @param set
 		 */
 		private void createFileFilters(Set<? extends PathwayModelIO> set) {
 			jfc.setAcceptAllFileFilterUsed(false);
@@ -318,10 +396,16 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 				jfc.setFileFilter(selectedFilter);
 		}
 
+		/**
+		 * @return
+		 */
 		public FileFilter getFileFilter() {
 			return jfc.getFileFilter();
 		}
 
+		/**
+		 * @return
+		 */
 		public int show() {
 			int status = jfc.showDialog(getApplicationPanel(), taskName);
 			if (status == JFileChooser.APPROVE_OPTION) {
@@ -330,11 +414,19 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 			return status;
 		}
 
+		/**
+		 * @return
+		 */
 		public File getSelectedFile() {
 			return jfc.getSelectedFile();
 		}
 	}
 
+	/**
+	 * @param f
+	 * @param exporterName
+	 * @return
+	 */
 	public boolean exportPathwayModel(final File f, final String exporterName) {
 		if (mayOverwrite(f)) {
 			final ProgressKeeper pk = new ProgressKeeper();
@@ -347,6 +439,9 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 			SwingWorker<Boolean, Boolean> sw = new SwingWorker<Boolean, Boolean>() {
 				private List<String> warnings;
 
+				/**
+				 *
+				 */
 				@Override
 				protected Boolean doInBackground() {
 					try {
@@ -361,6 +456,9 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 					}
 				}
 
+				/**
+				 *
+				 */
 				@Override
 				public void done() {
 					if (warnings != null && warnings.size() > 0) {
@@ -380,6 +478,10 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 		return false;
 	}
 
+	/**
+	 * @param f
+	 * @return
+	 */
 	public boolean exportPathwayModel(final File f) {
 		if (mayOverwrite(f)) {
 			final ProgressKeeper pk = new ProgressKeeper();
@@ -425,6 +527,9 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 		return false;
 	}
 
+	/**
+	 * @return
+	 */
 	public boolean importPathwayModel() {
 		PathwayModelChooser pc = new PathwayModelChooser("Import", JFileChooser.OPEN_DIALOG,
 				GlobalPreference.DIR_LAST_USED_IMPORT, engine.getPathwayModelImporters());
@@ -445,8 +550,8 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 	 * @return true if a pathway was openend, false if the operation was cancelled
 	 */
 	public boolean openPathwayModel() {
-		PathwayModelChooser pc = new PathwayModelChooser("Open", JFileChooser.OPEN_DIALOG, GlobalPreference.DIR_LAST_USED_OPEN,
-				GPML_FORMAT_ONLY);
+		PathwayModelChooser pc = new PathwayModelChooser("Open", JFileChooser.OPEN_DIALOG,
+				GlobalPreference.DIR_LAST_USED_OPEN, GPML_FORMAT_ONLY);
 		int status = pc.show();
 
 		if (status == JFileChooser.APPROVE_OPTION) {
@@ -456,6 +561,10 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 		return false;
 	}
 
+	/**
+	 * @param f
+	 * @return
+	 */
 	public boolean mayOverwrite(File f) {
 		boolean allow = true;
 		if (f.exists()) {
@@ -466,9 +575,12 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 		return allow;
 	}
 
+	/**
+	 * @return
+	 */
 	public boolean savePathwayModelAs() {
-		PathwayModelChooser pc = new PathwayModelChooser("Save", JFileChooser.SAVE_DIALOG, GlobalPreference.DIR_LAST_USED_SAVE,
-				GPML_FORMAT_ONLY);
+		PathwayModelChooser pc = new PathwayModelChooser("Save", JFileChooser.SAVE_DIALOG,
+				GlobalPreference.DIR_LAST_USED_SAVE, GPML_FORMAT_ONLY);
 		int status = pc.show();
 
 		if (status == JFileChooser.APPROVE_OPTION) {
@@ -489,6 +601,9 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 		return false;
 	}
 
+	/**
+	 * @return
+	 */
 	public boolean savePathwayModel() {
 		PathwayModel pathway = engine.getActivePathwayModel();
 
@@ -540,6 +655,9 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 		return true;
 	}
 
+	/**
+	 *
+	 */
 	public void applicationEvent(ApplicationEvent e) {
 		switch (e.getType()) {
 		case PATHWAY_OPENED:
@@ -550,6 +668,9 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 		}
 	}
 
+	/**
+	 * 
+	 */
 	public void updateTitle() {
 		if (frame != null) {
 			if (engine.getActivePathwayModel() == null) {
@@ -564,14 +685,23 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 		}
 	}
 
+	/**
+	 *
+	 */
 	public void statusFlagChanged(StatusFlagEvent e) {
 		updateTitle();
 	}
 
+	/**
+	 * @param frame
+	 */
 	public void setFrame(JFrame frame) {
 		this.frame = frame;
 	}
 
+	/**
+	 * @return
+	 */
 	public JFrame getFrame() {
 		return frame;
 	}
@@ -581,6 +711,8 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 	/**
 	 * Set the browser launcher that will be used to open urls in the system's
 	 * default web browser.
+	 * 
+	 * @param b
 	 */
 	public void setUrlBrowser(Browser b) {
 		this.browser = b;
@@ -590,6 +722,7 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 	 * Opens an URL in the system's default browser if a browser is set
 	 * 
 	 * @see #setUrlBrowser
+	 * @param url
 	 * @throws UnsupportedOperationException when there is no browser set.
 	 */
 	public void openUrl(URL url) throws UnsupportedOperationException {
@@ -611,7 +744,7 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 	private boolean disposed = false;
 
 	/**
-	 * free all resources (such as listeners) held by this class. Owners of this
+	 * Frees all resources (such as listeners) held by this class. Owners of this
 	 * class must explicitly dispose of it to clean up.
 	 */
 	public void dispose() {
@@ -630,6 +763,9 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 		return Organism.fromLatinName(organism);
 	}
 
+	/**
+	 * @param e the hyperlink event.
+	 */
 	public void hyperlinkUpdate(HyperlinkEvent e) {
 		if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
 			try {
@@ -646,6 +782,11 @@ public class SwingEngine implements ApplicationEventListener, PathwayModel.Statu
 
 	private PopupDialogHandler popupDlgHandler = new PopupDialogHandler(this);
 
+	/**
+	 * Returns the {@link PopupDialogHandler}.
+	 * 
+	 * @return
+	 */
 	public PopupDialogHandler getPopupDialogHandler() {
 		return popupDlgHandler;
 	}

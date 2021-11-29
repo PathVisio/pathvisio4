@@ -22,30 +22,40 @@ import org.pathvisio.core.Engine;
 import org.pathvisio.core.preferences.PreferenceManager;
 import org.pathvisio.gui.SwingEngine;
 
+/**
+ * Activator class.
+ * 
+ * @author unknown
+ *
+ */
 public class Activator implements BundleActivator {
 
+	/**
+	 * @param context
+	 */
 	public void start(BundleContext context) throws Exception {
 		// PreferenceManager needs to be initialized before
 		// Engine object is created
 		PreferenceManager.init();
-		
+
 		Engine engine = new Engine();
 		SwingEngine swingEngine = new SwingEngine(engine);
-		
+
 		final PvDesktop pvDesktop = new PvDesktop(swingEngine, context);
 		context.registerService(PvDesktop.class.getName(), pvDesktop, null);
-		
+
 		final GuiMain gui = new GuiMain();
-		
-		javax.swing.SwingUtilities.invokeLater(new Runnable()
-		{
-			public void run()
-			{
+
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
 				gui.init(pvDesktop);
 			}
 		});
 	}
 
+	/**
+	 * @param context
+	 */
 	public void stop(BundleContext context) throws Exception {
 	}
 

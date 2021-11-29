@@ -31,7 +31,7 @@ import org.bridgedb.IDMapperException;
 import org.bridgedb.Xref;
 import org.pathvisio.core.data.GdbManager;
 import org.pathvisio.event.PathwayModelExporter;
-import org.pathvisio.io.ConverterException;
+import org.pathvisio.model.ConverterException;
 import org.pathvisio.model.DataNode;
 import org.pathvisio.model.PathwayModel;
 

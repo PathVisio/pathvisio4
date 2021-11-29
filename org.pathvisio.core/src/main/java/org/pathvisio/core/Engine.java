@@ -31,7 +31,7 @@ import java.util.Set;
 import javax.swing.SwingUtilities;
 
 import org.pathvisio.debug.Logger;
-import org.pathvisio.io.ConverterException;
+import org.pathvisio.model.ConverterException;
 import org.pathvisio.model.PathwayModel;
 import org.pathvisio.event.PathwayModelExporter;
 import org.pathvisio.event.PathwayModelImporter;

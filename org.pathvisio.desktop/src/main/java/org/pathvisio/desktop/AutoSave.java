@@ -26,31 +26,45 @@ import javax.swing.SwingUtilities;
 
 import org.pathvisio.core.Engine;
 import org.pathvisio.debug.Logger;
-import org.pathvisio.io.ConverterException;
-import org.pathvisio.io.GpmlFormat;
+import org.pathvisio.model.ConverterException;
+import org.pathvisio.model.GpmlFormat;
 import org.pathvisio.model.PathwayModel;
 import org.pathvisio.gui.SwingEngine;
 
 /**
  * Collection of methods for autosave and recovery of PathVisio files
+ * 
+ * @author unknown
  */
 public class AutoSave {
+	
 	private Timer timer;
 	private final SwingEngine swingEngine;
 	private final Engine engine;
 	private final File autoSaveFile = autoSaveFileLocation();
 
+	/**
+	 * 
+	 * @param se the swing engine. 
+	 */
 	public AutoSave(SwingEngine se) {
 		engine = se.getEngine();
 		swingEngine = se;
 	}
 
+	/**
+	 * 
+	 * @return autoSaveFile the file. 
+	 */
 	private File autoSaveFileLocation() {
 		String tempDir = System.getProperty("java.io.tmpdir");
 		File autoSaveFile = new File(tempDir, "PathVisioAutoSave.gpml");
 		return autoSaveFile;
 	}
 
+	/**
+	 * @throws ConverterException
+	 */
 	private void autoSaveFile() throws ConverterException {
 		PathwayModel p = engine.getActivePathwayModel();
 		if (p != null) {
@@ -59,6 +73,10 @@ public class AutoSave {
 		}
 	}
 
+	/**
+	 * 
+	 * @author unknown
+	 */
 	private class DoSave extends TimerTask {
 		public void run() {
 			try {
@@ -82,7 +100,8 @@ public class AutoSave {
 	}
 
 	/**
-	 * @param period autosave period in seconds
+	 * 
+	 * @param period the autosave period in seconds
 	 */
 	public void startTimer(int period) {
 		if (autoSaveFile.exists()) {
@@ -92,11 +111,17 @@ public class AutoSave {
 		timer.schedule(new DoSave(), period * 1000, period * 1000);
 	}
 
+	/**
+	 * 
+	 */
 	public void stopTimer() {
 		timer.cancel();
 		autoSaveFile.delete();
 	}
 
+	/**
+	 * 
+	 */
 	private void autoRecoveryDlg() {
 		int result = JOptionPane.showConfirmDialog(swingEngine.getApplicationPanel(),
 				"Sorry, it seems PathVisio crashed.\n" + "Recover the auto-saved file?", "Crash recovery",

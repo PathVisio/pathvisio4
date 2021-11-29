@@ -55,6 +55,10 @@ import org.pathvisio.gui.completer.CompleterQueryTextField;
 import org.pathvisio.gui.completer.OptionProvider;
 import org.pathvisio.gui.util.PermissiveComboBox;
 
+/**
+ * 
+ * @author unknown
+ */
 public class LineDialog extends PathwayObjectDialog implements ItemListener {
 
 	/**
@@ -150,7 +154,7 @@ public class LineDialog extends PathwayObjectDialog implements ItemListener {
 		dsm.setPrimaryFilter(true);
 		dsm.setSpeciesFilter(swingEngine.getCurrentOrganism());
 		dbCombo = new PermissiveComboBox(dsm);
-		typeCombo = new PermissiveComboBox((ComboBoxModel) ArrowHeadType.getValues()); //TODO 
+		typeCombo = new PermissiveComboBox((ComboBoxModel) ArrowHeadType.getValues()); // TODO
 
 		GridBagConstraints c = new GridBagConstraints();
 		c.ipadx = c.ipady = 5;
