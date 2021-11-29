@@ -29,6 +29,7 @@ import org.pathvisio.model.type.HAlignType;
 import org.pathvisio.model.type.DataNodeType;
 import org.pathvisio.model.type.GroupType;
 import org.pathvisio.model.type.LineStyleType;
+import org.pathvisio.model.type.ObjectType;
 import org.pathvisio.model.type.ArrowHeadType;
 import org.pathvisio.model.PathwayElement;
 import org.pathvisio.prop.Property;
