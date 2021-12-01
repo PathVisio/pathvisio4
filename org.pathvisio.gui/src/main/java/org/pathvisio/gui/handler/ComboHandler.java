@@ -58,19 +58,6 @@ public class ComboHandler extends DefaultCellEditor implements TableCellRenderer
 		useIndex = aUseIndex;
 	}
 
-	public ComboHandler(PropertyType aType, List<Object> labels, List<Object> values) {
-		this(aType, labels, false);
-		if (labels.size() != values.size()) {
-			throw new IllegalArgumentException("Number of labels doesn't equal number of values");
-		}
-		label2value = new HashMap<Object, Object>();
-		value2label = new HashMap<Object, Object>();
-		for (int i = 0; i < labels.size(); i++) {
-			label2value.put(labels.get(i), values.get(i));
-			value2label.put(values.get(i), labels.get(i));
-		}
-	}
-
 	public ComboHandler(PropertyType aType, Object[] labels, Object[] values) {
 		this(aType, labels, false);
 		if (labels.length != values.length) {
@@ -81,6 +68,19 @@ public class ComboHandler extends DefaultCellEditor implements TableCellRenderer
 		for (int i = 0; i < labels.length; i++) {
 			label2value.put(labels[i], values[i]);
 			value2label.put(values[i], labels[i]);
+		}
+	}
+	
+	public ComboHandler(PropertyType aType, List labels, List values) {
+		this(aType, labels, false);
+		if (labels.size() != values.size()) {
+			throw new IllegalArgumentException("Number of labels doesn't equal number of values");
+		}
+		label2value = new HashMap<Object, Object>();
+		value2label = new HashMap<Object, Object>();
+		for (int i = 0; i < labels.size(); i++) {
+			label2value.put(labels.get(i), values.get(i));
+			value2label.put(values.get(i), labels.get(i));
 		}
 	}
 

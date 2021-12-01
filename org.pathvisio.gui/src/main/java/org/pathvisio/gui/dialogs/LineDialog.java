@@ -154,7 +154,8 @@ public class LineDialog extends PathwayObjectDialog implements ItemListener {
 		dsm.setPrimaryFilter(true);
 		dsm.setSpeciesFilter(swingEngine.getCurrentOrganism());
 		dbCombo = new PermissiveComboBox(dsm);
-		typeCombo = new PermissiveComboBox((ComboBoxModel) ArrowHeadType.getValues()); // TODO
+		Object[] arrowHeadTypesArray = ArrowHeadType.getValues().toArray(new Object[0]);
+		typeCombo = new PermissiveComboBox(arrowHeadTypesArray); //TODO 
 
 		GridBagConstraints c = new GridBagConstraints();
 		c.ipadx = c.ipady = 5;

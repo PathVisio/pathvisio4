@@ -92,7 +92,7 @@ public class LitReferencePanel extends PathwayElementPanel implements ActionList
 	}
 
 	public void setInput(PathwayElement e) {
-//		if (e != getInput()) {
+//		if (e != getInput()) { //TODO 
 //			elmMgr = e.getParent().getBiopaxElementManager();
 //			refMgr = e.getBiopaxReferenceManager();
 //		}

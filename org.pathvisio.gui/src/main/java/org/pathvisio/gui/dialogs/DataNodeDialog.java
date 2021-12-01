@@ -55,6 +55,7 @@ import org.bridgedb.IDMapperStack;
 import org.bridgedb.Xref;
 import org.pathvisio.core.data.XrefWithSymbol;
 import org.pathvisio.debug.Logger;
+import org.pathvisio.model.type.ArrowHeadType;
 import org.pathvisio.model.type.DataNodeType;
 import org.pathvisio.util.XrefUtils;
 import org.pathvisio.model.DataNode;
@@ -320,7 +321,8 @@ public class DataNodeDialog extends PathwayObjectDialog {
 		dsm.setPrimaryFilter(true);
 		dsm.setSpeciesFilter(swingEngine.getCurrentOrganism());
 		dbCombo = new PermissiveComboBox(dsm);
-		typeCombo = new PermissiveComboBox((ComboBoxModel) DataNodeType.getValues()); //TODO 
+		Object[] dataNodeTypesArray = DataNodeType.getValues().toArray(new Object[0]);
+		typeCombo = new PermissiveComboBox(dataNodeTypesArray); //TODO 
 
 		GridBagConstraints c = new GridBagConstraints();
 		c.ipadx = c.ipady = 5;

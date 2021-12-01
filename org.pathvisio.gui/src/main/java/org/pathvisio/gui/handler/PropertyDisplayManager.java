@@ -80,8 +80,9 @@ public class PropertyDisplayManager {
 		registerTypeHandler(new ComboHandler(StaticPropertyType.SHAPETYPE, ShapeType.getNames(), ShapeType.getValues()));
 		registerTypeHandler(new ComboHandler(StaticPropertyType.VALIGNTYPE, VAlignType.getNames(), VAlignType.values()));
 		registerTypeHandler(new ComboHandler(StaticPropertyType.HALIGNTYPE, HAlignType.getNames(), HAlignType.values()));
-		registerTypeHandler(new ComboHandler(CellularComponentType.CELL_COMPONENT_TYPE, CellularComponentType.getNames(), false));
-
+		// registerTypeHandler(new ComboHandler(CellularComponentType.CELL_COMPONENT_TYPE, CellularComponentType.getNames(), false));
+		//TODO
+		
 		// register core properties
 		for (StaticProperty p : StaticProperty.values()) {
 			registerProperty(p);
@@ -89,11 +90,11 @@ public class PropertyDisplayManager {
 
 		//Register specific dynamic property
 		//TODO: refactor as Static Property with next GPML update
-		registerProperty(CellularComponentType.CELL_COMPONENT_PROPERTY);
-		setPropertyScope(
-				CellularComponentType.CELL_COMPONENT_PROPERTY, 
-				EnumSet.of(ObjectType.SHAPE)
-		);
+//		registerProperty(CellularComponentType.CELL_COMPONENT_PROPERTY); TODO 
+//		setPropertyScope(
+//				CellularComponentType.CELL_COMPONENT_PROPERTY, 
+//				EnumSet.of(ObjectType.SHAPE)
+//		);
 	}
 
 

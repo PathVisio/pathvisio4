@@ -108,9 +108,9 @@ public class PathwayObjectDialog extends OkCancelDialog {
 	protected void storeState() {
 		PathwayObject e = getInput();
 		originalPathway = (PathwayModel) e.getPathwayModel().clone();
-//		for (StaticProperty t : e.getStaticPropertyKeys()) { //TODO 
-//			state.put(t, e.getStaticProperty(t));
-//		}
+		for (StaticProperty t : e.getStaticPropertyKeys()) { 
+			state.put(t, e.getStaticProperty(t));
+		}
 	}
 
 	/**
@@ -119,9 +119,9 @@ public class PathwayObjectDialog extends OkCancelDialog {
 	 */
 	protected void restoreState() {
 		PathwayObject e = getInput();
-//		for (StaticProperty t : state.keySet()) { TODO 
-//			e.setStaticProperty(t, state.get(t));
-//		}
+		for (StaticProperty t : state.keySet()) { 
+			e.setStaticProperty(t, state.get(t));
+		}
 	}
 
 	private void createTabs() {

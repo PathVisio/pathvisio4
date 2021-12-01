@@ -16,6 +16,8 @@
  ******************************************************************************/
 package org.pathvisio.gui.util;
 
+import java.util.List;
+
 import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.event.ListDataEvent;

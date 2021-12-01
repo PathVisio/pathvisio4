@@ -21,18 +21,6 @@
 	<build>
 		<plugins>
 			<plugin>
-				<inherited>false</inherited>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>${maven-release-plugin.version}</version>
-				<configuration>
-					<autoVersionSubmodules>true</autoVersionSubmodules>
-					<goals>deploy</goals>
-					<!-- so that impl bundles with modules will build correctly -->
-					<preparationGoals>clean install</preparationGoals>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
 				<version>${maven-bundle-plugin.version}</version>
@@ -45,21 +33,16 @@
 						<Private-Package>${bundle.namespace}.*</Private-Package>
 						<Embed-Dependency>batik-transcoder,batik-svggen,batik-dom</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
-						<Import-Package>*;resolution:=optional</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
 
-
-
 	<repositories>
 		<repository>
-			<!-- libGPML load as repository. DO NOT set id to "local" because it is 
-				reserved by Maven -->
 			<id>repo</id>
-			<url>file:///${project.basedir}/org.pathvisio.core/repo</url>
+			<url>file:///${project.basedir}/repo/org.pathvisio.libgpml-4.0.0-SNAPSHOT.jar</url>
 		</repository>
 	</repositories>
 
