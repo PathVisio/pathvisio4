@@ -19,7 +19,7 @@ package org.pathvisio.gui;
 import java.io.File;
 import javax.swing.filechooser.FileFilter;
 
-import org.pathvisio.event.PathwayModelIO;
+import org.pathvisio.io.PathwayModelIO;
 
 /**
  * A filefilter that filters files for a given {@link PathwayImporter} or
